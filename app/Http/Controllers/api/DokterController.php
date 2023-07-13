@@ -18,7 +18,9 @@ class DokterController extends Controller
     {
         // get dokter by kd_dokter, kd_dokter get from token sub
         $kd_dokter = $this->payload->get('sub');
-        $dokter = \App\Models\Dokter::where('kd_dokter', $kd_dokter)->first();
+        $dokter = \App\Models\Dokter::with(['pegawai', 'pegawai.kualifikasi_staff'])
+            ->where('kd_dokter', $kd_dokter)
+            ->first();
 
         return isSuccess($dokter, 'Data berhasil dimuat');
     }
