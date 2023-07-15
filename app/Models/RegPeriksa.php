@@ -33,21 +33,19 @@ class RegPeriksa extends Model
         return $this->belongsTo(Penjab::class, 'kd_pj', 'kd_pj');
     }
 
+    public function pemeriksaanRalan()
+    {
+        return $this->hasOne(PemeriksaanRalan::class, 'no_rawat', 'no_rawat');
+    }
+
     // public function ranapGabung()
     // {
     //     return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat');
     // }
 
-
     // public function upload()
     // {
     //     return $this->hasMany(Upload::class, 'no_rawat', 'no_rawat');
-    // }
-
-
-    // public function pemeriksaanRalan()
-    // {
-    //     return $this->hasOne(PemeriksaanRalan::class, 'no_rawat', 'no_rawat');
     // }
 
     // public function catatanPerawatan()

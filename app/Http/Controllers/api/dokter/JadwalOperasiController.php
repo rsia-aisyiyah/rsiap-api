@@ -14,7 +14,7 @@ class JadwalOperasiController extends Controller
         $this->payload = auth()->payload();
     }
 
-    public function jadwalOperasi()
+    public function index()
     {
         $kd_dokter = $this->payload->get('sub');
         $jadwal = \App\Models\BookingOperasi::where('kd_dokter', $kd_dokter)
@@ -25,7 +25,7 @@ class JadwalOperasiController extends Controller
         return isSuccess($jadwal, 'Data berhasil dimuat');
     }
 
-    public function jadwalOperasiNow()
+    public function now()
     {
         $kd_dokter = $this->payload->get('sub');
         $jadwal = \App\Models\BookingOperasi::where('kd_dokter', $kd_dokter)
@@ -37,7 +37,7 @@ class JadwalOperasiController extends Controller
         return isSuccess($jadwal, 'Data berhasil dimuat');
     }
 
-    function jadwalOperasiByDate($tahun = null, $bulan = null, $tanggal = null)
+    function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         if ($tahun !== null) {
             $jadwal = \App\Models\BookingOperasi::where('kd_dokter', $this->payload->get('sub'))

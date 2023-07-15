@@ -3,6 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\dokter\DokterController;
+use App\Http\Controllers\api\dokter\PasienController;
+use App\Http\Controllers\api\dokter\KunjunganController;
+use App\Http\Controllers\api\dokter\PasienRalanController;
+use App\Http\Controllers\api\dokter\PasienRanapController;
+use App\Http\Controllers\api\dokter\JadwalOperasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,49 +32,49 @@ Route::prefix('auth')->group(function ($router) {
 
 // Auth
 Route::middleware('api')->prefix('auth')->group(function ($router) {
-    Route::post('me', [AuthController::class, 'me']);
     Route::post('validate', [AuthController::class, 'validateToken']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('me', [AuthController::class, 'me']);
 });
 
 // Dokter Endpoints
 Route::middleware('api')->prefix('dokter')->group(function ($router) {
-    Route::get('/', [App\Http\Controllers\api\dokter\DokterController::class, 'index']);
-    Route::get('spesialis', [App\Http\Controllers\api\dokter\DokterController::class, 'spesialis']);
-
-    // Semua Pasien (termasuk rawat inap dan rawat jalan)
-    Route::get('pasien', [App\Http\Controllers\api\dokter\PasienController::class, 'pasien']);
-    Route::get('pasien/now', [App\Http\Controllers\api\dokter\PasienController::class, 'pasienNow']);
-    Route::get('pasien/{tahun}', [App\Http\Controllers\api\dokter\PasienController::class, 'pasienByDate']);
-    Route::get('pasien/{tahun}/{bulan}', [App\Http\Controllers\api\dokter\PasienController::class, 'pasienByDate']);
-    Route::get('pasien/{tahun}/{bulan}/{tanggal}', [App\Http\Controllers\api\dokter\PasienController::class, 'pasienByDate']);
+    Route::get('spesialis', [DokterController::class, 'spesialis']);
+    Route::get('/', [DokterController::class, 'index']);
 
     // Pasien Rawat Inap
-    Route::get('pasien/ranap', [App\Http\Controllers\api\dokter\PasienRanapController::class, 'pasienRawatInap']);
-    Route::get('pasien/ranap/now', [App\Http\Controllers\api\dokter\PasienRanapController::class, 'pasienRawatInapNow']);
-    Route::get('pasien/ranap/{tahun}', [App\Http\Controllers\api\dokter\PasienRanapController::class, 'pasienRawatInapByDate']);
-    Route::get('pasien/ranap/{tahun}/{bulan}', [App\Http\Controllers\api\dokter\PasienRanapController::class, 'pasienRawatInapByDate']);
-    Route::get('pasien/ranap/{tahun}/{bulan}/{tanggal}', [App\Http\Controllers\api\dokter\PasienRanapController::class, 'pasienRawatInapByDate']);
+    Route::get('pasien/ranap/{tahun}/{bulan}/{tanggal}', [PasienRanapController::class, 'byDate']);
+    Route::get('pasien/ranap/{tahun}/{bulan}', [PasienRanapController::class, 'byDate']);
+    Route::get('pasien/ranap/{tahun}', [PasienRanapController::class, 'byDate']);
+    Route::get('pasien/ranap/now', [PasienRanapController::class, 'now']);
+    Route::get('pasien/ranap', [PasienRanapController::class, 'index']);
 
     // Pasien Rawat Jalan
-    Route::get('pasien/ralan', [App\Http\Controllers\api\dokter\PasienRalanController::class, 'pasienRawatJalan']);
-    Route::get('pasien/ralan/now', [App\Http\Controllers\api\dokter\PasienRalanController::class, 'pasienRawatJalanNow']);
-    Route::get('pasien/ralan/{tahun}', [App\Http\Controllers\api\dokter\PasienRalanController::class, 'pasienRawatJalanByDate']);
-    Route::get('pasien/ralan/{tahun}/{bulan}', [App\Http\Controllers\api\dokter\PasienRalanController::class, 'pasienRawatJalanByDate']);
-    Route::get('pasien/ralan/{tahun}/{bulan}/{tanggal}', [App\Http\Controllers\api\dokter\PasienRalanController::class, 'pasienRawatJalanByDate']);
+    Route::get('pasien/ralan/{tahun}/{bulan}/{tanggal}', [PasienRalanController::class, 'byDate']);
+    Route::get('pasien/ralan/{tahun}/{bulan}', [PasienRalanController::class, 'byDate']);
+    Route::get('pasien/ralan/{tahun}', [PasienRalanController::class, 'byDate']);
+    Route::get('pasien/ralan/now', [PasienRalanController::class, 'now']);
+    Route::get('pasien/ralan', [PasienRalanController::class, 'index']);
+
+    // Semua Pasien (termasuk rawat inap dan rawat jalan)
+    Route::get('pasien/{tahun}/{bulan}/{tanggal}', [PasienController::class, 'byDate']);
+    Route::get('pasien/{tahun}/{bulan}', [PasienController::class, 'byDate']);
+    Route::get('pasien/{tahun}', [PasienController::class, 'byDate']);
+    Route::get('pasien/now', [PasienController::class, 'now']);
+    Route::get('pasien', [PasienController::class, 'index']);
 
     // Jadwal Operasi Dokter
-    Route::get('jadwal/operasi', [App\Http\Controllers\api\dokter\JadwalOperasiController::class, 'jadwalOperasi']);
-    Route::get('jadwal/operasi/now', [App\Http\Controllers\api\dokter\JadwalOperasiController::class, 'jadwalOperasiNow']);
-    Route::get('jadwal/operasi/{tahun}', [App\Http\Controllers\api\dokter\JadwalOperasiController::class, 'jadwalOperasiByDate']);
-    Route::get('jadwal/operasi/{tahun}/{bulan}', [App\Http\Controllers\api\dokter\JadwalOperasiController::class, 'jadwalOperasiByDate']);
-    Route::get('jadwal/operasi/{tahun}/{bulan}/{tanggal}', [App\Http\Controllers\api\dokter\JadwalOperasiController::class, 'jadwalOperasiByDate']);
+    Route::get('jadwal/operasi/{tahun}/{bulan}/{tanggal}', [JadwalOperasiController::class, 'byDate']);
+    Route::get('jadwal/operasi/{tahun}/{bulan}', [JadwalOperasiController::class, 'byDate']);
+    Route::get('jadwal/operasi/{tahun}', [JadwalOperasiController::class, 'byDate']);
+    Route::get('jadwal/operasi/now', [JadwalOperasiController::class, 'now']);
+    Route::get('jadwal/operasi', [JadwalOperasiController::class, 'index']);
 
     // Kunjungan Dokter
-    Route::get('kunjungan', [App\Http\Controllers\api\dokter\KunjunganController::class, 'kunjunganDokter']);
-    Route::get('kunjungan/now', [App\Http\Controllers\api\dokter\KunjunganController::class, 'kunjunganDokterNow']);
-    Route::get('kunjungan/{tahun}', [App\Http\Controllers\api\dokter\KunjunganController::class, 'kunjunganDokterByDate']);
-    Route::get('kunjungan/{tahun}/{bulan}', [App\Http\Controllers\api\dokter\KunjunganController::class, 'kunjunganDokterByDate']);
-    Route::get('kunjungan/{tahun}/{bulan}/{tanggal}', [App\Http\Controllers\api\dokter\KunjunganController::class, 'kunjunganDokterByDate']);
+    Route::get('kunjungan/{tahun}/{bulan}/{tanggal}', [KunjunganController::class, 'byDate']);
+    Route::get('kunjungan/{tahun}/{bulan}', [KunjunganController::class, 'byDate']);
+    Route::get('kunjungan/{tahun}', [KunjunganController::class, 'byDate']);
+    Route::get('kunjungan/now', [KunjunganController::class, 'now']);
+    Route::get('kunjungan', [KunjunganController::class, 'index']);
 });

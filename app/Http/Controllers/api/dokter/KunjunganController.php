@@ -14,7 +14,7 @@ class KunjunganController extends Controller
         $this->payload = auth()->payload();
     }
 
-    public function kunjunganDokter()
+    public function index()
     {
         $kd_dokter = $this->payload->get('sub');
         $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
@@ -25,7 +25,7 @@ class KunjunganController extends Controller
         return isSuccess($kunjungan, 'Data berhasil dimuat');
     }
 
-    public function kunjunganDokterNow()
+    public function now()
     {
         $kd_dokter = $this->payload->get('sub');
         $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
@@ -35,7 +35,7 @@ class KunjunganController extends Controller
         return isSuccess($kunjungan, 'Data berhasil dimuat');
     }
 
-    function kunjunganDokterByDate($tahun = null, $bulan = null, $tanggal = null)
+    function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         if ($tahun !== null) {
             $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))

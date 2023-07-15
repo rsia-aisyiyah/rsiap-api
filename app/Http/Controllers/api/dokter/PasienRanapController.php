@@ -14,7 +14,7 @@ class PasienRanapController extends Controller
         $this->payload = auth()->payload();
     }
 
-    public function pasienRawatInap()
+    public function index()
     {
         $kd_dokter = $this->payload->get('sub');
         $pasien = \App\Models\RegPeriksa::with(['pasien', 'dokter'])
@@ -27,7 +27,7 @@ class PasienRanapController extends Controller
         return isSuccess($pasien, 'Data berhasil dimuat');
     }
 
-    public function pasienRawatInapNow()
+    public function now()
     {
         $kd_dokter = $this->payload->get('sub');
         $pasien = \App\Models\RegPeriksa::with(['pasien', 'dokter'])
@@ -40,7 +40,7 @@ class PasienRanapController extends Controller
         return isSuccess($pasien, 'Data berhasil dimuat');
     }
 
-    function pasienRawatInapByDate($tahun = null, $bulan = null, $tanggal = null)
+    function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         if ($tahun !== null) {
             $pasien = \App\Models\RegPeriksa::with(['pasien', 'dokter'])
