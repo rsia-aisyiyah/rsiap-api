@@ -20,7 +20,7 @@ class KunjunganController extends Controller
         $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->orderBy('tgl_registrasi', 'desc')
             ->orderBy('jam_reg', 'desc')
-            ->paginate(10);
+            ->paginate(env('PER_PAGE', 20));
 
         return isSuccess($kunjungan, 'Data berhasil dimuat');
     }
@@ -30,7 +30,7 @@ class KunjunganController extends Controller
         $kd_dokter = $this->payload->get('sub');
         $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
-            ->paginate(10);
+            ->paginate(env('PER_PAGE', 20));
 
         return isSuccess($kunjungan, 'Data berhasil dimuat');
     }
@@ -42,7 +42,7 @@ class KunjunganController extends Controller
                 ->whereYear('tgl_registrasi', $tahun)
                 ->orderBy('tgl_registrasi', 'desc')
                 ->orderBy('jam_reg', 'desc')
-                ->paginate(10);
+                ->paginate(env('PER_PAGE', 20));
         }
 
         if ($tahun !== null && $bulan !== null) {
@@ -51,7 +51,7 @@ class KunjunganController extends Controller
                 ->whereMonth('tgl_registrasi', $bulan)
                 ->orderBy('tgl_registrasi', 'desc')
                 ->orderBy('jam_reg', 'desc')
-                ->paginate(10);
+                ->paginate(env('PER_PAGE', 20));
         }
 
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
@@ -60,7 +60,7 @@ class KunjunganController extends Controller
                 ->where('tgl_registrasi', $fullDate)
                 ->orderBy('tgl_registrasi', 'desc')
                 ->orderBy('jam_reg', 'desc')
-                ->paginate(10);
+                ->paginate(env('PER_PAGE', 20));
         }
 
         return isSuccess($kunjungan, 'Data berhasil dimuat');

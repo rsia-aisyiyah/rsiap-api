@@ -20,7 +20,7 @@ class JadwalOperasiController extends Controller
         $jadwal = \App\Models\BookingOperasi::where('kd_dokter', $kd_dokter)
             ->orderBy('tanggal', 'DESC')
             ->orderBy('jam_mulai', 'DESC')
-            ->paginate(10);
+            ->paginate(env('PER_PAGE', 20));
 
         return isSuccess($jadwal, 'Data berhasil dimuat');
     }
@@ -32,7 +32,7 @@ class JadwalOperasiController extends Controller
             ->where('tanggal', date('Y-m-d'))
             ->orderBy('tanggal', 'DESC')
             ->orderBy('jam_mulai', 'DESC')
-            ->paginate(10);
+            ->paginate(env('PER_PAGE', 20));
 
         return isSuccess($jadwal, 'Data berhasil dimuat');
     }
@@ -44,7 +44,7 @@ class JadwalOperasiController extends Controller
                 ->whereYear('tanggal', $tahun)
                 ->orderBy('tanggal', 'DESC')
                 ->orderBy('jam_mulai', 'DESC')
-                ->paginate(10);
+                ->paginate(env('PER_PAGE', 20));
         }
 
         if ($tahun !== null && $bulan !== null) {
@@ -53,7 +53,7 @@ class JadwalOperasiController extends Controller
                 ->whereMonth('tanggal', $bulan)
                 ->orderBy('tanggal', 'DESC')
                 ->orderBy('jam_mulai', 'DESC')
-                ->paginate(10);
+                ->paginate(env('PER_PAGE', 20));
         }
 
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
@@ -62,7 +62,7 @@ class JadwalOperasiController extends Controller
                 ->where('tanggal', $fullDate)
                 ->orderBy('tanggal', 'DESC')
                 ->orderBy('jam_mulai', 'DESC')
-                ->paginate(10);
+                ->paginate(env('PER_PAGE', 20));
         }
 
         return isSuccess($jadwal, 'Data berhasil dimuat');
