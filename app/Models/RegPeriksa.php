@@ -13,6 +13,10 @@ class RegPeriksa extends Model
     protected $primaryKey = 'no_rawat';
     public $timestamps = false;
 
+    protected $casts = [
+        'no_rawat' => 'string',
+    ];
+
     public function pasien()
     {
         return $this->belongsTo(Pasien::class, 'no_rkm_medis', 'no_rkm_medis');
@@ -36,6 +40,11 @@ class RegPeriksa extends Model
     public function pemeriksaanRalan()
     {
         return $this->hasOne(PemeriksaanRalan::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function pemeriksaanRanap()
+    {
+        return $this->hasOne(PemeriksaanRanap::class, 'no_rawat', 'no_rawat');
     }
 
     // public function ranapGabung()

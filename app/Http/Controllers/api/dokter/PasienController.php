@@ -71,4 +71,44 @@ class PasienController extends Controller
 
         return isSuccess($pasien, 'Data berhasil dimuat');
     }
+
+    /**
+     * pemeriksaan
+     *
+     * @bodyParam no_rawat string required
+     * @return json
+     * 
+     * @authenticated
+     */
+    function pemeriksaan() {
+        // if not post return error
+        if (!request()->isMethod('post')) {
+            return isFail('Method not allowed');
+        }
+
+        // if no data return error
+        if (!request()->has('no_rawat')) {
+            return isFail('No Rawat tidak boleh kosong');
+        }
+
+        // get reg periksa data by no rawat
+        $regPeriksa = \App\Models\RegPeriksa::where('no_rawat', request()->no_rawat)->first();
+        
+        // get status lanjuat from reg periksa
+        $statusLanjut = $regPeriksa->status_lanjut;
+
+        if ($statusLanjut == 'Ranap') {
+            $data = \App\Models\RegPeriksa::with('pasien','penjab','pemeriksaanRanap')
+                ->where('no_rawat', request()->no_rawat)
+                ->where('status_lanjut', 'Ranap')
+                ->first();
+        } else {
+            $data = \App\Models\RegPeriksa::with('pasien','penjab','pemeriksaanRalan')
+                ->where('no_rawat', request()->no_rawat)
+                ->where('status_lanjut', 'Ralan')
+                ->first();
+        }
+        
+        return isSuccess($data, 'Data berhasil dimuat');
+    }
 }
