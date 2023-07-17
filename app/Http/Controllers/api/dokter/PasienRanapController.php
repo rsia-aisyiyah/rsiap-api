@@ -17,7 +17,7 @@ class PasienRanapController extends Controller
     public function index()
     {
         $kd_dokter = $this->payload->get('sub');
-        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
+        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
             ->where('kd_dokter', $kd_dokter)
             ->where('status_lanjut', 'Ranap')
             ->orderBy('tgl_registrasi', 'DESC')
@@ -30,7 +30,7 @@ class PasienRanapController extends Controller
     public function now()
     {
         $kd_dokter = $this->payload->get('sub');
-        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
+        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
             ->where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
             ->where('status_lanjut', 'Ranap')
@@ -43,7 +43,7 @@ class PasienRanapController extends Controller
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         if ($tahun !== null) {
-            $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
+            $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->where('status_lanjut', 'Ranap')
@@ -53,7 +53,7 @@ class PasienRanapController extends Controller
         }
 
         if ($tahun !== null && $bulan !== null) {
-            $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
+            $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->whereMonth('tgl_registrasi', $bulan)
@@ -65,7 +65,7 @@ class PasienRanapController extends Controller
 
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
             $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
-            $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
+            $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->where('tgl_registrasi', $fullDate)
                 ->where('status_lanjut', 'Ranap')

@@ -17,7 +17,7 @@ class PasienController extends Controller
     public function index()
     {
         $kd_dokter = $this->payload->get('sub');
-        $pasien = \App\Models\RegPeriksa::with('pasien','penjab')
+        $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab')
             ->where('kd_dokter', $kd_dokter)
             ->orderBy('tgl_registrasi', 'DESC')
             ->paginate(env('PER_PAGE', 20));
@@ -29,7 +29,7 @@ class PasienController extends Controller
     {
         $kd_dokter = $this->payload->get('sub');
 
-        $pasien = \App\Models\RegPeriksa::with('pasien','penjab')
+        $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab')
             ->where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
             ->orderBy('jam_reg', 'DESC')
@@ -41,7 +41,7 @@ class PasienController extends Controller
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         if ($tahun !== null) {
-            $pasien = \App\Models\RegPeriksa::with('pasien','penjab')
+            $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->orderBy('tgl_registrasi', 'DESC')
@@ -50,7 +50,7 @@ class PasienController extends Controller
         }
 
         if ($tahun !== null && $bulan !== null) {
-            $pasien = \App\Models\RegPeriksa::with('pasien','penjab')
+            $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->whereMonth('tgl_registrasi', $bulan)
@@ -61,7 +61,7 @@ class PasienController extends Controller
 
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
             $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
-            $pasien = \App\Models\RegPeriksa::with('pasien','penjab')
+            $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->where('tgl_registrasi', $fullDate)
                 ->orderBy('tgl_registrasi', 'DESC')
@@ -98,12 +98,12 @@ class PasienController extends Controller
         $statusLanjut = $regPeriksa->status_lanjut;
 
         if ($statusLanjut == 'Ranap') {
-            $data = \App\Models\RegPeriksa::with('pasien','penjab','pemeriksaanRanap')
+            $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab','pemeriksaanRanap')
                 ->where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ranap')
                 ->first();
         } else {
-            $data = \App\Models\RegPeriksa::with('pasien','penjab','pemeriksaanRalan')
+            $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab','pemeriksaanRalan')
                 ->where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ralan')
                 ->first();

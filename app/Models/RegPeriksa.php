@@ -17,6 +17,10 @@ class RegPeriksa extends Model
         'no_rawat' => 'string',
     ];
 
+    protected $hidden = [
+        'kd_poli', 'kd_dokter'
+    ];
+
     public function pasien()
     {
         return $this->belongsTo(Pasien::class, 'no_rkm_medis', 'no_rkm_medis');
@@ -47,6 +51,11 @@ class RegPeriksa extends Model
         return $this->hasOne(PemeriksaanRanap::class, 'no_rawat', 'no_rawat');
     }
 
+    public function poliklinik()
+    {
+        return $this->belongsTo(Poliklinik::class, 'kd_poli', 'kd_poli');
+    }
+
     // public function ranapGabung()
     // {
     //     return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat');
@@ -60,11 +69,6 @@ class RegPeriksa extends Model
     // public function catatanPerawatan()
     // {
     //     return $this->hasOne(CatatanPerawatan::class, 'no_rawat', 'no_rawat');
-    // }
-
-    // public function poliklinik()
-    // {
-    //     return $this->belongsTo(Poliklinik::class, 'kd_poli', 'kd_poli');
     // }
 
     // public function diagnosaPasien()
