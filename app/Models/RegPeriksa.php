@@ -48,7 +48,7 @@ class RegPeriksa extends Model
 
     public function pemeriksaanRanap()
     {
-        return $this->hasOne(PemeriksaanRanap::class, 'no_rawat', 'no_rawat');
+        return $this->hasMany(PemeriksaanRanap::class, 'no_rawat', 'no_rawat');
     }
 
     public function poliklinik()
