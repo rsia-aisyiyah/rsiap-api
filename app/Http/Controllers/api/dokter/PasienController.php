@@ -104,11 +104,17 @@ class PasienController extends Controller
                 ->where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ranap')
                 ->first();
+
+            $data->pemeriksaan = $data->pemeriksaanRanap;
+            unset($data->pemeriksaanRanap);
         } else {
             $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab','pemeriksaanRalan')
                 ->where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ralan')
                 ->first();
+                
+            $data->pemeriksaan = $data->pemeriksaanRalan;
+            unset($data->pemeriksaanRalan);
         }
         
         return isSuccess($data, 'Data berhasil dimuat');
