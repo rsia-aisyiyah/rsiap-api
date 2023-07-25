@@ -68,11 +68,11 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
     Route::post('pasien/pemeriksaan', [PasienController::class, 'pemeriksaan']);
 
     // Jadwal Operasi Dokter
-    Route::get('jadwal/operasi/{tahun}/{bulan}/{tanggal}', [JadwalOperasiController::class, 'byDate']);
-    Route::get('jadwal/operasi/{tahun}/{bulan}', [JadwalOperasiController::class, 'byDate']);
-    Route::get('jadwal/operasi/{tahun}', [JadwalOperasiController::class, 'byDate']);
-    Route::get('jadwal/operasi/now', [JadwalOperasiController::class, 'now']);
     Route::get('jadwal/operasi', [JadwalOperasiController::class, 'index']);
+    Route::get('jadwal/operasi/now', [JadwalOperasiController::class, 'now']);
+    Route::get('jadwal/operasi/{tahun}', [JadwalOperasiController::class, 'byDate']);
+    Route::get('jadwal/operasi/{tahun}/{bulan}', [JadwalOperasiController::class, 'byDate']);
+    Route::get('jadwal/operasi/{tahun}/{bulan}/{tanggal}', [JadwalOperasiController::class, 'byDate']);
 
     // Kunjungan Dokter
     Route::get('kunjungan/{tahun}/{bulan}/{tanggal}', [KunjunganController::class, 'byDate']);
