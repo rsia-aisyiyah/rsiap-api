@@ -16,6 +16,7 @@ class PasienRalanController extends Controller
 
     public function index()
     {
+        $message = 'Seluruh Pasien Rawat Jalan berhasil dimuat';
         $kd_dokter = $this->payload->get('sub');
         $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
             ->where('kd_dokter', $kd_dokter)
@@ -24,11 +25,12 @@ class PasienRalanController extends Controller
             ->orderBy('jam_reg', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
-        return isSuccess($pasien, 'Data berhasil dimuat');
+        return isSuccess($pasien, $message);
     }
     
     public function now()
     {
+        $message = 'Pasien Rawat Jalan hari ini berhasil dimuat';
         $kd_dokter = $this->payload->get('sub');
         $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
             ->where('kd_dokter', $kd_dokter)
@@ -37,12 +39,13 @@ class PasienRalanController extends Controller
             ->orderBy('jam_reg', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
-        return isSuccess($pasien, 'Data berhasil dimuat');
+        return isSuccess($pasien, $message);
     }
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         if ($tahun !== null) {
+            $message = "Pasien Rawat Jalan tahun $tahun berhasil dimuat";
             $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
@@ -53,6 +56,7 @@ class PasienRalanController extends Controller
         }
 
         if ($tahun !== null && $bulan !== null) {
+            $message = "Pasien Rawat Jalan bulan $bulan tahun $tahun berhasil dimuat";
             $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
@@ -64,6 +68,7 @@ class PasienRalanController extends Controller
         }
 
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
+            $message = "Pasien Rawat Jalan tanggal $tanggal bulan $bulan tahun $tahun berhasil dimuat";
             $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
             $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
                 ->where('kd_dokter', $this->payload->get('sub'))
@@ -74,6 +79,6 @@ class PasienRalanController extends Controller
                 ->paginate(env('PER_PAGE', 20));
         }
 
-        return isSuccess($pasien, 'Data berhasil dimuat');
+        return isSuccess($pasien, $message);
     }
 }
