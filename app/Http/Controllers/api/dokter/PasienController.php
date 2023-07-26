@@ -94,14 +94,14 @@ class PasienController extends Controller
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
         
-        if ($request->keywords) {
+        if ($request->nama) {
             $message .= ' dengan kata kunci ' . $request->keywords;
             $pasien->whereHas('pasien', function ($query) use ($request) {
                 $query->where('nm_pasien', 'LIKE', '%' . $request->keywords . '%');
             });
         }
 
-        if ($request->statusLanjut) {
+        if ($request->status_lanjut) {
             $message .= ' dengan status lanjut ' . $request->statusLanjut;
             $pasien->where('status_lanjut', $request->statusLanjut);
         }
