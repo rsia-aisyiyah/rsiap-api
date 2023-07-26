@@ -94,10 +94,11 @@ class PasienController extends Controller
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
         
-        if ($request->nama) {
+        if ($request->keywords) {
             $message .= ' dengan kata kunci ' . $request->keywords;
             $pasien->whereHas('pasien', function ($query) use ($request) {
-                $query->where('nm_pasien', 'LIKE', '%' . $request->keywords . '%');
+                $query->where('nm_pasien', 'LIKE', '%' . $request->keywords . '%')
+                    ->orWhere('no_rkm_medis', 'LIKE', '%' . $request->keywords . '%');
             });
         }
 
@@ -111,18 +112,6 @@ class PasienController extends Controller
             $pasien->whereHas('penjab', function ($query) use ($request) {
                 $query->where('png_jawab', 'LIKE', '%' . $request->penjab . '%');
             });
-        }
-        
-        // search text example : rawat 2023/01/01/000001
-        if ($request->no_rawat) {
-            $message .= ' dengan no rawat ' . $request->no_rawat;
-            $pasien->where('no_rawat', 'LIKE', '%' . $request->no_rawat . '%');
-        }
-
-        // search text example : rm 009380
-        if($request->rm) {
-            $message .= ' dengan no rm ' . $request->rm;
-            $pasien->where('no_rkm_medis', 'LIKE', '%' . $request->rm . '%');
         }
 
         $pasien = $pasien->paginate(env('PER_PAGE', 20));
