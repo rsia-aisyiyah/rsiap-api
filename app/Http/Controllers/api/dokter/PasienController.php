@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\dokter;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class PasienController extends Controller
 {
@@ -85,7 +86,7 @@ class PasienController extends Controller
      * @bodyParam rm string search example : rm 009380
      * 
      * @return json 
-     **/ 
+     **/
     public function search(Request $request)
     {
         $message = 'Data berhasil dimuat';
@@ -93,7 +94,31 @@ class PasienController extends Controller
             ->where('kd_dokter', $this->payload->get('sub'))
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
-        
+
+
+        if ($request->tgl_registrasi) {
+            $date = $this->parseDate($request->tgl_registrasi);
+
+            // if isset year in date
+            if (isset($date['year'])) {
+                $message .= ' pada tahun ' . $date['year'];
+                $pasien->whereYear('tgl_registrasi', $date['year']);
+            }
+            
+            // if isset month in date
+            if (isset($date['month'])) {
+                $message .= ' pada bulan ' . $date['month'];
+                $pasien->whereMonth('tgl_registrasi', $date['month']);
+            }
+            
+            // if isset day in date
+            if (isset($date['day'])) {
+                $message .= ' pada tanggal ' . $date['day'];
+                $pasien->whereDay('tgl_registrasi', $date['day']);
+            }
+
+        }
+
         if ($request->keywords) {
             $message .= ' dengan kata kunci ' . $request->keywords;
             $pasien->whereHas('pasien', function ($query) use ($request) {
@@ -103,8 +128,8 @@ class PasienController extends Controller
         }
 
         if ($request->status_lanjut) {
-            $message .= ' dengan status lanjut ' . $request->statusLanjut;
-            $pasien->where('status_lanjut', $request->statusLanjut);
+            $message .= ' dengan status lanjut ' . $request->status_lanjut;
+            $pasien->where('status_lanjut', $request->status_lanjut);
         }
 
         if ($request->penjab) {
@@ -148,7 +173,7 @@ class PasienController extends Controller
 
         if ($regPeriksa->status_lanjut == 'Ranap') {
             $message = 'Pemeriksaan Ranap berhasil dimuat';
-            $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab','pemeriksaanRanap')
+            $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'pemeriksaanRanap')
                 ->where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ranap')
                 ->first();
@@ -157,15 +182,34 @@ class PasienController extends Controller
             unset($data->pemeriksaanRanap);
         } else {
             $message = 'Pemeriksaan Ralan berhasil dimuat';
-            $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien','penjab','pemeriksaanRalan')
+            $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'pemeriksaanRalan')
                 ->where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ralan')
                 ->first();
-                
+
             $data->pemeriksaan = $data->pemeriksaanRalan;
             unset($data->pemeriksaanRalan);
         }
-        
-        return isSuccess($data, 'Data berhasil dimuat');
+
+        return isSuccess($data, $message);
+    }
+
+    protected function parseDate($date)
+    {
+        $exp = explode('-', $date);
+        $date = [];
+
+        if (count($exp) > 0 && count($exp) == 1) {
+            $date['year'] = $exp[0];
+        } else if (count($exp) > 0 && count($exp) == 2) {
+            $date['year'] = $exp[0];
+            $date['month'] = $exp[1];
+        } else if (count($exp) > 0 && count($exp) == 3) {
+            $date['year'] = $exp[0];
+            $date['month'] = $exp[1];
+            $date['day'] = $exp[2];
+        }
+
+        return $date;
     }
 }
