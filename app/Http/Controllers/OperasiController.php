@@ -18,7 +18,7 @@ class OperasiController extends Controller
     function index()
     {
         $message = 'Seluruh Pasien Operasi berhasil dimuat';
-        $data    = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'operasi', 'operasi.laporanOperasi'])
+        $data    = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'operasi', 'operasi.laporanOperasi', 'operasi.paketOperasi'])
             ->whereHas('operasi')
             ->where('kd_dokter', $this->payload->get('sub'))
             ->orderBy('no_rawat', 'DESC')
@@ -31,7 +31,7 @@ class OperasiController extends Controller
     function filter(Request $request)
     {
         $message = 'Seluruh Pasien Operasi';
-        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'operasi', 'operasi.laporanOperasi'])
+        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'operasi', 'operasi.laporanOperasi', 'operasi.paketOperasi'])
             ->where('kd_dokter', $this->payload->get('sub'))
             ->whereHas('operasi');
 
