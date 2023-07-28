@@ -56,9 +56,13 @@ class RegPeriksa extends Model
         return $this->belongsTo(Poliklinik::class, 'kd_poli', 'kd_poli');
     }
 
-    // booking operasi by no_rawat
     public function bookingOperasi()
     {
         return $this->hasOne(BookingOperasi::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function operasi()
+    {
+        return $this->hasOne(Operasi::class, 'no_rawat', 'no_rawat');
     }
 }
