@@ -17,4 +17,9 @@ class PaketOperasi extends Model
     {
         return $this->hasMany(BookingOperasi::class, 'kode_paket', 'kode_paket');
     }
+
+    public function operasi()
+    {
+        return $this->hasMany(Operasi::class, 'kode_paket', 'kode_paket');
+    }
 }

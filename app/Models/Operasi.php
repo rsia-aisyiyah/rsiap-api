@@ -25,4 +25,9 @@ class Operasi extends Model
     {
         return $this->hasOne(LaporanOperasi::class, 'no_rawat', 'no_rawat');
     }
+
+    public function paketOperasi()
+    {
+        return $this->belongsTo(PaketOperasi::class, 'kode_paket', 'kode_paket');
+    }
 }
