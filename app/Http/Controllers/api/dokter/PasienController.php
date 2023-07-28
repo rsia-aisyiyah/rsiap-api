@@ -95,28 +95,13 @@ class PasienController extends Controller
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
 
-
         if ($request->tgl_registrasi) {
-            $date = $this->parseDate($request->tgl_registrasi);
+            $start = Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+            $end = Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
 
-            // if isset year in date
-            if (isset($date['year'])) {
-                $message .= ' pada tahun ' . $date['year'];
-                $pasien->whereYear('tgl_registrasi', $date['year']);
-            }
-            
-            // if isset month in date
-            if (isset($date['month'])) {
-                $message .= ' pada bulan ' . $date['month'];
-                $pasien->whereMonth('tgl_registrasi', $date['month']);
-            }
-            
-            // if isset day in date
-            if (isset($date['day'])) {
-                $message .= ' pada tanggal ' . $date['day'];
-                $pasien->whereDay('tgl_registrasi', $date['day']);
-            }
+            $message .= ' dari tanggal ' . $start . ' sampai ' . $end;
 
+            $pasien->whereBetween('tgl_registrasi', [$start, $end]);
         }
 
         if ($request->keywords) {
@@ -192,24 +177,5 @@ class PasienController extends Controller
         }
 
         return isSuccess($data, $message);
-    }
-
-    protected function parseDate($date)
-    {
-        $exp = explode('-', $date);
-        $date = [];
-
-        if (count($exp) > 0 && count($exp) == 1) {
-            $date['year'] = $exp[0];
-        } else if (count($exp) > 0 && count($exp) == 2) {
-            $date['year'] = $exp[0];
-            $date['month'] = $exp[1];
-        } else if (count($exp) > 0 && count($exp) == 3) {
-            $date['year'] = $exp[0];
-            $date['month'] = $exp[1];
-            $date['day'] = $exp[2];
-        }
-
-        return $date;
     }
 }
