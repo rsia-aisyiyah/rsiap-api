@@ -63,6 +63,6 @@ class RegPeriksa extends Model
 
     public function operasi()
     {
-        return $this->hasOne(Operasi::class, 'no_rawat', 'no_rawat');
+        return $this->hasOne(Operasi::class, 'no_rawat', 'no_rawat')->latest('tgl_operasi');
     }
 }

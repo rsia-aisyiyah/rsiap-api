@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\api\dokter;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -24,6 +25,8 @@ class OperasiController extends Controller
             ->orderBy('no_rawat', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
+        // sort eloquent collection by nested relationship
+        $data->setCollection($data->sortByDesc('operasi.tgl_operasi'));
 
         return isSuccess($data, $message);
     }
@@ -61,5 +64,12 @@ class OperasiController extends Controller
                 $query->whereBetween('tgl_operasi', [$start, $end]);
             }); 
         }
+
+        $pasien = $pasien->paginate(env('PER_PAGE', 20));
+
+        // sort eloquent collection by nested relationship
+        $pasien->setCollection($pasien->sortByDesc('operasi.tgl_operasi'));
+        
+        return isSuccess($pasien, $message);
     }
 }

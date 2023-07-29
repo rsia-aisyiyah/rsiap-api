@@ -9,7 +9,7 @@ use App\Http\Controllers\api\dokter\KunjunganController;
 use App\Http\Controllers\api\dokter\PasienRalanController;
 use App\Http\Controllers\api\dokter\PasienRanapController;
 use App\Http\Controllers\api\dokter\JadwalOperasiController;
-use App\Http\Controllers\OperasiController;
+use App\Http\Controllers\api\dokter\OperasiController;
 
 /*
 |--------------------------------------------------------------------------
