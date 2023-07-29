@@ -86,7 +86,8 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
 
 
     Route::get('operasi', [OperasiController::class, 'index']);
-
+    Route::post('operasi/data', [OperasiController::class, 'data']);
+    Route::post('operasi/filter', [OperasiController::class, 'filter']);
 
     // Kunjungan Dokter
     Route::get('kunjungan', [KunjunganController::class, 'index']);

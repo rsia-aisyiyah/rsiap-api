@@ -19,32 +19,45 @@ class OperasiController extends Controller
     function index()
     {
         $message = 'Seluruh Pasien Operasi berhasil dimuat';
-        $data    = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'operasi', 'operasi.laporanOperasi', 'operasi.paketOperasi'])
+        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
             ->whereHas('operasi')
             ->where('kd_dokter', $this->payload->get('sub'))
             ->orderBy('no_rawat', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
-        // sort eloquent collection by nested relationship
-        $data->setCollection($data->sortByDesc('operasi.tgl_operasi'));
+        return isSuccess($pasien, $message);
+    }
 
-        return isSuccess($data, $message);
+    function data(Request $request)
+    {
+        if (!$request->isMethod('post')) {
+            return isFail('Method not allowed');
+        }
+
+        if (!$request->has('no_rawat')) {
+            return isFail('No Rawat tidak ditemukan');
+        }
+
+        $operasi = \App\Models\Operasi::with('paketOperasi')
+            ->where('no_rawat', $request->no_rawat)
+            ->get();
+
+        return isSuccess($operasi, 'Data Operasi berhasil dimuat');
     }
 
     function filter(Request $request)
     {
         $message = 'Seluruh Pasien Operasi';
-        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'operasi', 'operasi.laporanOperasi', 'operasi.paketOperasi'])
+        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
             ->where('kd_dokter', $this->payload->get('sub'))
             ->whereHas('operasi');
 
         if ($request->keywords) {
             $pasien->whereHas('pasien', function ($query) use ($request) {
-                $query->where('nm_pasien', 'LIKE', '%' . $request->keywords . '%')
-                    ->orWhere('no_rkm_medis', 'LIKE', '%' . $request->keywords . '%');
-            })->orWhereHas('operasi', function ($query) use ($request) {
-                $query->where('no_rawat', 'LIKE', '%' . $request->keywords . '%');
-            });
+                $query->where('nm_pasien', 'LIKE', '%' . $request->keywords . '%');
+            })
+            ->orWhere('no_rawat', 'LIKE', '%' . $request->keywords . '%')
+            ->orWhere('no_rkm_medis', 'LIKE', '%' . $request->keywords . '%');
         }
 
         if ($request->penjab) {
@@ -54,22 +67,19 @@ class OperasiController extends Controller
             });
         }
 
-        if ($request->tgl_operasi) {
-            $start = Carbon::parse($request->tgl_operasi['start'])->format('Y-m-d');
-            $end = Carbon::parse($request->tgl_operasi['end'])->format('Y-m-d');
+        // if ($request->tgl_operasi) {
+        //     $start = Carbon::parse($request->tgl_operasi['start'])->format('Y-m-d');
+        //     $end   = Carbon::parse($request->tgl_operasi['end'])->format('Y-m-d');
 
-            $message .= ' dari tanggal ' . $start . ' sampai ' . $end;
+        //     $message .= ' dari tanggal ' . $start . ' sampai ' . $end;
 
-            $pasien->whereHas('operasi', function ($query) use ($start, $end) {
-                $query->whereBetween('tgl_operasi', [$start, $end]);
-            }); 
-        }
+        //     $pasien->whereHas('operasi', function ($query) use ($start, $end) {
+        //         $query->whereBetween('tgl_operasi', [$start, $end]);
+        //     });
+        // }
 
         $pasien = $pasien->paginate(env('PER_PAGE', 20));
 
-        // sort eloquent collection by nested relationship
-        $pasien->setCollection($pasien->sortByDesc('operasi.tgl_operasi'));
-        
         return isSuccess($pasien, $message);
     }
 }
