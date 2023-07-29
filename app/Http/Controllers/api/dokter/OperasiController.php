@@ -38,7 +38,7 @@ class OperasiController extends Controller
             return isFail('No Rawat tidak ditemukan');
         }
 
-        $operasi = \App\Models\Operasi::with('paketOperasi')
+        $operasi = \App\Models\Operasi::with(['paketOperasi', 'laporanOperasi'])
             ->where('no_rawat', $request->no_rawat)
             ->get();
 
