@@ -93,6 +93,7 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
     Route::get('kunjungan', [KunjunganController::class, 'index']);
     Route::get('kunjungan/now', [KunjunganController::class, 'now']);
     Route::post('kunjungan/rekap', [KunjunganController::class, 'rekap']);
+    
     Route::get('kunjungan/{tahun}', [KunjunganController::class, 'byDate']);
     Route::get('kunjungan/{tahun}/{bulan}', [KunjunganController::class, 'byDate']);
     Route::get('kunjungan/{tahun}/{bulan}/{tanggal}', [KunjunganController::class, 'byDate']);

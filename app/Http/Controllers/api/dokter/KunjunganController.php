@@ -36,7 +36,7 @@ class KunjunganController extends Controller
     }
 
     private function getTotal($source) {
-        $dataMap = ["UMUM", "BPJS"];
+        $dataMap = ["UMUM", "BPJS", "TOTAL"];
         $data = $source->get();
         $data = $data->pluck('penjab')->countBy(
             function ($item, $key) {
@@ -47,6 +47,10 @@ class KunjunganController extends Controller
         foreach ($dataMap as $key => $value) {
             if (!isset($data[$value])) {
                 $data[$value] = 0;
+            }
+
+            if ($value == "TOTAL") {
+                $data[$value] = $data['UMUM'] + $data['BPJS'];
             }
         }
 
