@@ -67,16 +67,16 @@ class OperasiController extends Controller
             });
         }
 
-        // if ($request->tgl_operasi) {
-        //     $start = Carbon::parse($request->tgl_operasi['start'])->format('Y-m-d');
-        //     $end   = Carbon::parse($request->tgl_operasi['end'])->format('Y-m-d');
+        if ($request->tgl_operasi) {
+            $start = Carbon::parse($request->tgl_operasi['start'])->format('Y-m-d');
+            $end   = Carbon::parse($request->tgl_operasi['end'])->format('Y-m-d');
 
-        //     $message .= ' dari tanggal ' . $start . ' sampai ' . $end;
+            $message .= ' dari tanggal ' . $start . ' sampai ' . $end;
 
-        //     $pasien->whereHas('operasi', function ($query) use ($start, $end) {
-        //         $query->whereBetween('tgl_operasi', [$start, $end]);
-        //     });
-        // }
+            $pasien->whereHas('operasi', function ($query) use ($start, $end) {
+                $query->whereBetween('tgl_operasi', [$start, $end]);
+            });
+        }
 
         $pasien = $pasien->paginate(env('PER_PAGE', 20));
 
