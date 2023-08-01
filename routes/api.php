@@ -74,6 +74,7 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
     // Pasien POST
     Route::post('pasien/search', [PasienController::class, 'search']);
     Route::post('pasien/pemeriksaan', [PasienController::class, 'pemeriksaan']);
+    Route::post('pasien/pemeriksaan/chart', [PasienController::class, 'pemeriksaanChart']);
 
 
     // Jadwal Operasi Dokter
