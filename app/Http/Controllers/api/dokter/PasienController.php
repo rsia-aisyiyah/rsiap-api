@@ -18,7 +18,7 @@ class PasienController extends Controller
     public function index()
     {
         $kd_dokter = $this->payload->get('sub');
-        $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+        $pasien    = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
             ->where('kd_dokter', $kd_dokter)
             ->orderBy('tgl_registrasi', 'DESC')
             ->paginate(env('PER_PAGE', 20));
@@ -43,7 +43,7 @@ class PasienController extends Controller
     {
         if ($tahun !== null) {
             $message = "Pasien tahun $tahun berhasil dimuat";
-            $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+            $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->orderBy('tgl_registrasi', 'DESC')
@@ -53,7 +53,7 @@ class PasienController extends Controller
 
         if ($tahun !== null && $bulan !== null) {
             $message = "Pasien bulan $bulan tahun $tahun berhasil dimuat";
-            $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+            $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->whereMonth('tgl_registrasi', $bulan)
@@ -63,9 +63,9 @@ class PasienController extends Controller
         }
 
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
-            $message = "Pasien tanggal $tanggal bulan $bulan tahun $tahun berhasil dimuat";
+            $message  = "Pasien tanggal $tanggal bulan $bulan tahun $tahun berhasil dimuat";
             $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
-            $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+            $pasien   = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->where('tgl_registrasi', $fullDate)
                 ->orderBy('tgl_registrasi', 'DESC')
@@ -90,14 +90,14 @@ class PasienController extends Controller
     public function search(Request $request)
     {
         $message = 'Data berhasil dimuat';
-        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
+        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
             ->where('kd_dokter', $this->payload->get('sub'))
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
 
         if ($request->tgl_registrasi) {
             $start = Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-            $end = Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+            $end   = Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
 
             $message .= ' dari tanggal ' . $start . ' sampai ' . $end;
 
@@ -158,7 +158,14 @@ class PasienController extends Controller
 
         if ($regPeriksa->status_lanjut == 'Ranap') {
             $message = 'Pemeriksaan Ranap berhasil dimuat';
-            $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'pemeriksaanRanap')
+            $data    = \App\Models\RegPeriksa::with([
+                'poliklinik',
+                'pasien',
+                'penjab',
+                'pemeriksaanRanap' => function ($q) {
+                    $q->orderBy('tgl_perawatan', 'DESC');
+                }
+            ])
                 ->where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ranap')
                 ->first();
@@ -167,13 +174,57 @@ class PasienController extends Controller
             unset($data->pemeriksaanRanap);
         } else {
             $message = 'Pemeriksaan Ralan berhasil dimuat';
-            $data = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'pemeriksaanRalan')
+            $data    = \App\Models\RegPeriksa::with([
+                'poliklinik',
+                'pasien',
+                'penjab',
+                'pemeriksaanRalan' => function ($q) {
+                    $q->orderBy('tgl_perawatan', 'DESC');
+                }
+            ])
                 ->where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ralan')
                 ->first();
 
             $data->pemeriksaan = $data->pemeriksaanRalan;
             unset($data->pemeriksaanRalan);
+        }
+
+        return isSuccess($data, $message);
+    }
+
+    function pemeriksaanChart(Request $request)
+    {
+        // if not post return error
+        if (!$request->isMethod('post')) {
+            return isFail('Method not allowed');
+        }
+
+        // if no data return error
+        if (!$request->has('no_rawat')) {
+            return isFail('No Rawat tidak boleh kosong');
+        }
+
+        if (!$request->has('stts_lanjut')) {
+            return isFail('Status lanjut tidak boleh kosong');
+        }
+
+        if (ucfirst($request->stts_lanjut) == 'Ranap') {
+            $message = 'Pemeriksaan Ranap untuk chaart berhasil dimuat';
+            $data    = \App\Models\PemeriksaanRanap::select('tgl_perawatan', 'suhu_tubuh', 'nadi')
+                ->where('no_rawat', $request->no_rawat)
+                ->get();
+
+            // $data->pemeriksaan = $data->pemeriksaanRanap;
+            // unset($data->pemeriksaanRanap);
+        } else {
+            $message = 'Pemeriksaan Ralan untuk chaart berhasil dimuat';
+            $data    = \App\Models\PemeriksaanRalan::select('tgl_perawatan', 'suhu_tubuh', 'nadi')
+                ->where('no_rawat', $request->no_rawat)
+                ->get();
+
+            // $data->pemeriksaan = $data->pemeriksaanRalan;
+            // unset($data->pemeriksaanRalan);
         }
 
         return isSuccess($data, $message);
