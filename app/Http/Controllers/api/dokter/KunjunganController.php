@@ -57,6 +57,24 @@ class KunjunganController extends Controller
         return $data;
     }
 
+    private function checkData($data) {
+        $dataVal = ["UMUM", "BPJS", "TOTAL"];
+        $dataKey = ["Ranap", "Ralan", "Operasi"];
+
+        // jika dataKey didalam data tidak adan maka tambahkan dataKey dengan isi dataVal
+        foreach ($dataKey as $key => $value) {
+            if (!isset($data[$value])) {
+                $data[$value] = array_fill_keys($dataVal, 0);
+            }
+        }
+
+        $data = collect($data)->sortBy(function ($item, $key) use ($dataKey) {
+            return array_search($key, $dataKey);
+        })->toArray();
+
+        return $data;
+    }
+
     function rekap(Request $request)
     {
 
@@ -92,7 +110,7 @@ class KunjunganController extends Controller
         });
         $data['Operasi'] = $this->getTotal($operasi->get());
 
-        return isSuccess($data, 'Data berhasil dimuat');
+        return isSuccess($this->checkData($data), 'Data berhasil dimuat');
     }
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
