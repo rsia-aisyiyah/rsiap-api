@@ -40,4 +40,9 @@ class User extends Authenticatable implements JWTSubject
 	public function getJWTCustomClaims() {
         return [];
 	}
+
+    function spesialis()
+    {
+        return $this->belongsTo(Spesialis::class, 'kd_sps', 'kd_sps');
+    }
 }
