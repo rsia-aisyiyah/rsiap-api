@@ -16,17 +16,32 @@ class AuthController extends Controller
         $credentials = request(['username', 'password']);
 
         $user = User::select(DB::raw('AES_DECRYPT(id_user, "nur") as id_user'), DB::raw('AES_DECRYPT(id_user, "nur") as username'))
+            ->with('spesialis')
             ->where('id_user', DB::raw('AES_ENCRYPT("' . $credentials['username'] . '", "nur")'))
             ->where('password', DB::raw('AES_ENCRYPT("' . $credentials['password'] . '", "windi")'))
             ->first();
+
 
         if (!$user) {
             return isUnauthenticated('Unauthorized');
         }
 
+        $pegawai = Pegawai::with('dokter.spesialis')
+            ->where('pegawai.nik', $credentials['username'])
+            ->first();
+
         $payloadable = [
             "sub" => $user->username,
         ];
+
+        if ($pegawai) {
+            if ($pegawai->dokter) {
+                if ($pegawai->dokter->spesialis) {
+                    $payloadable['sps'] = $pegawai->dokter->spesialis->kd_sps;
+                    $payloadable['spss'] = $pegawai->dokter->spesialis->nm_sps;
+                }
+            }
+        }
 
         $token = auth()->claims($payloadable)->login($user);
         if (!$token) {
@@ -72,10 +87,10 @@ class AuthController extends Controller
     {
         $exp = auth()->factory()->getTTL() / 60 / 24;
         return response()->json([
-            'success' => true,
+            'success'      => true,
             'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => round($exp) . ' days'
+            'token_type'   => 'bearer',
+            'expires_in'   => round($exp) . ' days'
         ], 200);
     }
 }

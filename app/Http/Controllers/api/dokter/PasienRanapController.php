@@ -26,6 +26,17 @@ class PasienRanapController extends Controller
 
         return isSuccess($pasien, 'Data berhasil dimuat');
     }
+    
+    public function all()
+    {
+        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
+            ->where('status_lanjut', 'Ranap')
+            ->orderBy('tgl_registrasi', 'DESC')
+            ->orderBy('jam_reg', 'DESC')
+            ->paginate(env('PER_PAGE', 20));
+
+        return isSuccess($pasien, 'Data berhasil dimuat');
+    }
 
     public function now()
     {

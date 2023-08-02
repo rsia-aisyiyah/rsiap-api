@@ -22,8 +22,9 @@ class Dokter extends Model
     {
         return $this->belongsTo(Pegawai::class, 'kd_dokter', 'nik');
     }
-    
-    function booking_operasi() {
+
+    function booking_operasi()
+    {
         return $this->hasMany(BookingOperasi::class, 'kd_dokter', 'kd_dokter');
     }
 
