@@ -213,7 +213,7 @@ class PasienController extends Controller
 
         if (ucfirst($request->stts_lanjut) == 'Ranap') {
             $message = 'Pemeriksaan Ranap untuk chaart berhasil dimuat';
-            $data    = \App\Models\PemeriksaanRanap::select('tgl_perawatan', 'jam_rawat', 'suhu_tubuh', 'nadi', 'spo2')
+            $data    = \App\Models\PemeriksaanRanap::select('tgl_perawatan', 'jam_rawat', 'suhu_tubuh', 'nadi', 'spo2', 'respirasi')
                 ->where('no_rawat', $request->no_rawat)
                 ->get();
 
@@ -221,7 +221,7 @@ class PasienController extends Controller
             // unset($data->pemeriksaanRanap);
         } else {
             $message = 'Pemeriksaan Ralan untuk chaart berhasil dimuat';
-            $data    = \App\Models\PemeriksaanRalan::select('tgl_perawatan', 'jam_rawat', 'suhu_tubuh', 'nadi', 'spo2')
+            $data    = \App\Models\PemeriksaanRalan::select('tgl_perawatan', 'jam_rawat', 'suhu_tubuh', 'nadi', 'spo2', 'respirasi')
                 ->where('no_rawat', $request->no_rawat)
                 ->get();
 
