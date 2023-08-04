@@ -28,7 +28,7 @@ class RegPeriksa extends Model
 
     public function kamarInap()
     {
-        return $this->hasMany(KamarInap::class, 'no_rawat', 'no_rawat');
+        return $this->belongsTo(KamarInap::class, 'no_rawat', 'no_rawat');
     }
 
     public function dokter()

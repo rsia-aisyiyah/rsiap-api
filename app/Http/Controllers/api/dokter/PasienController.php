@@ -158,34 +158,34 @@ class PasienController extends Controller
 
         if ($regPeriksa->status_lanjut == 'Ranap') {
             $message = 'Pemeriksaan Ranap berhasil dimuat';
-            $data    = \App\Models\RegPeriksa::with([
-                'poliklinik',
-                'pasien',
-                'penjab',
-                'pemeriksaanRanap' => function ($q) {
-                    $q->orderBy('tgl_perawatan', 'DESC');
-                    $q->orderBy('jam_rawat', 'DESC');
-                }
-            ])
-                ->where('no_rawat', request()->no_rawat)
+            $data    = \App\Models\RegPeriksa::where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ranap')
+                ->with([
+                    'poliklinik',
+                    'pasien',
+                    'penjab',
+                    'pemeriksaanRanap' => function ($q) {
+                        $q->orderBy('tgl_perawatan', 'DESC');
+                        $q->orderBy('jam_rawat', 'DESC');
+                    }
+                ])
                 ->first();
 
             $data->pemeriksaan = $data->pemeriksaanRanap;
             unset($data->pemeriksaanRanap);
         } else {
             $message = 'Pemeriksaan Ralan berhasil dimuat';
-            $data    = \App\Models\RegPeriksa::with([
-                'poliklinik',
-                'pasien',
-                'penjab',
-                'pemeriksaanRalan' => function ($q) {
-                    $q->orderBy('tgl_perawatan', 'DESC');
-                    $q->orderBy('jam_rawat', 'DESC');
-                }
-            ])
-                ->where('no_rawat', request()->no_rawat)
+            $data    = \App\Models\RegPeriksa::where('no_rawat', request()->no_rawat)
                 ->where('status_lanjut', 'Ralan')
+                ->with([
+                    'poliklinik',
+                    'pasien',
+                    'penjab',
+                    'pemeriksaanRalan' => function ($q) {
+                        $q->orderBy('tgl_perawatan', 'DESC');
+                        $q->orderBy('jam_rawat', 'DESC');
+                    }
+                ])
                 ->first();
 
             $data->pemeriksaan = $data->pemeriksaanRalan;
