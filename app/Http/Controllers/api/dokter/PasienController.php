@@ -18,7 +18,7 @@ class PasienController extends Controller
     public function index()
     {
         $kd_dokter = $this->payload->get('sub');
-        $pasien    = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+        $pasien    = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
             ->where('kd_dokter', $kd_dokter)
             ->orderBy('tgl_registrasi', 'DESC')
             ->paginate(env('PER_PAGE', 20));
@@ -30,11 +30,17 @@ class PasienController extends Controller
     {
         $kd_dokter = $this->payload->get('sub');
 
-        $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+        $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
             ->where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
-            ->orderBy('jam_reg', 'DESC')
-            ->paginate(env('PER_PAGE', 20));
+            ->orderBy('jam_reg', 'DESC');
+
+        // $pasien->whereHas('kamarInap', function ($query) {
+        //     $query->where('stts_pulang', '-');
+        //     $query->orWhere('tgl_keluar', '0000-00-00');
+        // });
+        
+        $pasien->paginate(env('PER_PAGE', 20));
 
         return isSuccess($pasien, 'Pasien hari ini berhasil dimuat');
     }
@@ -43,7 +49,7 @@ class PasienController extends Controller
     {
         if ($tahun !== null) {
             $message = "Pasien tahun $tahun berhasil dimuat";
-            $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+            $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->orderBy('tgl_registrasi', 'DESC')
@@ -53,7 +59,7 @@ class PasienController extends Controller
 
         if ($tahun !== null && $bulan !== null) {
             $message = "Pasien bulan $bulan tahun $tahun berhasil dimuat";
-            $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+            $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->whereMonth('tgl_registrasi', $bulan)
@@ -65,7 +71,7 @@ class PasienController extends Controller
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
             $message  = "Pasien tanggal $tanggal bulan $bulan tahun $tahun berhasil dimuat";
             $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
-            $pasien   = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab')
+            $pasien   = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
                 ->where('kd_dokter', $this->payload->get('sub'))
                 ->where('tgl_registrasi', $fullDate)
                 ->orderBy('tgl_registrasi', 'DESC')
@@ -90,7 +96,7 @@ class PasienController extends Controller
     public function search(Request $request)
     {
         $message = 'Data berhasil dimuat';
-        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
+        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap.kamar.bangsal'])
             ->where('kd_dokter', $this->payload->get('sub'))
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
@@ -99,9 +105,21 @@ class PasienController extends Controller
             $start = Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
             $end   = Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
 
-            $message .= ' dari tanggal ' . $start . ' sampai ' . $end;
-
-            $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+            if ($request->dateby) {
+                if ($request->dateby == 'pulang') {
+                    $message .= ' berdasarkan tanggal pulang ' . $start . ' sampai ' . $end;
+                    $pasien->whereHas('kamarInap', function ($query) use ($start, $end) {
+                        $query->whereBetween('tgl_keluar', [$start, $end]);
+                        $query->where('stts_pulang', '<>', 'Pindah Kamar');
+                    });
+                } else {
+                    $message .= ' berdasarkan tanggal registrasi ' . $start . ' sampai ' . $end;
+                    $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+                }
+            } else {
+                $message .= ' berdasarkan tanggal registrasi ' . $start . ' sampai ' . $end;
+                $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+            }
         }
 
         if ($request->keywords) {
@@ -164,6 +182,7 @@ class PasienController extends Controller
                     'poliklinik',
                     'pasien',
                     'penjab',
+                    'kamarInap.kamar.bangsal',
                     'pemeriksaanRanap' => function ($q) {
                         $q->orderBy('tgl_perawatan', 'DESC');
                         $q->orderBy('jam_rawat', 'DESC');
@@ -181,6 +200,7 @@ class PasienController extends Controller
                     'poliklinik',
                     'pasien',
                     'penjab',
+                    'kamarInap.kamar.bangsal',
                     'pemeriksaanRalan' => function ($q) {
                         $q->orderBy('tgl_perawatan', 'DESC');
                         $q->orderBy('jam_rawat', 'DESC');
