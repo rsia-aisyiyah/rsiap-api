@@ -45,6 +45,36 @@ class PasienController extends Controller
         return isSuccess($pasien, 'Pasien hari ini berhasil dimuat');
     }
 
+    public function metricNow() {
+        $kd_dokter = $this->payload->get('sub');
+
+        // get pasien raawt jalan hari ini
+        // get pasien rawat inap hari ini
+        // get jadwal operasi hari ini
+
+        $pasienRalan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
+            ->where('tgl_registrasi', date('Y-m-d'))
+            ->where('status_lanjut', 'Ralan')
+            ->count();
+
+        $pasienRanap = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
+            ->where('tgl_registrasi', date('Y-m-d'))
+            ->where('status_lanjut', 'Ranap')
+            ->count();
+
+        $jadwalOperasi = \App\Models\BookingOperasi::where('kd_dokter', $kd_dokter)
+            ->where('tanggal', date('Y-m-d'))
+            ->count();
+
+        $data = [
+            'pasien_ralan' => $pasienRalan,
+            'pasien_ranap' => $pasienRanap,
+            'jadwal_operasi' => $jadwalOperasi
+        ];
+
+        return isSuccess($data, 'Data metric berhasil dimuat');
+    }
+
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         if ($tahun !== null) {
