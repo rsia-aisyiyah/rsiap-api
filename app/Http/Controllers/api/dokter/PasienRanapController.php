@@ -47,7 +47,9 @@ class PasienRanapController extends Controller
                 $query->where('tgl_keluar', '0000-00-00');
                 $query->where('stts_pulang', '-');
             })
-            ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap', 'kamarInap.kamar', 'kamarInap.kamar.bangsal'])
+            ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap'=>function($q){
+                return $q->where('stts_pulang', '-');
+            }, 'kamarInap.kamar.bangsal'])
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
 
