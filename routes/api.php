@@ -66,6 +66,7 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
     // Semua Pasien (termasuk rawat inap dan rawat jalan)
     Route::get('pasien', [PasienController::class, 'index']);
     Route::get('pasien/now', [PasienController::class, 'now']);
+    Route::get('pasien/metric/now', [PasienController::class, 'metricNow']);
 
     Route::get('pasien/{tahun}', [PasienController::class, 'byDate']);
     Route::get('pasien/{tahun}/{bulan}', [PasienController::class, 'byDate']);
