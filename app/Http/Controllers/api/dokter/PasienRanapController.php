@@ -43,11 +43,16 @@ class PasienRanapController extends Controller
         $kd_dokter = $this->payload->get('sub');
         $pasien    = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('status_lanjut', 'Ranap')
-            ->whereHas('kamarInap', function ($query) {
-                $query->where('tgl_keluar', '0000-00-00');
-                $query->where('stts_pulang', '-');
-            })
-            ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap', 'kamarInap.kamar', 'kamarInap.kamar.bangsal'])
+            ->with([
+                'pasien',
+                'penjab',
+                'poliklinik',
+                'kamarInap' => function ($query) {
+                    $query->where('tgl_keluar', '0000-00-00')->where('stts_pulang', '-');
+                },
+                'kamarInap.kamar',
+                'kamarInap.kamar.bangsal'
+            ])
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
 
