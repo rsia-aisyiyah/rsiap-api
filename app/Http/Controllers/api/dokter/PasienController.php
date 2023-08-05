@@ -35,12 +35,12 @@ class PasienController extends Controller
             ->where('tgl_registrasi', date('Y-m-d'))
             ->orderBy('jam_reg', 'DESC');
 
-        // $pasien->whereHas('kamarInap', function ($query) {
+        // $pasien = $pasien->whereHas('kamarInap', function ($query) {
         //     $query->where('stts_pulang', '-');
         //     $query->orWhere('tgl_keluar', '0000-00-00');
         // });
         
-        $pasien->paginate(env('PER_PAGE', 20));
+        $pasien = $pasien->paginate(env('PER_PAGE', 20));
 
         return isSuccess($pasien, 'Pasien hari ini berhasil dimuat');
     }
