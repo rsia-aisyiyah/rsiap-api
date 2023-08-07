@@ -29,10 +29,14 @@ class PasienRanapController extends Controller
 
     public function all()
     {
-        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
-            return $q->where('stts_pulang', '-')->where('tgl_keluar', '0000-00-00');
-        }, 'kamarInap.kamar.bangsal'])
-            ->where('status_lanjut', 'Ranap')
+        $pasien = \App\Models\RegPeriksa::where('status_lanjut', 'Ranap')
+            ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap' =>function($q){
+                return $q->where('stts_pulang', '-');
+            }, 'kamarInap.kamar.bangsal'])
+            ->whereHas('kamarInap', function ($query) {
+                $query->where('tgl_keluar', '0000-00-00');
+                $query->where('stts_pulang', '-');
+            })
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC')
             ->paginate(env('PER_PAGE', 20));
@@ -45,13 +49,13 @@ class PasienRanapController extends Controller
         $kd_dokter = $this->payload->get('sub');
         $pasien    = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('status_lanjut', 'Ranap')
+            ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap'=>function($q){
+                return $q->where('stts_pulang', '-');
+            }, 'kamarInap.kamar.bangsal'])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('tgl_keluar', '0000-00-00');
                 $query->where('stts_pulang', '-');
             })
-            ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap'=>function($q){
-                return $q->where('stts_pulang', '-');
-            }, 'kamarInap.kamar.bangsal'])
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
 
