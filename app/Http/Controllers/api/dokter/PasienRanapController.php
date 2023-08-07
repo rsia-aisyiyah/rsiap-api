@@ -29,7 +29,9 @@ class PasienRanapController extends Controller
 
     public function all()
     {
-        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap', 'kamarInap.kamar', 'kamarInap.kamar.bangsal'])
+        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
+            return $q->where('stts_pulang', '-')->where('tgl_keluar', '0000-00-00');
+        }, 'kamarInap.kamar.bangsal'])
             ->where('status_lanjut', 'Ranap')
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC')
