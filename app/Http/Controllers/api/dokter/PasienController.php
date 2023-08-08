@@ -174,13 +174,6 @@ class PasienController extends Controller
         }
 
         $pasien = $pasien->paginate(env('PER_PAGE', 20));
-
-        if($request->status_lanjut) {
-            if ($request->status_lanjut == 'Ralan') {
-                $pasien = $this->shortByNamaPoli($pasien);
-            }
-        }
-
         return isSuccess($pasien, $message);
     }
 
