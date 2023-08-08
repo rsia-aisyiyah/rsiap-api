@@ -39,23 +39,49 @@ class PasienController extends Controller
         //     $query->where('stts_pulang', '-');
         //     $query->orWhere('tgl_keluar', '0000-00-00');
         // });
-        
+
         $pasien = $pasien->paginate(env('PER_PAGE', 20));
 
         return isSuccess($pasien, 'Pasien hari ini berhasil dimuat');
     }
 
-    public function metricNow() {
+    public function metricNow()
+    {
         $kd_dokter = $this->payload->get('sub');
+        $pesialis  = \App\Models\Dokter::select('spesialis.kd_sps', 'spesialis.nm_sps')
+            ->join('spesialis', 'spesialis.kd_sps', '=', 'dokter.kd_sps')
+            ->where('kd_dokter', $kd_dokter)->first();
+
+        if (strpos($pesialis->nm_sps, 'UMUM')) {
+            $pasienRanap = \App\Models\RegPeriksa::where('status_lanjut', 'Ranap')
+                ->with([
+                    'kamarInap' => function ($q) {
+                        return $q->where('stts_pulang', '-');
+                    }
+                ])
+                ->whereHas('kamarInap', function ($query) {
+                    $query->where('tgl_keluar', '0000-00-00');
+                    $query->where('stts_pulang', '-');
+                })
+                ->count();
+        } else {
+            $pasienRanap = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
+                ->where('status_lanjut', 'Ranap')
+                ->with([
+                    'kamarInap' => function ($q) {
+                        return $q->where('stts_pulang', '-');
+                    }
+                ])
+                ->whereHas('kamarInap', function ($query) {
+                    $query->where('tgl_keluar', '0000-00-00');
+                    $query->where('stts_pulang', '-');
+                })
+                ->count();
+        }
 
         $pasienRalan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
             ->where('status_lanjut', 'Ralan')
-            ->count();
-
-        $pasienRanap = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
-            ->where('tgl_registrasi', date('Y-m-d'))
-            ->where('status_lanjut', 'Ranap')
             ->count();
 
         $jadwalOperasi = \App\Models\BookingOperasi::where('kd_dokter', $kd_dokter)
@@ -63,8 +89,8 @@ class PasienController extends Controller
             ->count();
 
         $data = [
-            'pasien_ralan' => $pasienRalan,
-            'pasien_ranap' => $pasienRanap,
+            'pasien_ralan'   => $pasienRalan,
+            'pasien_ranap'   => $pasienRanap,
             'jadwal_operasi' => $jadwalOperasi
         ];
 
@@ -160,9 +186,11 @@ class PasienController extends Controller
             $message .= ' dengan status lanjut ' . $request->status_lanjut;
             $pasien->where('status_lanjut', $request->status_lanjut);
             if ($request->status_lanjut == 'Ranap') {
-                $pasien->with(['kamarInap' => function ($q) {
-                    return $q->where('stts_pulang', '<>', 'Pindah Kamar');
-                }]);
+                $pasien->with([
+                    'kamarInap' => function ($q) {
+                        return $q->where('stts_pulang', '<>', 'Pindah Kamar');
+                    }
+                ]);
             }
         }
 
@@ -177,14 +205,15 @@ class PasienController extends Controller
         return isSuccess($pasien, $message);
     }
 
-    private function shortByNamaPoli($realData) {
+    private function shortByNamaPoli($realData)
+    {
         $collection = $realData->toArray();
-        $data = $collection['data'];
+        $data       = $collection['data'];
         usort($data, function ($a, $b) {
             return $a['poliklinik']['nm_poli'] <=> $b['poliklinik']['nm_poli'];
         });
-        
-        $collection['data'] = $data; 
+
+        $collection['data'] = $data;
         return $collection;
     }
 
