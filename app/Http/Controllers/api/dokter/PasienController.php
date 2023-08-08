@@ -52,7 +52,7 @@ class PasienController extends Controller
             ->join('spesialis', 'spesialis.kd_sps', '=', 'dokter.kd_sps')
             ->where('kd_dokter', $kd_dokter)->first();
 
-        if (strpos($pesialis->nm_sps, 'UMUM')) {
+        if (str_contains(strtolower($pesialis->nm_sps), 'umum')) {
             $pasienRanap = \App\Models\RegPeriksa::where('status_lanjut', 'Ranap')
                 ->with([
                     'kamarInap' => function ($q) {
