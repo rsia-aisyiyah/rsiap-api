@@ -163,6 +163,11 @@ class PasienController extends Controller
         if ($request->status_lanjut) {
             $message .= ' dengan status lanjut ' . $request->status_lanjut;
             $pasien->where('status_lanjut', $request->status_lanjut);
+            if ($request->status_lanjut == 'Ranap') {
+                $pasien->with(['kamarInap' => function ($q) {
+                    return $q->where('stts_pulang', '<>', 'Pindah Kamar');
+                }]);
+            }
         }
 
         if ($request->penjab) {
