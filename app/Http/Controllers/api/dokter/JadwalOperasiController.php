@@ -28,7 +28,7 @@ class JadwalOperasiController extends Controller
 
     public function now()
     {
-        $jadwal = \App\Models\BookingOperasi::with('regPeriksa')
+        $jadwal = \App\Models\BookingOperasi::with('regPeriksa', 'regPeriksa.penjab', 'regPeriksa.pasien', 'paketOperasi', 'rsiaDiagnosaOperasi')
             ->where('kd_dokter', $this->payload->get('sub'))
             ->where('tanggal', '>=', date('Y-m-d'))
             ->orderBy('no_rawat', 'DESC')
