@@ -36,7 +36,7 @@ class PasienRalanController extends Controller
             ->where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
             ->where('status_lanjut', 'Ralan')
-            ->orderBy('jam_reg', 'DESC')
+            ->orderByRaw("FIELD(kd_poli, 'BBL', 'P001', 'P009', 'P007', 'LAB', 'OPE', 'U0016', 'P003', 'U0017', 'P008', 'P005', 'PKIA', 'P004', 'P006', 'IGDK', 'P002')")
             ->paginate(env('PER_PAGE', 20));
 
         return isSuccess($pasien, $message);
