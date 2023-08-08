@@ -48,10 +48,6 @@ class PasienController extends Controller
     public function metricNow() {
         $kd_dokter = $this->payload->get('sub');
 
-        // get pasien raawt jalan hari ini
-        // get pasien rawat inap hari ini
-        // get jadwal operasi hari ini
-
         $pasienRalan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
             ->where('status_lanjut', 'Ralan')
@@ -63,7 +59,7 @@ class PasienController extends Controller
             ->count();
 
         $jadwalOperasi = \App\Models\BookingOperasi::where('kd_dokter', $kd_dokter)
-            ->where('tanggal', date('Y-m-d'))
+            ->where('tanggal', ">=", date('Y-m-d'))
             ->count();
 
         $data = [
