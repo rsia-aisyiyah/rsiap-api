@@ -28,15 +28,15 @@ class JadwalOperasiController extends Controller
 
     public function now()
     {
-        $jadwal = \App\Models\BookingOperasi::with('regPeriksa', 'regPeriksa.penjab', 'regPeriksa.pasien', 'paketOperasi', 'rsiaDiagnosaOperasi')
+        $jadwal = \App\Models\BookingOperasi::with('regPeriksa')
             ->where('kd_dokter', $this->payload->get('sub'))
-            ->where('tanggal', date('Y-m-d'))
+            ->where('tanggal', '>=', date('Y-m-d'))
             ->orderBy('no_rawat', 'DESC')
             ->orderBy('tanggal', 'DESC')
             ->orderBy('jam_mulai', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
-        return isSuccess($jadwal, 'Data berhasil dimuat');
+        return isSuccess($jadwal, 'Data jadwal operasi hari ini berhasil dimuat');
     }
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
@@ -66,7 +66,7 @@ class JadwalOperasiController extends Controller
             $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
             $jadwal = \App\Models\BookingOperasi::with('regPeriksa', 'regPeriksa.penjab', 'regPeriksa.pasien', 'paketOperasi', 'rsiaDiagnosaOperasi')
                 ->where('kd_dokter', $this->payload->get('sub'))
-                ->where('tanggal', $fullDate)
+                ->where('tanggal', '>=', $fullDate)
                 ->orderBy('no_rawat', 'DESC')
                 ->orderBy('tanggal', 'DESC')
                 ->orderBy('jam_mulai', 'DESC')
