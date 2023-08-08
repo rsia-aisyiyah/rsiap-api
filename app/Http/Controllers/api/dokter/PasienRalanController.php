@@ -39,14 +39,15 @@ class PasienRalanController extends Controller
             ->orderBy('jam_reg', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
-        // order pasien collection by poliklinik.nm_poli ASC
-        $pasien = $pasien->sortBy(function ($pasien, $key) {
-            return $pasien->poliklinik->nm_poli;
+        $arrPasien = $pasien->toArray();
+        $data = $arrPasien['data'];
+        usort($data, function ($a, $b) {
+            return $a['poliklinik']['nm_poli'] <=> $b['poliklinik']['nm_poli'];
         });
+        
+        $arrPasien['data'] = $data; 
 
-        $pasien = $pasien->values()->all();
-
-        return isSuccess($pasien, $message);
+        return isSuccess($arrPasien, $message);
     }
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
