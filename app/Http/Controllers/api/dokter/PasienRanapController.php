@@ -17,9 +17,14 @@ class PasienRanapController extends Controller
     public function index()
     {
         $kd_dokter = $this->payload->get('sub');
-        $pasien    = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap.kamar.bangsal'])
-            ->where('kd_dokter', $kd_dokter)
+        $pasien    = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('status_lanjut', 'Ranap')
+            ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
+                return $q->where('stts_pulang', '<>', 'Pindah Kamar');
+            }, 'kamarInap.kamar.bangsal'])
+            ->whereHas('kamarInap', function ($query) {
+                $query->where('stts_pulang', '<>', 'Pindah Kamar');
+            })
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC')
             ->paginate(env('PER_PAGE', 20));
@@ -69,10 +74,15 @@ class PasienRanapController extends Controller
         $message = 'Data berhasil dimuat';
         if ($tahun !== null) {
             $message .= ' pada tahun ' . $tahun;
-            $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap', 'kamarInap.kamar', 'kamarInap.kamar.bangsal'])
-                ->where('kd_dokter', $this->payload->get('sub'))
+            $pasien  = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->where('status_lanjut', 'Ranap')
+                ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
+                    return $q->where('stts_pulang', '<>', 'Pindah Kamar');
+                }, 'kamarInap.kamar.bangsal'])
+                ->whereHas('kamarInap', function ($query) {
+                    $query->where('stts_pulang', '<>', 'Pindah Kamar');
+                })
                 ->orderBy('tgl_registrasi', 'DESC')
                 ->orderBy('jam_reg', 'DESC')
                 ->paginate(env('PER_PAGE', 20));
@@ -80,11 +90,16 @@ class PasienRanapController extends Controller
 
         if ($tahun !== null && $bulan !== null) {
             $message .= ' bulan ' . $bulan;
-            $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap', 'kamarInap.kamar', 'kamarInap.kamar.bangsal'])
-                ->where('kd_dokter', $this->payload->get('sub'))
+            $pasien  = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
+                ->where('status_lanjut', 'Ranap')
                 ->whereYear('tgl_registrasi', $tahun)
                 ->whereMonth('tgl_registrasi', $bulan)
-                ->where('status_lanjut', 'Ranap')
+                ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
+                    return $q->where('stts_pulang', '<>', 'Pindah Kamar');
+                }, 'kamarInap.kamar.bangsal'])
+                ->whereHas('kamarInap', function ($query) {
+                    $query->where('stts_pulang', '<>', 'Pindah Kamar');
+                })
                 ->orderBy('tgl_registrasi', 'DESC')
                 ->orderBy('jam_reg', 'DESC')
                 ->paginate(env('PER_PAGE', 20));
@@ -93,10 +108,15 @@ class PasienRanapController extends Controller
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
             $message .= ' tanggal ' . $tanggal;
             $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
-            $pasien   = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap', 'kamarInap.kamar', 'kamarInap.kamar.bangsal'])
-                ->where('kd_dokter', $this->payload->get('sub'))
+            $pasien   = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
                 ->where('tgl_registrasi', $fullDate)
                 ->where('status_lanjut', 'Ranap')
+                ->with(['pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
+                    return $q->where('stts_pulang', '<>', 'Pindah Kamar');
+                }, 'kamarInap.kamar.bangsal'])
+                ->whereHas('kamarInap', function ($query) {
+                    $query->where('stts_pulang', '<>', 'Pindah Kamar');
+                })
                 ->orderBy('tgl_registrasi', 'DESC')
                 ->orderBy('jam_reg', 'DESC')
                 ->paginate(env('PER_PAGE', 20));
