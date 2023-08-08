@@ -175,7 +175,24 @@ class PasienController extends Controller
 
         $pasien = $pasien->paginate(env('PER_PAGE', 20));
 
+        if($request->status_lanjut) {
+            if ($request->status_lanjut == 'Ralan') {
+                $pasien = $this->shortByNamaPoli($pasien);
+            }
+        }
+
         return isSuccess($pasien, $message);
+    }
+
+    private function shortByNamaPoli($realData) {
+        $collection = $realData->toArray();
+        $data = $collection['data'];
+        usort($data, function ($a, $b) {
+            return $a['poliklinik']['nm_poli'] <=> $b['poliklinik']['nm_poli'];
+        });
+        
+        $collection['data'] = $data; 
+        return $collection;
     }
 
     /**

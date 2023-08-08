@@ -14,6 +14,17 @@ class PasienRalanController extends Controller
         $this->payload = auth()->payload();
     }
 
+    private function shortByNamaPoli($realData) {
+        $collection = $realData->toArray();
+        $data = $collection['data'];
+        usort($data, function ($a, $b) {
+            return $a['poliklinik']['nm_poli'] <=> $b['poliklinik']['nm_poli'];
+        });
+        
+        $collection['data'] = $data; 
+        return $collection;
+    }
+
     public function index()
     {
         $message = 'Seluruh Pasien Rawat Jalan berhasil dimuat';
@@ -25,7 +36,7 @@ class PasienRalanController extends Controller
             ->orderBy('jam_reg', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
-        return isSuccess($pasien, $message);
+        return isSuccess($this->shortByNamaPoli($pasien), $message);
     }
     
     public function now()
@@ -39,15 +50,7 @@ class PasienRalanController extends Controller
             ->orderBy('jam_reg', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
-        $arrPasien = $pasien->toArray();
-        $data = $arrPasien['data'];
-        usort($data, function ($a, $b) {
-            return $a['poliklinik']['nm_poli'] <=> $b['poliklinik']['nm_poli'];
-        });
-        
-        $arrPasien['data'] = $data; 
-
-        return isSuccess($arrPasien, $message);
+        return isSuccess($this->shortByNamaPoli($pasien), $message);
     }
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
@@ -87,6 +90,6 @@ class PasienRalanController extends Controller
                 ->paginate(env('PER_PAGE', 20));
         }
 
-        return isSuccess($pasien, $message);
+        return isSuccess($this->shortByNamaPoli($pasien), $message);
     }
 }
