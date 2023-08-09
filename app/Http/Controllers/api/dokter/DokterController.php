@@ -28,10 +28,7 @@ class DokterController extends Controller
     public function spesialis()
     {
         $kd_dokter = $this->payload->get('sub');
-        $dokter = \App\Models\Dokter::select('spesialis.kd_sps', 'spesialis.nm_sps')
-            ->join('spesialis', 'spesialis.kd_sps', '=', 'dokter.kd_sps')
-            ->where('dokter.kd_dokter', $kd_dokter)
-            ->first();
+        $dokter = \App\Models\Dokter::getSpesialis($kd_dokter);
 
         return isSuccess($dokter, 'Data berhasil dimuat');
     }

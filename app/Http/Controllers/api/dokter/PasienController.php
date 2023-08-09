@@ -48,9 +48,7 @@ class PasienController extends Controller
     public function metricNow()
     {
         $kd_dokter = $this->payload->get('sub');
-        $pesialis  = \App\Models\Dokter::select('spesialis.kd_sps', 'spesialis.nm_sps')
-            ->join('spesialis', 'spesialis.kd_sps', '=', 'dokter.kd_sps')
-            ->where('kd_dokter', $kd_dokter)->first();
+        $pesialis  = \App\Models\Dokter::getSpesialis($kd_dokter);
 
         if (str_contains(strtolower($pesialis->nm_sps), 'umum')) {
             $pasienRanap = \App\Models\RegPeriksa::where('status_lanjut', 'Ranap')
