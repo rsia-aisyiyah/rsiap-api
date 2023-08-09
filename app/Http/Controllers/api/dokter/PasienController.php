@@ -50,6 +50,7 @@ class PasienController extends Controller
         $kd_dokter = $this->payload->get('sub');
         $pesialis  = \App\Models\Dokter::getSpesialis($kd_dokter);
 
+        // Ranap
         if (str_contains(strtolower($pesialis->nm_sps), 'umum')) {
             $pasienRanap = \App\Models\RegPeriksa::where('status_lanjut', 'Ranap')
                 ->with([
@@ -77,11 +78,21 @@ class PasienController extends Controller
                 ->count();
         }
 
+        // Ralan
         $pasienRalan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
-            ->where('status_lanjut', 'Ralan')
-            ->count();
+            ->where('status_lanjut', 'Ralan');
 
+        if (str_contains(strtolower($pesialis->nm_sps), 'umum')) {
+            $pasienRalan = $pasienRalan->whereHas('poliklinik', function ($query) {
+                $query->whereNotIn('nm_poli', ['IGDK', 'UGD']);
+            });
+        }
+
+        $pasienRalan = $pasienRalan->count();
+
+
+        // Jadwal Operasi
         $jadwalOperasi = \App\Models\BookingOperasi::where('kd_dokter', $kd_dokter)
             ->where('tanggal', ">=", date('Y-m-d'))
             ->count();
