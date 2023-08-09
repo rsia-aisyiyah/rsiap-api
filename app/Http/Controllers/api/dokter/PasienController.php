@@ -83,7 +83,7 @@ class PasienController extends Controller
             ->where('tgl_registrasi', date('Y-m-d'))
             ->where('status_lanjut', 'Ralan');
 
-        if (str_contains(strtolower($pesialis->nm_sps), 'umum')) {
+        if (str_contains(strtolower($pesialis->nm_sps), 'anak')) {
             $pasienRalan = $pasienRalan->whereHas('poliklinik', function ($query) {
                 $query->whereNotIn('nm_poli', ['IGDK', 'UGD']);
             });
