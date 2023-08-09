@@ -12,6 +12,17 @@ class Dokter extends Model
     protected $table = 'dokter';
     protected $hidden = ['kd_dokter'];
 
+    // custom function
+    public static function getSpesialis($kd_dokter) 
+    {
+        $dokter = Dokter::select('spesialis.kd_sps', 'spesialis.nm_sps')
+            ->join('spesialis', 'spesialis.kd_sps', '=', 'dokter.kd_sps')
+            ->where('dokter.kd_dokter', $kd_dokter)
+            ->first();
+
+        return $dokter;
+    }
+
 
     public function regPeriksa()
     {
