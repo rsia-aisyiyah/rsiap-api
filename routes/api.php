@@ -62,6 +62,13 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
     Route::get('pasien/ralan/{tahun}/{bulan}', [PasienRalanController::class, 'byDate']);
     Route::get('pasien/ralan/{tahun}/{bulan}/{tanggal}', [PasienRalanController::class, 'byDate']);
 
+
+    // Pasien POST
+    Route::post('pasien/search', [PasienController::class, 'search']);
+    Route::post('pasien/pemeriksaan', [PasienController::class, 'pemeriksaan']);
+    Route::post('pasien/pemeriksaan/chart', [PasienController::class, 'pemeriksaanChart']);
+    Route::post('pasien/pemeriksaan/verify', [PasienController::class, 'verifikasiSoap']);
+
     // Semua Pasien (termasuk rawat inap dan rawat jalan)
     Route::get('pasien', [PasienController::class, 'index']);
     Route::get('pasien/now', [PasienController::class, 'now']);
@@ -70,11 +77,6 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
     Route::get('pasien/{tahun}', [PasienController::class, 'byDate']);
     Route::get('pasien/{tahun}/{bulan}', [PasienController::class, 'byDate']);
     Route::get('pasien/{tahun}/{bulan}/{tanggal}', [PasienController::class, 'byDate']);
-    
-    // Pasien POST
-    Route::post('pasien/search', [PasienController::class, 'search']);
-    Route::post('pasien/pemeriksaan', [PasienController::class, 'pemeriksaan']);
-    Route::post('pasien/pemeriksaan/chart', [PasienController::class, 'pemeriksaanChart']);
 
 
     // Jadwal Operasi Dokter
@@ -86,14 +88,17 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
     Route::get('jadwal/operasi/{tahun}/{bulan}/{tanggal}', [JadwalOperasiController::class, 'byDate']);
 
 
-    Route::get('operasi', [OperasiController::class, 'index']);
     Route::post('operasi/data', [OperasiController::class, 'data']);
     Route::post('operasi/filter', [OperasiController::class, 'filter']);
+    
+    Route::get('operasi', [OperasiController::class, 'index']);
 
     // Kunjungan Dokter
+    Route::post('kunjungan/rekap', [KunjunganController::class, 'rekap']);
+    
+    
     Route::get('kunjungan', [KunjunganController::class, 'index']);
     Route::get('kunjungan/now', [KunjunganController::class, 'now']);
-    Route::post('kunjungan/rekap', [KunjunganController::class, 'rekap']);
     
     Route::get('kunjungan/{tahun}', [KunjunganController::class, 'byDate']);
     Route::get('kunjungan/{tahun}/{bulan}', [KunjunganController::class, 'byDate']);
