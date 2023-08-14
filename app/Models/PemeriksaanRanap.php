@@ -25,4 +25,8 @@ class PemeriksaanRanap extends Model
     {
         return $this->belongsTo(Pegawai::class, 'nip', 'nik');
     }
+
+    public function verifikasi() {
+        return $this->hasMany(RsiaVerifPemeriksaanRanap::class, 'no_rawat', 'no_rawat');
+    }
 }

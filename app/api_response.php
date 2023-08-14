@@ -5,7 +5,7 @@ function isSuccess($data, $message = null, $code = 200)
     return response()->json([
         'success' => true,
         'message' => $message,
-        'data' => $data
+        'data'    => $data
     ], $code);
 }
 
@@ -61,4 +61,15 @@ function isError(string $message = 'Internal Server Error')
         'success' => false,
         'message' => $message
     ], 500);
+}
+
+//debug return 
+function debugReturn($data, $message = "Debug", $code = 200)
+{
+    return response()->json([
+        'success'   => true,
+        'debug'     => true,
+        'message'   => $message,
+        'data'      => $data
+    ], $code);
 }

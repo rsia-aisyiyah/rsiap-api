@@ -269,8 +269,30 @@ class PasienController extends Controller
                 ])
                 ->first();
 
+            $verifikasi = \App\Models\RsiaVerifPemeriksaanRanap::where('no_rawat', request()->no_rawat)
+                ->with([
+                    'petugas' => function ($q) {
+                        $q->select('nip', 'nama');
+                    }
+                ])
+                ->orderBy('tgl_perawatan', 'DESC')
+                ->orderBy('jam_rawat', 'DESC')
+                ->get();
+
             $data->pemeriksaan = $data->pemeriksaanRanap;
             unset($data->pemeriksaanRanap);
+
+            foreach ($data->pemeriksaan as $key => $value) {
+                foreach ($verifikasi as $key2 => $value2) {
+                    if ($value->no_rawat == $value2->no_rawat && $value->tgl_perawatan == $value2->tgl_perawatan && $value->jam_rawat == $value2->jam_rawat) {
+                        $data->pemeriksaan[$key]->verifikasi = $value2;
+                        break;
+                    } else {
+                        $data->pemeriksaan[$key]->verifikasi = null;
+                    }
+                }
+            }
+
         } else {
             $message = 'Pemeriksaan Ralan berhasil dimuat';
             $data    = \App\Models\RegPeriksa::where('no_rawat', request()->no_rawat)
@@ -312,20 +334,16 @@ class PasienController extends Controller
 
         if (ucfirst($request->stts_lanjut) == 'Ranap') {
             $message = 'Pemeriksaan Ranap untuk chaart berhasil dimuat';
-            $data    = \App\Models\PemeriksaanRanap::select('tgl_perawatan', 'jam_rawat', 'suhu_tubuh', 'nadi', 'spo2', 'respirasi')
-                ->where('no_rawat', $request->no_rawat)
-                ->get();
-
-            // $data->pemeriksaan = $data->pemeriksaanRanap;
-            // unset($data->pemeriksaanRanap);
+            $data    = \App\Models\RsiaGrafikHarian::with([
+                'petugas' => function ($q) {
+                    $q->select('nip', 'nama');
+                }
+            ])->where('no_rawat', $request->no_rawat)->get();
         } else {
             $message = 'Pemeriksaan Ralan untuk chaart berhasil dimuat';
             $data    = \App\Models\PemeriksaanRalan::select('tgl_perawatan', 'jam_rawat', 'suhu_tubuh', 'nadi', 'spo2', 'respirasi')
                 ->where('no_rawat', $request->no_rawat)
                 ->get();
-
-            // $data->pemeriksaan = $data->pemeriksaanRalan;
-            // unset($data->pemeriksaanRalan);
         }
 
         return isSuccess($data, $message);
