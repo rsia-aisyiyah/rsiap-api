@@ -62,7 +62,6 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
     Route::get('pasien/ralan/{tahun}/{bulan}', [PasienRalanController::class, 'byDate']);
     Route::get('pasien/ralan/{tahun}/{bulan}/{tanggal}', [PasienRalanController::class, 'byDate']);
 
-
     // Semua Pasien (termasuk rawat inap dan rawat jalan)
     Route::get('pasien', [PasienController::class, 'index']);
     Route::get('pasien/now', [PasienController::class, 'now']);
