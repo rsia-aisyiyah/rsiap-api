@@ -348,4 +348,52 @@ class PasienController extends Controller
 
         return isSuccess($data, $message);
     }
+
+    public function verifikasiSoap(Request $request) {
+
+        if (!$request->isMethod('post')) {
+            return isFail('Method not allowed');
+        }
+
+        if (!$request->has('no_rawat')) {
+            return isFail('No Rawat tidak boleh kosong');
+        }
+
+        if (!$request->has('tgl_perawatan')) {
+            return isFail('Tanggal perawatan tidak boleh kosong');
+        }
+
+        if (!$request->has('jam_rawat')) {
+            return isFail('Jam rawat tidak boleh kosong');
+        }
+
+        $message = 'Verifikasi SOAP berhasil';
+
+        $verifModel = new \App\Models\RsiaVerifPemeriksaanRanap;
+
+        // check if data already exist
+        $check = $verifModel->where('no_rawat', $request->no_rawat)
+            ->where('tgl_perawatan', $request->tgl_perawatan)
+            ->where('jam_rawat', $request->jam_rawat)
+            ->first();
+
+        if ($check) {
+            return isOk('Data sudah diverifikasi pada tanggal ' . $check->tgl_verif . ' jam ' . $check->jam_verif);
+        }
+
+        $data = [
+            'no_rawat' => $request->no_rawat,
+            'tgl_perawatan' => $request->tgl_perawatan,
+            'jam_rawat' => $request->jam_rawat,
+            'tgl_verif' => date('Y-m-d'),
+            'jam_verif' => date('H:i:s'),
+            'verifikator' => $this->payload->get('sub'),
+        ];
+
+        if (!$verifModel->create($data)) {
+            return isFail('Verifikasi SOAP gagal');
+        }
+
+        return isOk($message);
+    }
 }
