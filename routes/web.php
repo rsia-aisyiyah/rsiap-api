@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +17,30 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/gc', function () {
+    $credentials = 'firebase_credentials.json';
+    $factory     = (new Factory)->withServiceAccount(base_path($credentials));
+
+    // Messaging with SDK
+    $messaging = $factory->createMessaging();
+
+    $message = CloudMessage::withTarget('topic', 'dokter-1')
+        ->fromArray([
+            'topic'         => 'dokter',
+            'notification'  => [
+                'title'     => 'RSIA Mobile Dokter',
+                'body'      => 'mwehehehehe',
+            ],
+            // optional
+            'data'         => [
+                'key' => 'value',
+            ],
+        ]);
+
+    // dd($message);
+
+    // send
+    $messaging->send($message);
 });
