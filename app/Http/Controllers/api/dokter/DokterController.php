@@ -18,7 +18,7 @@ class DokterController extends Controller
     {
         // get dokter by kd_dokter, kd_dokter get from token sub
         $kd_dokter = $this->payload->get('sub');
-        $dokter = \App\Models\Dokter::with(['pegawai', 'pegawai.kualifikasi_staff'])
+        $dokter = \App\Models\Dokter::with(['pegawai', 'pegawai.kualifikasi_staff', 'spesialis'])
             ->where('kd_dokter', $kd_dokter)
             ->first();
 
