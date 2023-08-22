@@ -16,7 +16,7 @@ use Kreait\Firebase\Messaging\CloudMessage;
  * 
  * @property \Kreait\Firebase\Factory $factory
  * @property \Kreait\Firebase\Messaging $messaging 
- * */ 
+ * */
 class PushNotification extends Controller
 {
     private $credentials = 'firebase_credentials.json';
@@ -31,7 +31,7 @@ class PushNotification extends Controller
     public function __construct()
     {
         // initialize firebase
-        $this->factory   = (new Factory)->withServiceAccount(base_path($this->credentials));
+        $this->factory = (new Factory)->withServiceAccount(base_path($this->credentials));
 
         // initialize messaging
         $this->messaging = $this->factory->createMessaging();
@@ -52,17 +52,18 @@ class PushNotification extends Controller
             return $check;
         }
 
+
         // build notification message
-        $message     = self::buildNotification($check->getData()->data);
+        $message = self::buildNotification($check->getData()->data);
 
         // send notification
         self::sendNotification($message);
 
         // return response
         return response()->json([
-            'success'   => true,
-            'message'   => 'notification sent',
-            'data'      => $message
+            'success' => true,
+            'message' => 'notification sent',
+            'data'    => $message
         ], 200);
     }
 
@@ -86,7 +87,7 @@ class PushNotification extends Controller
                 'title' => $msg->title,
                 'body'  => $msg->body
             ])->withData(json_decode(json_encode($msg->data), true));
-        
+
         // return message
         return $message;
     }
@@ -114,9 +115,45 @@ class PushNotification extends Controller
         // check request requirements
         foreach ($requirements as $requirement) {
             if ($request->has($requirement)) {
+
+                if ($requirement == "data") {
+                    // if data is not an array
+                    if (!is_array($request->data)) {
+                        $msg = "data bukan object";
+                        return isFail($msg);
+                    }
+
+                    // if empty data
+                    if (empty((array) $request->data)) {
+                        $msg = "data tidak boleh kosong";
+                        return isFail($msg);
+                    }
+
+                    // if no no_rawat in data
+                    if (!isset($request->data['no_rawat'])) {
+                        $msg = "no_rawat harus ada di data";
+                        return isFail($msg);
+                    }
+
+                    // if no_rawat is empty
+                    if (empty($request->data['no_rawat'])) {
+                        $msg = "no_rawat tidak boleh kosong";
+                        return isFail($msg);
+                    }
+
+                    // if no_rawat is not string
+                    if (!is_string($request->data['no_rawat'])) {
+                        $msg = "no_rawat harus string";
+                        return isFail($msg);
+                    }
+                }
+
                 $data[$requirement] = $request->$requirement;
             } else {
-                // return error response if requirements not met
+                if ($requirement == 'data') {
+                    $msg = $requirement . " is required and must be an object, at least add no_rawat to data, ex: {\"no_rawat\": \"123456\"}";
+                    return isFail($msg);
+                }
                 return isFail($requirement . ' is required');
             }
         }
