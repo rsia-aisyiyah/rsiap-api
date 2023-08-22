@@ -26,7 +26,7 @@ Route::get('/gc', function () {
     // Messaging with SDK
     $messaging = $factory->createMessaging();
 
-    $message = CloudMessage::withTarget('topic', 'dokter-1')
+    $message = CloudMessage::withTarget('topic', 'dokter')
         ->fromArray([
             'topic'         => 'dokter',
             'notification'  => [

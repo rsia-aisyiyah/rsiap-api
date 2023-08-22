@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PushNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
@@ -26,6 +27,9 @@ use App\Http\Controllers\api\dokter\JasaMedisController;
 Route::get('/', function () {
     return isOk('API is running');
 });
+
+// Push Notification mobile
+Route::post('/notification/send', [PushNotification::class, 'send']);
 
 // Auth without middleware
 Route::prefix('auth')->group(function ($router) {
