@@ -84,6 +84,7 @@ class PushNotification extends Controller
         // build message
         $message = CloudMessage::withTarget('topic', $msg->topic)
             ->withNotification([
+                'topic' => $msg->topic,
                 'title' => $msg->title,
                 'body'  => $msg->body
             ])->withData(json_decode(json_encode($msg->data), true));
