@@ -12,6 +12,7 @@ use App\Http\Controllers\api\dokter\PasienRanapController;
 use App\Http\Controllers\api\dokter\JadwalOperasiController;
 use App\Http\Controllers\api\dokter\OperasiController;
 use App\Http\Controllers\api\dokter\JasaMedisController;
+use App\Http\Controllers\api\dokter\SmtpController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +69,9 @@ Route::middleware('api')->prefix('dokter')->group(function ($router) {
 
     // Jasa Medis Dokter
     Route::get('jasamedis', [JasaMedisController::class, 'index']);
+    
+    // Email SMTP
+    Route::get('smtp', [SmtpController::class, 'index']);
 
     // Pasien Rawat Jalan
     Route::get('pasien/ralan/now', [PasienRalanController::class, 'now']);    
