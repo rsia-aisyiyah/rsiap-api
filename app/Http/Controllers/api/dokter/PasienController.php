@@ -398,7 +398,16 @@ class PasienController extends Controller
         }
 
         // insert to tracker
-        $this->tracker->create($this->tracker->insertSql($verifModel, $data), $this->payload->get('sub'));
+        try {
+            $this->tracker->insertSql($verifModel, $data);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                '#'         => "tracker",
+                'success'   => false,
+                'message'   => 'Verifikasi SOAP gagal',
+                'error'     => $e->getMessage()
+            ], 500);
+        }
 
         return isOk($message);
     }

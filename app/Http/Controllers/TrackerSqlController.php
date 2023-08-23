@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 class TrackerSqlController extends Controller
 {
     protected $tracker;
+    protected $paylod;
 
     public function __construct()
     {
         $this->tracker = new \App\Models\TrackerSql();
+        $this->paylod = auth()->payload();
     }
 
     public function insertSql($table, $values)
@@ -18,7 +20,9 @@ class TrackerSqlController extends Controller
         $table  = $table->getTable();
         $values = implode('|', $values);
 
-        return "insert into $table values(|$values))";
+        $str = "insert into $table values(|$values))";
+
+        $this->create($str);
     }
 
     public function stringClause($clause)
@@ -45,7 +49,9 @@ class TrackerSqlController extends Controller
         $table        = $table->getTable();
         $stringClause = $this->stringClause($clause);
 
-        return "delete from $table where $stringClause";
+        $str = "delete from $table where $stringClause";
+
+        $this->create($str);
     }
 
     public function updateSql($table, $values, $clause)
@@ -55,15 +61,17 @@ class TrackerSqlController extends Controller
         $keys         = implode('=?,', array_keys($values));
         $stringClause = $this->stringClause($clause);
 
-        return "update $table set $keys=? where $stringClause |$val ";
+        $str = "update $table set $keys=? where $stringClause |$val ";
+
+        $this->create($str);
     }
 
-    public function create($sql, $nik)
+    public function create($sql)
     {
         $data = [
             'tanggal' => date('Y-m-d H:i:s'),
             'sqle'    => $sql,
-            'usere'   => $nik,
+            'usere'   => $this->paylod->get('sub')
         ];
 
         try {
