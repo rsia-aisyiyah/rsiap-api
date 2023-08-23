@@ -9,10 +9,12 @@ use Illuminate\Support\Carbon;
 class PasienController extends Controller
 {
     protected $payload;
+    protected $tracker;
 
     public function __construct()
     {
         $this->payload = auth()->payload();
+        $this->tracker = new \App\Http\Controllers\TrackerSqlController();
     }
 
     public function index()
@@ -349,7 +351,8 @@ class PasienController extends Controller
         return isSuccess($data, $message);
     }
 
-    public function verifikasiSoap(Request $request) {
+    public function verifikasiSoap(Request $request)
+    {
 
         if (!$request->isMethod('post')) {
             return isFail('Method not allowed');
@@ -382,17 +385,20 @@ class PasienController extends Controller
         }
 
         $data = [
-            'no_rawat' => $request->no_rawat,
+            'no_rawat'      => $request->no_rawat,
             'tgl_perawatan' => $request->tgl_perawatan,
-            'jam_rawat' => $request->jam_rawat,
-            'tgl_verif' => date('Y-m-d'),
-            'jam_verif' => date('H:i:s'),
-            'verifikator' => $this->payload->get('sub'),
+            'jam_rawat'     => $request->jam_rawat,
+            'tgl_verif'     => date('Y-m-d'),
+            'jam_verif'     => date('H:i:s'),
+            'verifikator'   => $this->payload->get('sub'),
         ];
 
         if (!$verifModel->create($data)) {
             return isFail('Verifikasi SOAP gagal');
         }
+
+        // insert to tracker
+        $this->tracker->create($this->tracker->insertSql($verifModel, $data), $this->payload->get('sub'));
 
         return isOk($message);
     }
