@@ -28,7 +28,7 @@ class BookingOperasi extends Model
 
     public function rsiaDiagnosaOperasi()
     {
-        return $this->belongsTo(RSIADiagnosaOperasi::class, 'no_rawat', 'no_rawat');
+        return $this->belongsTo(RsiaDiagnosaOperasi::class, 'no_rawat', 'no_rawat');
     }
 
     public function regPeriksa()

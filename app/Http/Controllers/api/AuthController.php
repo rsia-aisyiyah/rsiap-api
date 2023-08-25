@@ -26,6 +26,8 @@ class AuthController extends Controller
             return isUnauthenticated('Unauthorized');
         }
 
+        // TODO : check pegawai, (jika nik / username tidak ada di tabel dokter, bukan dokter)
+        // dibawah kedepannya tidak lagi menggunakan with
         $pegawai = Pegawai::with('dokter.spesialis')
             ->where('pegawai.nik', $credentials['username'])
             ->first();
