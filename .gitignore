@@ -14,4 +14,8 @@ yarn-error.log
 /.idea
 /.vscode
 
+# firebase credentials file (https://firebase.google.com/docs/admin/setup#initialize-sdk) 
 firebase_credentials.json
+
+# scribe api documentation
+.scribe
