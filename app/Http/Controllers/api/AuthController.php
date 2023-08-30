@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dokter;
 use App\Models\Pegawai;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,35 +17,51 @@ class AuthController extends Controller
         $credentials = request(['username', 'password']);
 
         $user = User::select(DB::raw('AES_DECRYPT(id_user, "nur") as id_user'), DB::raw('AES_DECRYPT(id_user, "nur") as username'))
-            ->with('spesialis')
             ->where('id_user', DB::raw('AES_ENCRYPT("' . $credentials['username'] . '", "nur")'))
             ->where('password', DB::raw('AES_ENCRYPT("' . $credentials['password'] . '", "windi")'))
             ->first();
-
 
         if (!$user) {
             return isUnauthenticated('Unauthorized');
         }
 
-        // TODO : check pegawai, (jika nik / username tidak ada di tabel dokter, bukan dokter)
-        // dibawah kedepannya tidak lagi menggunakan with
-        $pegawai = Pegawai::with('dokter.spesialis')
-            ->where('pegawai.nik', $credentials['username'])
-            ->first();
-
         $payloadable = [
             "sub" => $user->username,
         ];
+        
+        // check credentials username is in table dokter or not
+        $checkDokter = Dokter::where('kd_dokter', $credentials['username'])->first();
 
-        if ($pegawai) {
-            if ($pegawai->dokter) {
-                if ($pegawai->dokter->spesialis) {
-                    $payloadable['sps'] = $pegawai->dokter->spesialis->kd_sps;
-                    $payloadable['spss'] = $pegawai->dokter->spesialis->nm_sps;
-                }
+        if ($checkDokter) {
+            $user->username = $checkDokter->kd_dokter;
+
+            $pegawai = Pegawai::with('dokter.spesialis')
+                ->where('pegawai.nik', $credentials['username'])
+                ->first();
+
+            $user->pegawai = $pegawai;
+
+            if ($pegawai->dokter->spesialis) {
+                $payloadable['isDokter'] = true;
+                $payloadable['kd_sps']  = $pegawai->dokter->spesialis->kd_sps;
+                $payloadable['nm_sps'] = $pegawai->dokter->spesialis->nm_sps;
+            }
+        } else {
+            $user->username = $user->username;
+
+            $pegawai = Pegawai::with('dpt')
+                ->where('pegawai.nik', $credentials['username'])
+                ->first();
+
+            $user->pegawai = $pegawai;
+
+            if ($pegawai->dpt) {
+                $payloadable['isDokter'] = false;
+                $payloadable['kd_dep']  = $pegawai->dpt->dep_id;
+                $payloadable['nm_dep'] = $pegawai->dpt->nama;
             }
         }
-
+        
         $token = auth()->claims($payloadable)->login($user);
         if (!$token) {
             return isUnauthenticated('Unauthorized');
@@ -57,8 +74,7 @@ class AuthController extends Controller
     {
         // get payload from token
         $payload = auth()->payload()->toArray();
-        $pegawai = Pegawai::select('pegawai.nama', 'pegawai.jbtn')
-            ->where('pegawai.nik', $payload['sub'])
+        $pegawai = Pegawai::where('pegawai.nik', $payload['sub'])
             ->first();
 
         return isSuccess($pegawai, 'Data berhasil dimuat');
