@@ -47,8 +47,18 @@ class Pegawai extends Model
         return $this->hasOne(Petugas::class, 'nip', 'nik');
     }
 
-    public function kualifikasi_staff()
+    public function kualifikasi_staff_klinis()
     {
         return $this->hasOne(KualifikasiStaff::class, 'nik', 'nik');
+    }
+
+    public function cuti()
+    {
+        return $this->hasMany(RsiaCuti::class, 'nik', 'nik');
+    }
+
+    public function diklat()
+    {
+        return $this->hasMany(RsiaDiklat::class, 'id_peg', 'id');
     }
 }
