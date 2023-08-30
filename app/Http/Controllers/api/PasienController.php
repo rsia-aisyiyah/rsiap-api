@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\api\dokter;
+namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
+/**
+ * @group Pasien Universal
+ * */
 class PasienController extends Controller
 {
     protected $payload;
@@ -154,7 +157,7 @@ class PasienController extends Controller
      * @bodyParam no_rawat string search example : rawat 2023/01/01/000001
      * @bodyParam rm string search example : rm 009380
      * 
-     * @return json 
+     * @return \Illuminate\Http\JsonResponse 
      **/
     public function search(Request $request)
     {
@@ -232,7 +235,7 @@ class PasienController extends Controller
      * pemeriksaan
      *
      * @bodyParam no_rawat string required
-     * @return json
+     * @return \Illuminate\Http\JsonResponse
      * 
      * @authenticated
      */

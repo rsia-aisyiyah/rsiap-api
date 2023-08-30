@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\api\dokter;
+namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+/**
+ * @group Jasa Medis
+ * */
 class JasaMedisController extends Controller
 {
     protected $payload;
@@ -23,6 +26,6 @@ class JasaMedisController extends Controller
             ->orderBy('bulan','Desc')
             ->paginate(env('PER_PAGE', 20));
 
-        return isSuccess($dokter, 'Data berhasil dimuat');
+        return isSuccess($dokter, 'Jasa medis dokter berhasil dimuat');
     }
 }

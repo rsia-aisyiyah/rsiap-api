@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\api\dokter;
+namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+/**
+ * @group Kunjungan Dokter
+ * */
 class KunjunganController extends Controller
 {
     protected $payload;
@@ -36,9 +39,9 @@ class KunjunganController extends Controller
     }
 
     private function getTotal($source)
-    {   
+    {
         $dataMap = ["UMUM", "BPJS", "TOTAL"];
-        $data = $source->pluck('penjab')->countBy(
+        $data    = $source->pluck('penjab')->countBy(
             function ($item, $key) {
                 return str_contains($item['png_jawab'], "BPJS") ? 'BPJS' : $item['png_jawab'];
             }
@@ -53,24 +56,6 @@ class KunjunganController extends Controller
                 $data[$value] = $data['UMUM'] + $data['BPJS'];
             }
         }
-
-        return $data;
-    }
-
-    private function checkData($data) {
-        $dataVal = ["UMUM", "BPJS", "TOTAL"];
-        $dataKey = ["Ranap", "Ralan", "Operasi"];
-
-        // jika dataKey didalam data tidak adan maka tambahkan dataKey dengan isi dataVal
-        foreach ($dataKey as $key => $value) {
-            if (!isset($data[$value])) {
-                $data[$value] = array_fill_keys($dataVal, 0);
-            }
-        }
-
-        $data = collect($data)->sortBy(function ($item, $key) use ($dataKey) {
-            return array_search($key, $dataKey);
-        })->toArray();
 
         return $data;
     }
@@ -99,13 +84,12 @@ class KunjunganController extends Controller
         if ($request->tgl_registrasi) {
             $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
             $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-
         }
 
         $pasien->whereBetween('tgl_registrasi', [$start, $end]);
         $operasi->whereBetween('tgl_registrasi', [$start, $end]);
 
-        $data = $pasien->get()->groupBy('status_lanjut')->map(function ($item, $key) {
+        $data            = $pasien->get()->groupBy('status_lanjut')->map(function ($item, $key) {
             return $this->getTotal(collect($item));
         });
         $data['Operasi'] = $this->getTotal($operasi->get());
@@ -115,32 +99,42 @@ class KunjunganController extends Controller
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
+        $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'));
         if ($tahun !== null) {
-            $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
-                ->whereYear('tgl_registrasi', $tahun)
-                ->orderBy('tgl_registrasi', 'desc')
-                ->orderBy('jam_reg', 'desc')
-                ->paginate(env('PER_PAGE', 20));
+            $kunjungan->whereYear('tgl_registrasi', $tahun);
         }
 
         if ($tahun !== null && $bulan !== null) {
-            $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
-                ->whereYear('tgl_registrasi', $tahun)
-                ->whereMonth('tgl_registrasi', $bulan)
-                ->orderBy('tgl_registrasi', 'desc')
-                ->orderBy('jam_reg', 'desc')
-                ->paginate(env('PER_PAGE', 20));
+            $kunjungan->whereYear('tgl_registrasi', $tahun)->whereMonth('tgl_registrasi', $bulan);
         }
 
         if ($tahun !== null && $bulan !== null && $tanggal !== null) {
-            $fullDate  = $tahun . '-' . $bulan . '-' . $tanggal;
-            $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
-                ->where('tgl_registrasi', $fullDate)
-                ->orderBy('tgl_registrasi', 'desc')
-                ->orderBy('jam_reg', 'desc')
-                ->paginate(env('PER_PAGE', 20));
+            $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
+            $kunjungan->where('tgl_registrasi', $fullDate);
         }
 
+        $kunjungan = $kunjungan->orderBy('tgl_registrasi', 'desc')
+            ->orderBy('jam_reg', 'desc')->paginate(env('PER_PAGE', 20));
+
         return isSuccess($kunjungan, 'Data berhasil dimuat');
+    }
+
+    private function checkData($data)
+    {
+        $dataVal = ["UMUM", "BPJS", "TOTAL"];
+        $dataKey = ["Ranap", "Ralan", "Operasi"];
+
+        // jika dataKey didalam data tidak adan maka tambahkan dataKey dengan isi dataVal
+        foreach ($dataKey as $key => $value) {
+            if (!isset($data[$value])) {
+                $data[$value] = array_fill_keys($dataVal, 0);
+            }
+        }
+
+        $data = collect($data)->sortBy(function ($item, $key) use ($dataKey) {
+            return array_search($key, $dataKey);
+        })->toArray();
+
+        return $data;
     }
 }
