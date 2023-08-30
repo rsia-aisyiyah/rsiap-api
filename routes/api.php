@@ -33,7 +33,15 @@ Route::middleware('api')->prefix('auth')->group(function ($router) {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('validate', [AuthController::class, 'validateToken']);
+
+    // Room Auth
+    Route::post('room/me', [AuthController::class, 'roomMe']);
+    Route::post('room/login', [AuthController::class, 'roomLogin']);
+    Route::post('room/logout', [AuthController::class, 'roomLogout']);
+    Route::post('room/refresh', [AuthController::class, 'roomRefresh']);
+    Route::post('room/validate', [AuthController::class, 'roomValidateToken']);
 });
+
 
 // Email SMTP
 Route::get('/smtp', [SmtpController::class, 'index']);

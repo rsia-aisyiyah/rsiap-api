@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Models\Dokter;
 use App\Models\Pegawai;
+use App\Models\RsiaUsers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -100,6 +101,72 @@ class AuthController extends Controller
 
         return isOk('Token valid');
     }
+
+
+    // ================================================= Room Auth
+
+    public function roomLogin(Request $request) {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+
+        $user = RsiaUsers::where('username', $request->username)
+            ->where('password', md5($request->password))
+            ->first();
+
+        if (!$user) {
+            return isUnauthenticated('Unauthorized');
+        }
+
+        $payloadable = [
+            "sub" => $user->username,
+            "dep" => $user->dep_id,
+            "peg" => $user->id_pegawai,
+            "nama" => $user->nama,
+            "status" => $user->status,
+        ];
+
+        $token = auth()->claims($payloadable)->login($user);
+
+        if (!$token) {
+            return isUnauthenticated('Unauthorized');
+        }
+
+        return $this->respondWithToken($token);
+    }
+
+    public function roomMe()
+    {
+        // get payload from token
+        $payload = auth()->payload()->toArray();
+        $pegawai = RsiaUsers::where('username', $payload['sub'])
+            ->first();
+
+        return isSuccess($pegawai, 'Data berhasil dimuat');
+    }
+
+    public function roomLogout()
+    {
+        auth()->logout();
+        return isOk('Successfully logged out');
+    }
+
+    public function roomRefresh()
+    {
+        return $this->respondWithToken(auth()->refresh());
+    }
+
+    public function roomValidateToken()
+    {
+        $token = auth()->getToken();
+        if (!$token) {
+            return isUnauthenticated('Unauthorized');
+        }
+
+        return isOk('Token valid');
+    }
+
 
     protected function respondWithToken($token)
     {
