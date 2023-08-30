@@ -1,18 +1,11 @@
 <?php
 
-use App\Http\Controllers\PushNotification;
-use Illuminate\Http\Request;
+use App\Http\Controllers\api\JasaMedisController;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\SmtpController;
+use App\Http\Controllers\PushNotification;
 use App\Http\Controllers\api\AuthController;
-use App\Http\Controllers\api\dokter\DokterController;
-use App\Http\Controllers\api\dokter\PasienController;
-use App\Http\Controllers\api\dokter\KunjunganController;
-use App\Http\Controllers\api\dokter\PasienRalanController;
-use App\Http\Controllers\api\dokter\PasienRanapController;
-use App\Http\Controllers\api\dokter\JadwalOperasiController;
-use App\Http\Controllers\api\dokter\OperasiController;
-use App\Http\Controllers\api\dokter\JasaMedisController;
-use App\Http\Controllers\api\dokter\SmtpController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,9 +22,6 @@ Route::get('/', function () {
     return isOk('API is running');
 });
 
-// Push Notification mobile
-Route::post('/notification/send', [PushNotification::class, 'send']);
-
 // Auth without middleware
 Route::prefix('auth')->group(function ($router) {
     Route::post('login', [AuthController::class, 'login']);
@@ -39,11 +29,23 @@ Route::prefix('auth')->group(function ($router) {
 
 // Auth
 Route::middleware('api')->prefix('auth')->group(function ($router) {
-    Route::post('validate', [AuthController::class, 'validateToken']);
-    Route::post('refresh', [AuthController::class, 'refresh']);
-    Route::post('logout', [AuthController::class, 'logout']);
     Route::post('me', [AuthController::class, 'me']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::post('validate', [AuthController::class, 'validateToken']);
 });
 
+// Email SMTP
+Route::get('/smtp', [SmtpController::class, 'index']);
+
+// Jasa Medis Dokter
+Route::get('/jasa-medis', [JasaMedisController::class, 'index']);
+
+// Push Notification mobile
+Route::post('/notification/send', [PushNotification::class, 'send']);
+
 require_once 'partials/api_dokter.php';
+require_once 'partials/api_pasien.php';
+require_once 'partials/api_kunjungan.php';
+require_once 'partials/api_jadwal_operasi.php';
 require_once 'partials/api_pegawai.php';
