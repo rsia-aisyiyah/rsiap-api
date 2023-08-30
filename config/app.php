@@ -175,6 +175,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+
     ],
 
     /*
@@ -232,6 +234,11 @@ return [
 
         // load ApiResponser class
         'APIResponse' => App\Traits\ApiResponser::class,
+
+        // JWT Auth
+        'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
+        'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
+        'JWTProvider' => Tymon\JWTAuth\Facades\JWTProvider::class,
     ],
 
 ];
