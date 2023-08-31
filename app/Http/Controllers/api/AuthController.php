@@ -121,10 +121,10 @@ class AuthController extends Controller
 
         $payloadable = [
             "sub" => $user->username,
-            "dep" => $user->dep_id,
-            "peg" => $user->id_pegawai,
             "nama" => $user->nama,
+            "dep" => $user->dep_id,
             "status" => $user->status,
+            "peg" => $user->id_pegawai,
         ];
 
         $token = auth()->claims($payloadable)->login($user);
@@ -170,12 +170,12 @@ class AuthController extends Controller
 
     protected function respondWithToken($token)
     {
-        $exp = auth()->factory()->getTTL() / 60 / 24;
+        $exp = auth()->factory()->getTTL() / 60;
         return response()->json([
             'success'      => true,
             'access_token' => $token,
             'token_type'   => 'bearer',
-            'expires_in'   => round($exp) . ' days'
+            'expires_in'   => round($exp) . ' hour'
         ], 200);
     }
 }
