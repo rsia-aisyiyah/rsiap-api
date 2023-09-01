@@ -10,7 +10,7 @@ class MonitorRmeController extends Controller
 {
     function ugd(Request $request)
     {
-        $pasien = \App\Models\RegPeriksa::where('tgl_registrasi', date('Y-m-d'))
+        $pasien = \App\Models\RegPeriksa::select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut')
             ->where('status_lanjut', 'Ralan')
             ->with([
                 'pasien',
@@ -44,6 +44,16 @@ class MonitorRmeController extends Controller
                 $query->where('kd_poli', 'IGDK');
             });
 
+        $start = date('Y-m-01');
+        $end   = date('Y-m-t');
+
+        if ($request->tgl_registrasi) {
+            $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+            $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+        }
+
+        $pasien = $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+
         if ($request->datatables == 'true') {
             $pasien = $pasien->get();
             return DataTables::of($pasien)->make(true);
@@ -56,7 +66,6 @@ class MonitorRmeController extends Controller
     function ranap(Request $request)
     {
         $pasien = \App\Models\RegPeriksa::select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut')
-            ->where('tgl_registrasi', date('Y-m-d'))
             ->where('status_lanjut', 'Ranap')
             ->with([
                 'penjab',
@@ -85,6 +94,17 @@ class MonitorRmeController extends Controller
                 },
             ]);
 
+        $start = date('Y-m-01');
+        $end   = date('Y-m-t');
+
+        if ($request->tgl_registrasi) {
+            $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+            $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+        }
+
+        $pasien = $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+
+        
         if ($request->datatables == 'true') {
             $pasien = $pasien->get();
             return DataTables::of($pasien)->make(true);
