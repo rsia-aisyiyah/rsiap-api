@@ -114,5 +114,27 @@ class RegPeriksa extends Model
         return $this->hasOne(ResepObat::class, 'no_rawat', 'no_rawat');
     }
 
-    
+    // RsiaVerifPemeriksaanRanap
+    public function rsiaVerifPemeriksaanRanap()
+    {
+        return $this->hasOne(RsiaVerifPemeriksaanRanap::class, 'no_rawat', 'no_rawat');
+    }
+
+    // no_rawat
+    public function grafikHarian()
+    {
+        return $this->hasMany(RsiaGrafikHarian::class, 'no_rawat', 'no_rawat');
+    }
+
+    // skriningGizi
+    public function skriningGizi()
+    {
+        return $this->hasOne(RsiaSkriningGizi::class, 'no_rawat', 'no_rawat');  
+    }
+
+    // rekonsiliasiObat
+    public function rekonsiliasiObat()
+    {
+        return $this->hasOne(RekonsiliasiObat::class, 'no_rawat', 'no_rawat');
+    }
 }

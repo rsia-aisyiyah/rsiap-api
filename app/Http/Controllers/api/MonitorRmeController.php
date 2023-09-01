@@ -55,16 +55,33 @@ class MonitorRmeController extends Controller
 
     function ranap(Request $request)
     {
-        $pasien = \App\Models\RegPeriksa::where('tgl_registrasi', date('Y-m-d'))
+        $pasien = \App\Models\RegPeriksa::select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut')
+            ->where('tgl_registrasi', date('Y-m-d'))
             ->where('status_lanjut', 'Ranap')
             ->with([
-                'pasien',
                 'penjab',
-                'rsiaGeneralConsent'                => function ($query) {
+                'pasien',
+                'rsiaGeneralConsent'        => function ($query) {
                     $query->select('no_rawat', 'no_rkm_medis', 'ttd');
                 },
-                'transferPasienAntarRuang' => function ($query) {
+                'transferPasienAntarRuang'  => function ($query) {
                     $query->select('no_rawat', 'asal_ruang', 'ruang_selanjutnya');
+                },
+                'pemeriksaanRanap'          => function ($query) {
+                    $query->select('no_rawat', 'tgl_perawatan');
+                },
+                'rsiaVerifPemeriksaanRanap' => function ($query) {
+                    $query->select('no_rawat', 'tgl_verif');
+                },
+                'grafikHarian'              => function ($query) {
+                    $query->select('no_rawat', 'tgl_perawatan', 'suhu_tubuh', 'nadi');
+                },
+                // rekonsiliasiObat
+                'rekonsiliasiObat'          => function ($query) {
+                    $query->select('no_rawat', 'no_rekonsiliasi');
+                },
+                'skriningGizi'              => function ($query) {
+                    $query->select('no_rawat', 'keterangan');
                 },
             ]);
 
