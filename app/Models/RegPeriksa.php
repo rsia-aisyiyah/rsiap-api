@@ -65,4 +65,54 @@ class RegPeriksa extends Model
     {
         return $this->hasMany(Operasi::class, 'no_rawat', 'no_rawat')->latest('tgl_operasi');
     }
+
+    // bridging sep
+    public function bridgingSep()
+    {
+        return $this->hasOne(BridgingSep::class, 'no_rawat', 'no_rawat');
+    }
+
+    // data_triase_igd
+    public function dataTriaseIgd()
+    {
+        return $this->hasOne(DataTriaseIgd::class, 'no_rawat', 'no_rawat');
+    }
+
+    // rsia_general_consent
+    public function rsiaGeneralConsent()
+    {
+        return $this->hasOne(RsiaGeneralConsent::class, 'no_rawat', 'no_rawat');
+    }
+
+    // penilaianAwalKeperawatanIgd
+    public function penilaianAwalKeperawatanIgd()
+    {
+        return $this->hasOne(PenilaianAwalKeperawatanIgd::class, 'no_rawat', 'no_rawat');
+    }
+
+    // PenilaianAwalKeperawatanKebidanan
+    public function penilaianAwalKeperawatanKebidanan()
+    {
+        return $this->hasOne(PenilaianAwalKeperawatanKebidanan::class, 'no_rawat', 'no_rawat');
+    }
+
+    // PenilaianMedisIgd
+    public function penilaianMedisIgd()
+    {
+        return $this->hasOne(PenilaianMedisIgd::class, 'no_rawat', 'no_rawat');
+    }
+
+    // TransferPasienAntarRuang
+    public function transferPasienAntarRuang()
+    {
+        return $this->hasOne(TransferPasienAntarRuang::class, 'no_rawat', 'no_rawat');
+    }
+
+    // ResepObat
+    public function resepObat()
+    {
+        return $this->hasOne(ResepObat::class, 'no_rawat', 'no_rawat');
+    }
+
+    
 }
