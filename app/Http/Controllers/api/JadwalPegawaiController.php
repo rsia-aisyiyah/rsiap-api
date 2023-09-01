@@ -74,12 +74,17 @@ class JadwalPegawaiController extends Controller
         if (!$pegawai) {
             return isFail('Pegawai not found', 404);
         }
+        
+        $currentDay = date('d');
+        if (substr($currentDay, 0, 1) == 0) {
+            $currentDay = substr($currentDay, 1);
+        }
 
         $message = 'Jadwal pegawai hari ini';
-        $jadwal  = \App\Models\JadwalPegawai::select("H" . date('d') . ' as shift')
+        $jadwal  = \App\Models\JadwalPegawai::select("h" . $currentDay . ' as shift')
             ->where('id', $pegawai->id)
-            ->where('bulan', "09")
-            ->where('tahun', "2021")
+            ->where('bulan', date('m'))
+            ->where('tahun', date('Y'))
             ->first();
 
         $jadwal->jam_masuk = \App\Models\JamMasuk::where('shift', $jadwal->shift)->first();
