@@ -137,4 +137,9 @@ class RegPeriksa extends Model
     {
         return $this->hasOne(RekonsiliasiObat::class, 'no_rawat', 'no_rawat');
     }
+
+    public function resumePasienRanap()
+    {
+        return $this->hasOne(ResumePasienRanap::class, 'no_rawat', 'no_rawat');
+    }
 }

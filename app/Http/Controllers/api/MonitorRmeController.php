@@ -8,36 +8,44 @@ use Yajra\DataTables\DataTables;
 
 class MonitorRmeController extends Controller
 {
+    protected $payload;
+
+    public function __construct()
+    {
+        $this->payload = auth()->payload();
+    }
     function ugd(Request $request)
     {
         $pasien = \App\Models\RegPeriksa::select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut')
             ->where('status_lanjut', 'Ralan')
             ->with([
-                'pasien',
                 'penjab',
+                'pasien'                            => function ($query) {
+                    $query->select('no_rkm_medis', 'nm_pasien', 'tgl_lahir', 'jk', 'pekerjaan', 'alamat', 'no_tlp');
+                },
                 'bridgingSep'                       => function ($query) {
-                    $query->select('no_rawat', 'no_sep');
+                    $query->select('no_rawat');
                 },
                 'dataTriaseIgd'                     => function ($query) {
-                    $query->select('no_rawat', 'tgl_kunjungan');
+                    $query->select('no_rawat');
                 },
                 'rsiaGeneralConsent'                => function ($query) {
-                    $query->select('no_rawat', 'no_rkm_medis', 'ttd');
+                    $query->select('no_rawat');
                 },
                 'penilaianAwalKeperawatanIgd'       => function ($query) {
-                    $query->select('no_rawat', 'tanggal');
+                    $query->select('no_rawat');
                 },
                 'penilaianAwalKeperawatanKebidanan' => function ($query) {
-                    $query->select('no_rawat', 'tanggal');
+                    $query->select('no_rawat');
                 },
                 'penilaianMedisIgd'                 => function ($query) {
-                    $query->select('no_rawat', 'tanggal');
+                    $query->select('no_rawat');
                 },
                 'pemeriksaanRalan'                  => function ($query) {
-                    $query->select('no_rawat', 'tgl_perawatan');
+                    $query->select('no_rawat');
                 },
                 'resepObat'                         => function ($query) {
-                    $query->select('no_rawat', 'no_resep');
+                    $query->select('no_rawat');
                 },
             ])
             ->whereHas('poliklinik', function ($query) {
@@ -46,13 +54,21 @@ class MonitorRmeController extends Controller
 
         $start = date('Y-m-01');
         $end   = date('Y-m-t');
-
+        
         if ($request->tgl_registrasi) {
-            $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-            $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+            if ($request->tgl_registrasi['start'] != null && $request->tgl_registrasi['end'] != null) {
+                $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+            }
         }
 
-        $pasien = $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+        $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+        
+        if ($request->pembiayaan && $request->pembiayaan != null & $request->pembiayaan != 'all') {
+            $pasien->whereHas('penjab', function ($query) use ($request) {
+                $query->where('png_jawab', 'LIKE', '%' . $request->pembiayaan . '%');
+            });
+        }
 
         if ($request->datatables == 'true') {
             $pasien = $pasien->get();
@@ -65,46 +81,77 @@ class MonitorRmeController extends Controller
 
     function ranap(Request $request)
     {
-        $pasien = \App\Models\RegPeriksa::select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut')
+        $message = 'Data berhasil dimuat';
+        $pasien  = \App\Models\RegPeriksa::select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut')
             ->where('status_lanjut', 'Ranap')
+            ->orderBy('no_rawat', 'DESC')
             ->with([
                 'penjab',
-                'pasien',
+                'pasien'                    => function ($query) {
+                    $query->select('no_rkm_medis', 'nm_pasien', 'tgl_lahir', 'jk', 'pekerjaan', 'alamat', 'no_tlp');
+                },
                 'rsiaGeneralConsent'        => function ($query) {
-                    $query->select('no_rawat', 'no_rkm_medis', 'ttd');
+                    $query->select('no_rawat');
                 },
                 'transferPasienAntarRuang'  => function ($query) {
-                    $query->select('no_rawat', 'asal_ruang', 'ruang_selanjutnya');
+                    $query->select('no_rawat');
                 },
                 'pemeriksaanRanap'          => function ($query) {
-                    $query->select('no_rawat', 'tgl_perawatan');
+                    $query->select('no_rawat');
                 },
                 'rsiaVerifPemeriksaanRanap' => function ($query) {
-                    $query->select('no_rawat', 'tgl_verif');
+                    $query->select('no_rawat');
                 },
                 'grafikHarian'              => function ($query) {
-                    $query->select('no_rawat', 'tgl_perawatan', 'suhu_tubuh', 'nadi');
+                    $query->select('no_rawat');
                 },
-                // rekonsiliasiObat
                 'rekonsiliasiObat'          => function ($query) {
-                    $query->select('no_rawat', 'no_rekonsiliasi');
+                    $query->select('no_rawat');
                 },
                 'skriningGizi'              => function ($query) {
-                    $query->select('no_rawat', 'keterangan');
+                    $query->select('no_rawat');
                 },
             ]);
 
-        $start = date('Y-m-01');
-        $end   = date('Y-m-t');
-
-        if ($request->tgl_registrasi) {
-            $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-            $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+        if ($request->tgl) {
+            if ($request->tgl['start'] != null && $request->tgl['end'] != null) {
+                $start = \Illuminate\Support\Carbon::parse($request->tgl['start'])->format('Y-m-d');
+                $end   = \Illuminate\Support\Carbon::parse($request->tgl['end'])->format('Y-m-d');
+    
+                if ($request->status && $request->status != null && $request->status != 'all') {
+                    if ($request->status == 'pulang') {
+                        $message .= ' berdasarkan tanggal pulang ' . $start . ' sampai ' . $end;
+                        $pasien->whereHas('kamarInap', function ($query) use ($start, $end) {
+                            $query->whereBetween('tgl_keluar', [$start, $end]);
+                            $query->where('stts_pulang', '<>', 'Pindah Kamar');
+                        });
+                    } else {
+                        $message .= ' berdasarkan tanggal registrasi ' . $start . ' sampai ' . $end;
+                        $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+                    }
+                } else {
+                    $message .= ' berdasarkan tanggal registrasi ' . $start . ' sampai ' . $end;
+                    $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+                }
+            } else {
+                $pasien->whereHas('kamarInap', function ($query) {
+                    $query->where('stts_pulang', '-');
+                });
+            }
+        } else {
+            $pasien->whereHas('kamarInap', function ($query) {
+                $query->where('stts_pulang', '-');
+            });
         }
 
-        $pasien = $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+        if ($request->pembiayaan && $request->pembiayaan != null & $request->pembiayaan != 'all') {
+            $message .= ' dengan pembiayaan ' . $request->pembiayaan;
+            $pasien->whereHas('penjab', function ($query) use ($request) {
+                $query->where('png_jawab', 'LIKE', '%' . $request->pembiayaan . '%');
+            });
+        }
 
-        
+        $message .= '.';
         if ($request->datatables == 'true') {
             $pasien = $pasien->get();
             return DataTables::of($pasien)->make(true);
