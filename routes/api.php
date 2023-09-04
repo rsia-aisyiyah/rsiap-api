@@ -25,6 +25,7 @@ Route::get('/', function () {
 // Auth without middleware
 Route::prefix('auth')->group(function ($router) {
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('room/login', [AuthController::class, 'roomLogin']);
 });
 
 // Auth
@@ -36,7 +37,6 @@ Route::middleware('api')->prefix('auth')->group(function ($router) {
 
     // Room Auth
     Route::post('room/me', [AuthController::class, 'roomMe']);
-    Route::post('room/login', [AuthController::class, 'roomLogin']);
     Route::post('room/logout', [AuthController::class, 'roomLogout']);
     Route::post('room/refresh', [AuthController::class, 'roomRefresh']);
     Route::post('room/validate', [AuthController::class, 'roomValidateToken']);
