@@ -64,7 +64,7 @@ class MonitorRmeController extends Controller
 
         $pasien->whereBetween('tgl_registrasi', [$start, $end]);
         
-        if ($request->pembiayaan && $request->pembiayaan != null & $request->pembiayaan != 'all') {
+        if ($request->pembiayaan && $request->pembiayaan != null && $request->pembiayaan != 'all') {
             $pasien->whereHas('penjab', function ($query) use ($request) {
                 $query->where('png_jawab', 'LIKE', '%' . $request->pembiayaan . '%');
             });
@@ -144,14 +144,12 @@ class MonitorRmeController extends Controller
             });
         }
 
-        if ($request->pembiayaan && $request->pembiayaan != null & $request->pembiayaan != 'all') {
-            $message .= ' dengan pembiayaan ' . $request->pembiayaan;
+        if ($request->pembiayaan && $request->pembiayaan != null && $request->pembiayaan != 'all') {
             $pasien->whereHas('penjab', function ($query) use ($request) {
                 $query->where('png_jawab', 'LIKE', '%' . $request->pembiayaan . '%');
             });
         }
 
-        $message .= '.';
         if ($request->datatables == 'true') {
             $pasien = $pasien->get();
             return DataTables::of($pasien)->make(true);
