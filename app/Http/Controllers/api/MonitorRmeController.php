@@ -127,7 +127,9 @@ class MonitorRmeController extends Controller
                         });
                     } else {
                         $message .= ' berdasarkan tanggal registrasi ' . $start . ' sampai ' . $end;
-                        $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+                        $pasien->whereBetween('tgl_registrasi', [$start, $end])->whereHas('kamarInap', function ($query) {
+                            $query->where('stts_pulang', '-');
+                        });
                     }
                 } else {
                     $message .= ' berdasarkan tanggal registrasi ' . $start . ' sampai ' . $end;
