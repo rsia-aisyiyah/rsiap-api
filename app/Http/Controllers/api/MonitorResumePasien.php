@@ -19,7 +19,7 @@ class MonitorResumePasien extends Controller
         $ranap = \App\Models\ResumePasienRanap::whereIn('shk', ['belum', 'Belum', 'BELUM', 'sudah', 'Sudah', 'SUDAH'])
             ->with([
                 'regPeriksa'        => function ($q) {
-                    $q->select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut');
+                    $q->select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut', 'p_jawab');
                 },
                 'regPeriksa.pasien' => function ($query) {
                     $query->select('no_rkm_medis', 'nm_pasien', 'tgl_lahir', 'jk', 'pekerjaan', 'alamat', 'no_tlp');
