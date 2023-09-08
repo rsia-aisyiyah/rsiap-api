@@ -61,4 +61,9 @@ class Pegawai extends Model
     {
         return $this->hasMany(RsiaDiklat::class, 'id_peg', 'id');
     }
+
+    public function rsia_email_pegawai()
+    {
+        return $this->hasOne(EmailPegawai::class, 'nik', 'nik');
+    }
 }
