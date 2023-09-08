@@ -142,4 +142,16 @@ class RegPeriksa extends Model
     {
         return $this->hasOne(ResumePasienRanap::class, 'no_rawat', 'no_rawat');
     }
+
+    // penilaian medis ralan anak
+    public function penilaianMedisRalanAnak()
+    {
+        return $this->hasOne(PenilaianMedisRalanAnak::class, 'no_rawat', 'no_rawat');
+    }
+
+    // penilaian medis ralan kandungan
+    public function penilaianMedisRalanKandungan()
+    {
+        return $this->hasOne(PenilaianMedisRalanKandungan::class, 'no_rawat', 'no_rawat');
+    }
 }
