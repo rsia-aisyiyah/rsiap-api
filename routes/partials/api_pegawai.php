@@ -24,4 +24,5 @@ Route::middleware('api')->prefix('pegawai')->group(function ($router) {
 
     Route::post('/presensi/tmp', [PresensiController::class, 'tmp']);
     Route::post('/presensi/rekap', [PresensiController::class, 'rekap']);
+    Route::post('/presensi/rekap/now', [PresensiController::class, 'rekap_now']);
 });
