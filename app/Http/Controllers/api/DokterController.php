@@ -20,7 +20,7 @@ class DokterController extends Controller
     public function index()
     {
         $kd_dokter = $this->payload->get('sub');
-        $dokter = \App\Models\Dokter::with(['pegawai', 'pegawai.kualifikasi_staff_klinis', 'spesialis'])
+        $dokter = \App\Models\Dokter::with(['pegawai', 'pegawai.kualifikasi_staff_klinis', 'spesialis','pegawai.rsia_email_pegawai'])
             ->where('kd_dokter', $kd_dokter)
             ->first();
 
