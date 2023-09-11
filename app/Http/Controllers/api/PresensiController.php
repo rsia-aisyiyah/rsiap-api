@@ -26,7 +26,7 @@ class PresensiController extends Controller
             return isFail('Pegawai tidak ditemukan, pastikan NIK benar', 404);
         }
 
-        $presensi = \App\Models\TemporaryPresensi::where('id', $pegawai->id)->get();
+        $presensi = \App\Models\TemporaryPresensi::where('id', $pegawai->id)->first();
 
         if (!$presensi) {
             return isFail('Belum ada data presensi', 404);
@@ -67,6 +67,28 @@ class PresensiController extends Controller
         $message .= " berhasil dimuat";
         $presensi = $presensi->get();
 
+        if (!$presensi) {
+            return isFail('Belum ada data presensi', 404);
+        }
+
+        return isSuccess($presensi);
+    }
+
+    public function rekap_now(Request $request){
+        if (!$request->nik) {
+            return isFail('NIK is required', 422);
+        }
+
+        $pegawai = \App\Models\Pegawai::where('nik', $request->nik)->first();
+        if (!$pegawai) {
+            return isFail('Pegawai tidak ditemukan, pastikan NIK benar', 404);
+        }
+
+        $message = "Data presensi ";
+        $presensi = \App\Models\RekapPresensi::where('id', $pegawai->id)->where(DB::raw('DATE(jam_datang)'), date('Y-m-d'));
+
+        $message .= " berhasil dimuat";
+        $presensi = $presensi->first();
         if (!$presensi) {
             return isFail('Belum ada data presensi', 404);
         }
