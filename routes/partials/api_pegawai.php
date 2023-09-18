@@ -8,7 +8,7 @@ use App\Http\Controllers\api\PresensiController;
 use App\Http\Controllers\api\RsiaKlinisController;
 use App\Http\Controllers\api\JadwalPegawaiController;
 
-Route::middleware('api')->prefix('pegawai')->group(function ($router) {
+Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::get('/', [PegawaiController::class, 'index']);
     Route::post('/jadwal', [JadwalPegawaiController::class, 'index']);
     Route::post('/jadwal/now', [JadwalPegawaiController::class, 'now']);

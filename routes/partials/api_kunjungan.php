@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\KunjunganController;
 
-Route::middleware('api')->prefix('kunjungan')->group(function ($router) {
+Route::middleware('jwt.verify')->prefix('kunjungan')->group(function ($router) {
     // Kunjungan Dokter
     Route::get('kunjungan', [KunjunganController::class, 'index']);
     Route::get('now', [KunjunganController::class, 'now']);

@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\api\JasaMedisController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\SmtpController;
 use App\Http\Controllers\PushNotification;
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\JasaMedisController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,35 +18,34 @@ use App\Http\Controllers\api\AuthController;
 |
 */
 
+
 Route::get('/', function () {
     return isOk('API is running');
 });
 
 // Auth without middleware
 Route::prefix('auth')->group(function ($router) {
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('room/login', [AuthController::class, 'roomLogin']);
+    $router->post('login', [AuthController::class, 'login']);
+    $router->post('room/login', [AuthController::class, 'roomLogin']);
 });
 
 // Auth
-Route::middleware('api')->prefix('auth')->group(function ($router) {
-    Route::post('me', [AuthController::class, 'me']);
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('refresh', [AuthController::class, 'refresh']);
-    Route::post('validate', [AuthController::class, 'validateToken']);
+Route::middleware('jwt.verify')->prefix('auth')->group(function ($router) {
+    $router->post('me', [AuthController::class, 'me']);
+    $router->post('logout', [AuthController::class, 'logout']);
+    $router->post('refresh', [AuthController::class, 'refresh']);
+    $router->post('validate', [AuthController::class, 'validateToken']);
 
     // Room Auth
-    Route::post('room/me', [AuthController::class, 'roomMe']);
-    Route::post('room/logout', [AuthController::class, 'roomLogout']);
-    Route::post('room/refresh', [AuthController::class, 'roomRefresh']);
-    Route::post('room/validate', [AuthController::class, 'roomValidateToken']);
+    $router->post('room/me', [AuthController::class, 'roomMe']);
+    $router->post('room/logout', [AuthController::class, 'roomLogout']);
+    $router->post('room/refresh', [AuthController::class, 'roomRefresh']);
+    $router->post('room/validate', [AuthController::class, 'roomValidateToken']);
 });
 
 
 // Email SMTP
 Route::get('/smtp', [SmtpController::class, 'index']);
-
-// Jasa Medis Dokter
 Route::get('/jasa-medis', [JasaMedisController::class, 'index']);
 
 // Push Notification mobile

@@ -5,7 +5,7 @@ use App\Http\Controllers\api\OperasiController;
 use App\Http\Controllers\api\PasienRalanController;
 use App\Http\Controllers\api\PasienRanapController;
 
-Route::middleware('api')->prefix('pasien')->group(function ($router) {
+Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
     // Semua Pasien (termasuk rawat inap dan rawat jalan)
     Route::get('/', [PasienController::class, 'index']);
     Route::get('now', [PasienController::class, 'now']);

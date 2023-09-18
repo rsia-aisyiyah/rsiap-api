@@ -2,7 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\JadwalOperasiController;
 
-Route::middleware('api')->prefix('jadwal')->group(function ($router) {
+Route::middleware('jwt.verify')->prefix('jadwal')->group(function ($router) {
     // Jadwal Operasi Dokter
     Route::get('operasi', [JadwalOperasiController::class, 'index']);
     Route::get('operasi/now', [JadwalOperasiController::class, 'now']);

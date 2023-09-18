@@ -8,6 +8,7 @@ Route::prefix('dokter')->group(function ($router) {
     Route::get('/active/get', [DokterController::class, 'getData']);
 });
 
+Route::middleware('jwt.verify')->prefix('dokter')->group(function ($router) {
     Route::get('/', [DokterController::class, 'index']);
     Route::get('spesialis', [DokterController::class, 'spesialis']);
 });
