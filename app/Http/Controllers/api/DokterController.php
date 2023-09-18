@@ -34,11 +34,12 @@ class DokterController extends Controller
 
     public function getData(Request $request)
     {
-        $dokter = \App\Models\Dokter::select('kd_sps', 'nm_dokter')
-            ->with(['spesialis'])
+        $dokter = \App\Models\Dokter::select('kd_dokter', 'kd_sps', 'nm_dokter')
+            ->with(['spesialis', 'pegawai' => function ($query) {
+                return $query->select('nik', 'nama', 'jk', 'jbtn', 'photo');
+            }])
             ->where('status', '1')
-            ->where('nm_dokter', "<>", '-')
-            ->where('kd_dokter', "<>", '-');
+            ->where('nm_dokter', "<>", '-');
 
         if ($request->has('sps')) {
             $dokter->where('nm_sps', 'like', '%' . $request->sps . '%');

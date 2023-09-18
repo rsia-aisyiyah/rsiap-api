@@ -10,7 +10,6 @@ class Dokter extends Model
     use HasFactory;
 
     protected $table = 'dokter';
-    protected $hidden = ['kd_dokter'];
 
     // custom function
     public static function getSpesialis($kd_dokter) 
