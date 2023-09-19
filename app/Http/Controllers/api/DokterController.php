@@ -57,4 +57,11 @@ class DokterController extends Controller
 
         return isSuccess($dokter, 'Dokter berhasil dimuat');
     }
+
+    public function getSpesialis(Request $request) 
+    {
+        $spesialis = \App\Models\Spesialis::get();
+
+        return isSuccess($spesialis, 'Data Spesialis berhasil dimuat');
+    }
 }
