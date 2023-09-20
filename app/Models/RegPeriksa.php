@@ -15,6 +15,7 @@ class RegPeriksa extends Model
 
     protected $casts = [
         'no_rawat' => 'string',
+        'no_rkm_medis' => 'string'
     ];
 
     protected $hidden = [
@@ -153,5 +154,25 @@ class RegPeriksa extends Model
     public function penilaianMedisRalanKandungan()
     {
         return $this->hasOne(PenilaianMedisRalanKandungan::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function ranapDokter()
+    {
+        return $this->hasOne(RawatInapDr::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function ranapGabungan()
+    {
+        return $this->hasOne(RawatInapDrPr::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function ralanDokter()
+    {
+        return $this->hasOne(RawatJalanDr::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function ralanGabungan()
+    {
+        return $this->hasOne(RawatJalanDrPr::class, 'no_rawat', 'no_rawat');
     }
 }

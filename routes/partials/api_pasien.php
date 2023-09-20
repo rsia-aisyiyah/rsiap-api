@@ -14,7 +14,7 @@ Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
 
     // Pasien Rawat Inap
     Route::get('ranap/now', [PasienRanapController::class, 'now']);
-    Route::get('ranap/all', [PasienRanapController::class, 'all']);
+    Route::get('ranap/all', [PasienRanapController::class, 'all']); // <- pasien rawat inap belum pulang
     Route::get('ranap', [PasienRanapController::class, 'index']);
 
     // Pasien Rawat Jalan
