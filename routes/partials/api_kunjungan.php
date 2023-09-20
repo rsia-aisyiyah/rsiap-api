@@ -9,6 +9,7 @@ Route::middleware('jwt.verify')->prefix('kunjungan')->group(function ($router) {
     Route::get('now', [KunjunganController::class, 'now']);
     
     Route::post('rekap', [KunjunganController::class, 'rekap']);
+    Route::post('rekap/umum', [KunjunganController::class, 'rekapUmum']);
 
     Route::get('{tahun}', [KunjunganController::class, 'byDate']);
     Route::get('{tahun}/{bulan}', [KunjunganController::class, 'byDate']);
