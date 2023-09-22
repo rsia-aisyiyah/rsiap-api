@@ -23,4 +23,8 @@ class RsiaGrafikHarian extends Model
     function verifikasi() {
         return $this->hasMany(RsiaVerifPemeriksaanRanap::class, 'no_rawat', 'no_rawat');
     }
+
+    function pegawai() {
+        return $this->belongsTo(Pegawai::class, 'nip', 'nip');
+    }
 }
