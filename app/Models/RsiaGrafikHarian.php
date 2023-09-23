@@ -25,6 +25,6 @@ class RsiaGrafikHarian extends Model
     }
 
     function pegawai() {
-        return $this->belongsTo(Pegawai::class, 'nip', 'nip');
+        return $this->belongsTo(Pegawai::class, 'nip', 'nik');
     }
 }
