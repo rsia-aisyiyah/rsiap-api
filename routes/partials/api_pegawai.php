@@ -16,6 +16,8 @@ Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::post('/detail', [PegawaiController::class, 'detail']);
     
     Route::post('/cuti', [CutiController::class, 'index']);
+    Route::post('/cuti/post', [CutiController::class, 'simpanCuti']);
+    Route::delete('/cuti/delete', [CutiController::class, 'hapusCuti']);
     
     Route::post('/diklat', [DiklatController::class, 'index']);
     Route::post('/diklat/filter', [DiklatController::class, 'filter']);

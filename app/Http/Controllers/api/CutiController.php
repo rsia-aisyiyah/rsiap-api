@@ -45,4 +45,73 @@ class CutiController extends Controller
 
         return isSuccess($pegawai);
     }
+
+
+    public function simpanCuti(Request $request){
+        if (!$request->nik) {
+            return isFail('NIK is required', 422);
+        } else if (!$request->id_pegawai) {
+            return isFail('Id Pegawai is required', 422);
+        } else if (!$request->nama) {
+            return isFail('Nama is required', 422);
+        } else if (!$request->dep_id) {
+            return isFail('Departemen is required', 422);
+        } else if (!$request->tanggal_cuti) {
+            return isFail('Tanggal cuti is required', 422);
+        } else if (!$request->id_jenis) {
+            return isFail('Id jenis is required', 422);
+        } else if (!$request->jenis) {
+            return isFail('Jenis cuti is required', 422);
+        }
+
+
+
+        $message = 'Simpan cuti berhasil';
+        $cutiModel = new \App\Models\RsiaCuti();
+
+        $check = $cutiModel->where('nik', $request->nik)
+            ->where('tanggal_cuti', $request->tanggal_cuti)
+            ->first();
+
+            if ($check) {
+                return isOk('Data cuti sudah diajukan pada tanggal tersebut');
+            }
+        
+            $data = [
+                'id_pegawai'    => $request->id_pegawai,
+                'nik'           => $request->nik,
+                'nama'          => $request->nama,
+                'dep_id'        => $request->dep_id,
+                'tanggal_cuti'       => $request->tanggal_cuti,
+                'id_jenis'              => $request->id_jenis,
+                'jenis'              => $request->jenis,
+                'status_cuti'        => '0',
+                'tanggal_pengajuan'  => date('Y-m-d H:i:s'),
+            ];
+
+            if (!$cutiModel->create($data)) {
+                return isFail('Simpan data gagal');
+            }
+    
+            return isOk($message);
+
+    }
+
+    public function hapusCuti(Request $request){
+        $message = 'Hapus cuti berhasil';
+        $cutiModel = new \App\Models\RsiaCuti();
+
+        $data = [
+            'id_cuti'    => $request->id_cuti,
+        ];
+
+        if (!$cutiModel->where($data)->delete()) {
+            return isFail('Hapus data gagal');
+        }
+
+        return isOk($message);
+
+
+
+    }
 }
