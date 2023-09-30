@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\PasienController;
 use App\Http\Controllers\api\OperasiController;
@@ -9,8 +10,10 @@ Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
     // Semua Pasien (termasuk rawat inap dan rawat jalan)
     Route::get('/', [PasienController::class, 'index']);
     Route::get('now', [PasienController::class, 'now']);
-    Route::get('metric/now', [PasienController::class, 'metricNow']);    
+    Route::get('metric/now', [PasienController::class, 'metricNow']);
     Route::post('search', [PasienController::class, 'search']);
+
+    Route::get('/ranap/gabung', [PasienRanapController::class, 'gabung']);
 
     // Pasien Rawat Inap
     Route::get('ranap/now', [PasienRanapController::class, 'now']);

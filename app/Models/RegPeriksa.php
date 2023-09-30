@@ -32,6 +32,16 @@ class RegPeriksa extends Model
         return $this->belongsTo(KamarInap::class, 'no_rawat', 'no_rawat');
     }
 
+    public function ranapGabung()
+    {
+        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function bayiGabung()
+    {
+        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat2');
+    }
+
     public function dokter()
     {
         return $this->belongsTo(Dokter::class, 'kd_dokter', 'kd_dokter');
@@ -130,7 +140,7 @@ class RegPeriksa extends Model
     // skriningGizi
     public function skriningGizi()
     {
-        return $this->hasOne(RsiaSkriningGizi::class, 'no_rawat', 'no_rawat');  
+        return $this->hasOne(RsiaSkriningGizi::class, 'no_rawat', 'no_rawat');
     }
 
     // rekonsiliasiObat

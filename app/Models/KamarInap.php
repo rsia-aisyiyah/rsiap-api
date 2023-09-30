@@ -16,6 +16,11 @@ class KamarInap extends Model
         return $this->belongsTo(RegPeriksa::class, 'no_rawat', 'no_rawat');
     }
 
+    public function ranapGabung()
+    {
+        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat');
+    }
+
     public function kamar()
     {
         return $this->belongsTo(Kamar::class, 'kd_kamar', 'kd_kamar');
