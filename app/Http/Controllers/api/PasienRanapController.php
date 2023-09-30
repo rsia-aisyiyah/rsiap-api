@@ -75,7 +75,8 @@ class PasienRanapController extends Controller
                 'kamarInap' => function ($q) {
                     return $q->where('stts_pulang', '-');
                 },
-                'kamarInap.kamar.bangsal'
+                'kamarInap.kamar.bangsal',
+                'ranapGabung.regPeriksa.pasien'
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('tgl_keluar', '0000-00-00');
@@ -95,7 +96,7 @@ class PasienRanapController extends Controller
             ->with([
                 'pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
                     return $q->where('stts_pulang', '<>', 'Pindah Kamar');
-                }, 'kamarInap.kamar.bangsal'
+                }, 'kamarInap.kamar.bangsal', 'ranapGabung.regPeriksa.pasien'
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('stts_pulang', '<>', 'Pindah Kamar');
