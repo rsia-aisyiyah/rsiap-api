@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+
+use function PHPSTORM_META\map;
 
 /** @authenticated
  * @group Cuti Pegawai
@@ -44,6 +47,35 @@ class CutiController extends Controller
         }
 
         return isSuccess($pegawai);
+    }
+
+    public function counterCuti(Request $request){
+        $message = 'Gagal ambil data';
+
+        if (!$request->nik) {
+            return isFail('nik is required', 422);
+        }
+        // $cutiModel = new \App\Models\RsiaCuti();
+
+        $hitung = DB::table('pegawai as t1')
+        ->select(DB::raw("(SELECT count(id_pegawai) from rsia_cuti WHERE id_pegawai=t1.id and id_jenis = '1' and YEAR(tanggal_cuti)=year(curdate()) and MONTH(tanggal_cuti) < 07 and status_cuti='2' ) as jml1, (SELECT count(id_pegawai) from rsia_cuti WHERE id_pegawai=t1.id and id_jenis = '1' and MONTH(tanggal_cuti) > 06 and YEAR(tanggal_cuti)=year(curdate()) and MONTH(tanggal_cuti) <= 12 and status_cuti='2') as jml2"))
+        ->where('t1.nik', $request->nik)            
+        ->get();
+
+        // $hitung = $hitung->map(function($val){
+        //     return [
+        //         "jml1"  => (String)$val->jml1,
+        //         "jml2"  => (String)$val->jml2
+        //     ];
+        // });
+
+        if ($hitung) {
+            return isSuccess($hitung);
+        } else {
+            return isOk($message);
+
+        }
+
     }
 
 

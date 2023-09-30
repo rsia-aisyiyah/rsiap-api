@@ -7,6 +7,7 @@ use App\Http\Controllers\api\PegawaiController;
 use App\Http\Controllers\api\PresensiController;
 use App\Http\Controllers\api\RsiaKlinisController;
 use App\Http\Controllers\api\JadwalPegawaiController;
+use App\Http\Controllers\api\JasaMedisController;
 
 Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::get('/', [PegawaiController::class, 'index']);
@@ -18,6 +19,7 @@ Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::post('/cuti', [CutiController::class, 'index']);
     Route::post('/cuti/post', [CutiController::class, 'simpanCuti']);
     Route::delete('/cuti/delete', [CutiController::class, 'hapusCuti']);
+    Route::post('/cuti/count', [CutiController::class, 'counterCuti']);
     
     Route::post('/diklat', [DiklatController::class, 'index']);
     Route::post('/diklat/filter', [DiklatController::class, 'filter']);
@@ -27,4 +29,7 @@ Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::post('/presensi/tmp', [PresensiController::class, 'tmp']);
     Route::post('/presensi/rekap', [PresensiController::class, 'rekap']);
     Route::post('/presensi/rekap/now', [PresensiController::class, 'rekap_now']);
+
+    
+
 });
