@@ -15,6 +15,7 @@ class RegPeriksa extends Model
 
     protected $casts = [
         'no_rawat' => 'string',
+        'no_rkm_medis' => 'string'
     ];
 
     protected $hidden = [
@@ -29,6 +30,16 @@ class RegPeriksa extends Model
     public function kamarInap()
     {
         return $this->belongsTo(KamarInap::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function ranapGabung()
+    {
+        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function bayiGabung()
+    {
+        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat2');
     }
 
     public function dokter()
@@ -129,7 +140,7 @@ class RegPeriksa extends Model
     // skriningGizi
     public function skriningGizi()
     {
-        return $this->hasOne(RsiaSkriningGizi::class, 'no_rawat', 'no_rawat');  
+        return $this->hasOne(RsiaSkriningGizi::class, 'no_rawat', 'no_rawat');
     }
 
     // rekonsiliasiObat
@@ -155,13 +166,23 @@ class RegPeriksa extends Model
         return $this->hasOne(PenilaianMedisRalanKandungan::class, 'no_rawat', 'no_rawat');
     }
 
-    public function ranapGabung()
+    public function ranapDokter()
     {
-        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat');
+        return $this->hasOne(RawatInapDr::class, 'no_rawat', 'no_rawat');
     }
-    
-    public function bayiGabung()
+
+    public function ranapGabungan()
     {
-        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat2');
+        return $this->hasOne(RawatInapDrPr::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function ralanDokter()
+    {
+        return $this->hasOne(RawatJalanDr::class, 'no_rawat', 'no_rawat');
+    }
+
+    public function ralanGabungan()
+    {
+        return $this->hasOne(RawatJalanDrPr::class, 'no_rawat', 'no_rawat');
     }
 }

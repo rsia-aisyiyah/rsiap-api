@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pegawai;
 use Illuminate\Http\Request;
 
 /**
@@ -51,8 +52,14 @@ class PegawaiController extends Controller
         $pegawai = \App\Models\Pegawai::where('nik', $request->nik);
         if ($this->isDokter($request->nik)) {
             $pegawai->with('dokter.spesialis');
+            $pegawai->with('rsia_email_pegawai');
         } else {
+            $pegawai->with('petugas');
             $pegawai->with('dpt');
+            $pegawai->with('stts_kerja');
+            $pegawai->with('rsia_email_pegawai');
+            $pegawai->with('berkas_pegawai');
+            $pegawai->with('berkas_pegawai.master_berkas_pegawai');
         }
 
         $pegawai = $pegawai->first();

@@ -95,6 +95,44 @@ class KunjunganController extends Controller
 
         return isSuccess($this->checkData($data), 'Data berhasil dimuat');
     }
+    
+    function rekapUmum(Request $request)
+    {
+
+        if (!$request->isMethod('post')) {
+            return isFail('Method not allowed');
+        }
+
+        if ($request->tgl_registrasi) {
+            $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+            $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+        } else {
+            $start = date('Y-m-01');
+            $end   = date('Y-m-t');
+        }
+
+        $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
+            ->whereHas('ranapDokter', function ($query) use ($start, $end) {
+                $query->where('kd_dokter', $this->payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
+            })
+            ->orWhereHas('ralanDokter', function ($query) use ($start, $end) {
+                $query->where('kd_dokter', $this->payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
+            })
+            ->orWhereHas('ranapGabungan', function ($query) use ($start, $end) {
+                $query->where('kd_dokter', $this->payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
+            })
+            ->orWhereHas('ralanGabungan', function ($query) use ($start, $end) {
+                $query->where('kd_dokter', $this->payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
+            })
+            ->orderBy('tgl_registrasi', 'DESC')
+            ->orderBy('jam_reg', 'DESC');
+
+        $data = $pasien->get()->groupBy('status_lanjut')->map(function ($item, $key) {
+            return $this->getTotal(collect($item));
+        });
+
+        return isSuccess($this->checkData($data), "Data rekap pasen dokter umum pada $start - $end berhasil dimuat");
+    }
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
@@ -118,7 +156,7 @@ class KunjunganController extends Controller
         return isSuccess($kunjungan, 'Data berhasil dimuat');
     }
 
-    private function checkData($data)
+    private function checkData($data, $isUmum = false)
     {
         $dataVal = ["UMUM", "BPJS", "TOTAL"];
         $dataKey = ["Ranap", "Ralan", "Operasi"];

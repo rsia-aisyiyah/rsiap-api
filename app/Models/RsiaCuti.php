@@ -10,6 +10,8 @@ class RsiaCuti extends Model
     use HasFactory;
 
     protected $table = 'rsia_cuti';
+    protected $guarded = [];
+    public $timestamps = false;
 
     public function pegawai()
     {

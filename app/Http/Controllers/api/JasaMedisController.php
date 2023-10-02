@@ -28,4 +28,17 @@ class JasaMedisController extends Controller
 
         return isSuccess($dokter, 'Jasa medis dokter berhasil dimuat');
     }
+
+    public function jasaPelayanan()
+    {
+        $nik = $this->payload->get('sub');
+        $pegawai = \App\Models\JasaPelayanan::with('pegawai')
+            ->where('nik', $nik)
+            ->where('status_payroll', '1')
+            ->orderBy('tahun','Desc')
+            ->orderBy('bulan','Desc')
+            ->paginate(env('PER_PAGE', 20));
+
+        return isSuccess($pegawai, 'Jasa pelayanan berhasil dimuat');
+    }
 }

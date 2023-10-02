@@ -29,12 +29,12 @@ class PasienRanapController extends Controller
                 'kamarInap' => function ($q) {
                     return $q->where('stts_pulang', '<>', 'Pindah Kamar');
                 },
-                'kamarInap.kamar.bangsal'
+                'kamarInap.kamar.bangsal',
+                'ranapGabung.regPeriksa.pasien'
             ])->whereHas('kamarInap', function ($query) {
                 $query->where('stts_pulang', '<>', 'Pindah Kamar');
             })
-            ->orderBy('tgl_registrasi', 'DESC')
-            ->orderBy('jam_reg', 'DESC')
+            ->orderBy('no_rawat', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
         return isSuccess($pasien, 'Data berhasil dimuat');
@@ -51,17 +51,14 @@ class PasienRanapController extends Controller
                     return $q->where('stts_pulang', '-');
                 },
                 'kamarInap.kamar.bangsal',
-
-                // ASK : kamar mesti sama dengan orang tua, penjab juga apakah sama atau tidak, 
                 'ranapGabung',
-                'ranapGabung.regPeriksa.pasien',
+                'ranapGabung.regPeriksa.pasien'
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('tgl_keluar', '0000-00-00');
                 $query->where('stts_pulang', '-');
             })
-            ->orderBy('tgl_registrasi', 'DESC')
-            ->orderBy('jam_reg', 'DESC')
+            ->orderBy('no_rawat', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
         return isSuccess($pasien, 'Semua data pasien rawat inap berhasil dimuat');
@@ -79,14 +76,13 @@ class PasienRanapController extends Controller
                 'kamarInap' => function ($q) {
                     return $q->where('stts_pulang', '-');
                 },
-                'kamarInap.kamar.bangsal'
+                'kamarInap.kamar.bangsal',
+                'ranapGabung.regPeriksa.pasien'
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('tgl_keluar', '0000-00-00');
                 $query->where('stts_pulang', '-');
-            })
-            ->orderBy('tgl_registrasi', 'DESC')
-            ->orderBy('jam_reg', 'DESC');
+            })->orderBy('no_rawat', 'DESC');
 
         $pasien = $pasien->paginate(env('PER_PAGE', 20));
 
@@ -99,9 +95,9 @@ class PasienRanapController extends Controller
         $pasien  = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
             ->where('status_lanjut', 'Ranap')
             ->with([
-                'pasien','penjab','poliklinik','kamarInap' => function ($q) {
+                'pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
                     return $q->where('stts_pulang', '<>', 'Pindah Kamar');
-                },'kamarInap.kamar.bangsal'
+                }, 'kamarInap.kamar.bangsal', 'ranapGabung.regPeriksa.pasien'
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('stts_pulang', '<>', 'Pindah Kamar');
@@ -123,8 +119,7 @@ class PasienRanapController extends Controller
             $pasien->where('tgl_registrasi', $tahun . '-' . $bulan . '-' . $tanggal);
         }
 
-        $pasien = $pasien->orderBy('tgl_registrasi', 'DESC')
-            ->orderBy('jam_reg', 'DESC')
+        $pasien = $pasien->orderBy('no_rawat', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
         return isSuccess($pasien, $message);
@@ -170,6 +165,6 @@ class PasienRanapController extends Controller
             });
         }
 
-        return isSuccess($ranap->paginate(env('PER_PAGE', 20)), 'Data berhasil dimuat');
-    } 
+        return isSuccess($ranap->paginate(env('PER_PAGE', 20)), 'data pasien belum pulang + rawat gabung berhasil di peroleh');
+    }
 }

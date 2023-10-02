@@ -47,6 +47,7 @@ Route::middleware('jwt.verify')->prefix('auth')->group(function ($router) {
 // Email SMTP
 Route::get('/smtp', [SmtpController::class, 'index']);
 Route::get('/jasa-medis', [JasaMedisController::class, 'index']);
+Route::get('/jasa-pelayanan', [JasaMedisController::class, 'jasaPelayanan']);
 
 // Push Notification mobile
 Route::post('/notification/send', [PushNotification::class, 'send']);

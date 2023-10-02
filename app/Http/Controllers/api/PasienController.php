@@ -271,8 +271,13 @@ class PasienController extends Controller
                     'penjab',
                     'kamarInap.kamar.bangsal',
                     'pemeriksaanRanap' => function ($q) {
-                        $q->orderBy('tgl_perawatan', 'DESC');
-                        $q->orderBy('jam_rawat', 'DESC');
+                        $q->orderBy('tgl_perawatan', 'DESC')
+                            ->orderBy('jam_rawat', 'DESC')
+                            ->with([
+                                'petugas' => function ($q) {
+                                    $q->select('nip', 'nama');
+                                }
+                            ]);
                     }
                 ])
                 ->first();
@@ -300,7 +305,6 @@ class PasienController extends Controller
                     }
                 }
             }
-
         } else {
             $message = 'Pemeriksaan Ralan berhasil dimuat';
             $data    = \App\Models\RegPeriksa::where('no_rawat', request()->no_rawat)
@@ -346,7 +350,11 @@ class PasienController extends Controller
                 'petugas' => function ($q) {
                     $q->select('nip', 'nama');
                 }
-            ])->where('no_rawat', $request->no_rawat)->get();
+            ])->where('no_rawat', $request->no_rawat)
+            ->whereHas('pegawai', function ($q) {
+                return $q->where('jbtn', 'not like', '%direktur%')
+                    ->where('jbtn', 'not like', '%spesialis%');
+            })->get();
         } else {
             $message = 'Pemeriksaan Ralan untuk chaart berhasil dimuat';
             $data    = \App\Models\PemeriksaanRalan::select('tgl_perawatan', 'jam_rawat', 'suhu_tubuh', 'nadi', 'spo2', 'respirasi')

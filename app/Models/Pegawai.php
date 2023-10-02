@@ -66,4 +66,12 @@ class Pegawai extends Model
     {
         return $this->hasOne(EmailPegawai::class, 'nik', 'nik');
     }
+    public function stts_kerja()
+    {
+        return $this->hasOne(StatusKerja::class, 'stts', 'stts_kerja');
+    }
+    public function berkas_pegawai()
+    {
+        return $this->hasMany(BerkasPegawai::class, 'nik', 'nik');
+    }
 }
