@@ -62,7 +62,6 @@ class KunjunganController extends Controller
 
     function rekap(Request $request)
     {
-
         if (!$request->isMethod('post')) {
             return isFail('Method not allowed');
         }

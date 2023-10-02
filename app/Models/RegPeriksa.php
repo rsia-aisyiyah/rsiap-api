@@ -154,4 +154,14 @@ class RegPeriksa extends Model
     {
         return $this->hasOne(PenilaianMedisRalanKandungan::class, 'no_rawat', 'no_rawat');
     }
+
+    public function ranapGabung()
+    {
+        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat');
+    }
+    
+    public function bayiGabung()
+    {
+        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat2');
+    }
 }

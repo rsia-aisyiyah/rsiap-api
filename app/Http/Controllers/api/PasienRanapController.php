@@ -50,7 +50,11 @@ class PasienRanapController extends Controller
                 'kamarInap' => function ($q) {
                     return $q->where('stts_pulang', '-');
                 },
-                'kamarInap.kamar.bangsal'
+                'kamarInap.kamar.bangsal',
+
+                // ASK : kamar mesti sama dengan orang tua, penjab juga apakah sama atau tidak, 
+                'ranapGabung',
+                'ranapGabung.regPeriksa.pasien',
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('tgl_keluar', '0000-00-00');
@@ -125,4 +129,47 @@ class PasienRanapController extends Controller
 
         return isSuccess($pasien, $message);
     }
+
+    public function gabung(Request $request)
+    {
+        $ranap = \App\Models\KamarInap::with([
+            'regPeriksa.pasien',
+            'regPeriksa.dokter',
+            'regPeriksa.dokter.spesialis',
+            'kamar',
+            'ranapGabung.regPeriksa.dokter',
+            'ranapGabung.regPeriksa.pasien',
+            'kamar.bangsal',
+            'regPeriksa.penjab',
+            'regPeriksa.kamarInap',
+        ]);
+
+        if ($request->stts_pulang == 'Masuk') {
+            $ranap->whereBetween('tgl_masuk', [$request->tgl_pertama, $request->tgl_kedua]);
+        } else if ($request->stts_pulang == 'Pulang') {
+            $ranap->whereBetween('tgl_keluar', [$request->tgl_pertama, $request->tgl_kedua]);
+        } else {
+            $ranap->where('stts_pulang', '-');
+        }
+
+        if ($request->kd_dokter) {
+            $ranap->whereHas('regPeriksa', function ($q) use ($request) {
+                $q->where('kd_dokter', $request->kd_dokter);
+            });
+        }
+
+        if ($request->spesialis) {
+            $ranap->whereHas('regPeriksa.dokter', function ($q) use ($request) {
+                $q->where('kd_sps', $request->spesialis);
+            });
+        }
+
+        if ($request->kamar) {
+            $ranap->whereHas('kamar.bangsal', function ($q) use ($request) {
+                $q->where('nm_bangsal', 'like', '%' . $request->kamar . '%');
+            });
+        }
+
+        return isSuccess($ranap->paginate(env('PER_PAGE', 20)), 'Data berhasil dimuat');
+    } 
 }

@@ -12,6 +12,9 @@ Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
     Route::get('metric/now', [PasienController::class, 'metricNow']);    
     Route::post('search', [PasienController::class, 'search']);
 
+    // Pasien Ranap Gabung
+    Route::get('ranap/gabung', [PasienRanapController::class, 'gabung']);
+
     // Pasien Rawat Inap
     Route::get('ranap/now', [PasienRanapController::class, 'now']);
     Route::get('ranap/all', [PasienRanapController::class, 'all']);
