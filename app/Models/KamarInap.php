@@ -25,9 +25,4 @@ class KamarInap extends Model
     {
         return $this->belongsTo(Kamar::class, 'kd_kamar', 'kd_kamar');
     }
-
-    public function ranapGabung()
-    {
-        return $this->belongsTo(RanapGabung::class, 'no_rawat', 'no_rawat');
-    }
 }
