@@ -111,10 +111,10 @@ class MonitorRmeController extends Controller
                 'skriningGizi'              => function ($query) {
                     $query->select('no_rawat');
                 },
-                'penilaianMedisRalanAnak'           => function ($query) {
+                'penilaianMedisRanap'           => function ($query) {
                     $query->select('no_rawat');
                 },
-                'penilaianMedisRalanKandungan'      => function ($query) {
+                'penilaianMedisRanapKandungan'      => function ($query) {
                     $query->select('no_rawat');
                 },
             ]);
