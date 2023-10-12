@@ -117,6 +117,15 @@ class MonitorRmeController extends Controller
                 'penilaianMedisRanapKandungan'      => function ($query) {
                     $query->select('no_rawat');
                 },
+                'penilaianAwalKeperawatanRanap'     => function ($query) {
+                    $query->select('no_rawat');
+                },
+                'penilaianAwalKeperawatanRanapAnak' => function ($query) {
+                    $query->select('no_rawat');
+                },
+                'PenilaianAwalKeperawatanRanapNeonatus' => function ($query) {
+                    $query->select('no_rawat');
+                },
             ]);
 
         if ($request->tgl) {

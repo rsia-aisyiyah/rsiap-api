@@ -107,6 +107,24 @@ class RegPeriksa extends Model
         return $this->hasOne(PenilaianAwalKeperawatanKebidanan::class, 'no_rawat', 'no_rawat');
     }
 
+    // penilaian awal keperawatan ranap
+    public function penilaianAwalKeperawatanRanap()
+    {
+        return $this->hasOne(PenilaianAwalKeperawatanRanap::class, 'no_rawat', 'no_rawat');
+    }
+
+    // penilaian awal keperawatan ranap anak
+    public function penilaianAwalKeperawatanRanapAnak()
+    {
+        return $this->hasOne(PenilaianAwalKeperawatanRanapAnak::class, 'no_rawat', 'no_rawat');
+    }
+
+    // penilaian awal keperawatan ranap neonatus
+    public function penilaianAwalKeperawatanRanapNeonatus()
+    {
+        return $this->hasOne(PenilaianAwalKeperawatanRanapNeonatus::class, 'no_rawat', 'no_rawat');
+    }
+
     // PenilaianMedisIgd
     public function penilaianMedisIgd()
     {
