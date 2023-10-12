@@ -15,7 +15,7 @@ use function PHPSTORM_META\map;
  * 1. Riwayat Cuti Pegawai
  * 2. pengajuan cuti pegawai
  * 3. Pengajuan cuti bersalin
- * */ 
+ * */
 class CutiController extends Controller
 {
     protected $payload;
@@ -49,7 +49,8 @@ class CutiController extends Controller
         return isSuccess($pegawai);
     }
 
-    public function counterCuti(Request $request){
+    public function counterCuti(Request $request)
+    {
         $message = 'Gagal ambil data';
 
         if (!$request->nik) {
@@ -58,9 +59,9 @@ class CutiController extends Controller
         // $cutiModel = new \App\Models\RsiaCuti();
 
         $hitung = DB::table('pegawai as t1')
-        ->select(DB::raw("(SELECT count(id_pegawai) from rsia_cuti WHERE id_pegawai=t1.id and id_jenis = '1' and YEAR(tanggal_cuti)=year(curdate()) and MONTH(tanggal_cuti) < 07 and status_cuti='2' ) as jml1, (SELECT count(id_pegawai) from rsia_cuti WHERE id_pegawai=t1.id and id_jenis = '1' and MONTH(tanggal_cuti) > 06 and YEAR(tanggal_cuti)=year(curdate()) and MONTH(tanggal_cuti) <= 12 and status_cuti='2') as jml2"))
-        ->where('t1.nik', $request->nik)            
-        ->get();
+            ->select(DB::raw("(SELECT count(id_pegawai) from rsia_cuti WHERE id_pegawai=t1.id and id_jenis = '1' and YEAR(tanggal_cuti)=year(curdate()) and MONTH(tanggal_cuti) < 07 and status_cuti='2' ) as jml1, (SELECT count(id_pegawai) from rsia_cuti WHERE id_pegawai=t1.id and id_jenis = '1' and MONTH(tanggal_cuti) > 06 and YEAR(tanggal_cuti)=year(curdate()) and MONTH(tanggal_cuti) <= 12 and status_cuti='2') as jml2"))
+            ->where('t1.nik', $request->nik)
+            ->get();
 
         // $hitung = $hitung->map(function($val){
         //     return [
@@ -73,13 +74,12 @@ class CutiController extends Controller
             return isSuccess($hitung);
         } else {
             return isOk($message);
-
         }
-
     }
 
 
-    public function simpanCuti(Request $request){
+    public function simpanCuti(Request $request)
+    {
         if (!$request->nik) {
             return isFail('NIK is required', 422);
         } else if (!$request->id_pegawai) {
@@ -100,36 +100,54 @@ class CutiController extends Controller
 
         $message = 'Simpan cuti berhasil';
         $cutiModel = new \App\Models\RsiaCuti();
+        $cutiBersalinModel = new \App\Models\RsiaCutiBersalin();
 
         $check = $cutiModel->where('nik', $request->nik)
             ->where('tanggal_cuti', $request->tanggal_cuti)
             ->first();
 
-            if ($check) {
-                return isOk('Data cuti sudah diajukan pada tanggal tersebut');
-            }
-        
+        if ($check) {
+            return isOk('Data cuti sudah diajukan pada tanggal tersebut');
+        }
+
+        $start = \Illuminate\Support\Carbon::parse($request->tanggal_cuti['start'])->format('Y-m-d');
+        $end = \Illuminate\Support\Carbon::parse($request->tanggal_cuti['end'])->format('Y-m-d');
+        $data = [
+            'id_pegawai'    => $request->id_pegawai,
+            'nik'           => $request->nik,
+            'nama'          => $request->nama,
+            'dep_id'        => $request->dep_id,
+            'tanggal_cuti'       => $start,
+            'id_jenis'              => $request->id_jenis,
+            'jenis'              => $request->jenis,
+            'status_cuti'        => '0',
+            'tanggal_pengajuan'  => date('Y-m-d H:i:s'),
+        ];
+
+        if (!$cutiModel->create($data)) {
+            return isFail('Simpan data gagal');
+        }
+
+        if ($request->jenis == "Cuti Bersalin") {
+            $id_cuti = \App\Models\RsiaCuti::orderBy('id_cuti', 'desc')->where('nik', $request->nik)
+                ->first();
+
             $data = [
-                'id_pegawai'    => $request->id_pegawai,
-                'nik'           => $request->nik,
-                'nama'          => $request->nama,
-                'dep_id'        => $request->dep_id,
-                'tanggal_cuti'       => $request->tanggal_cuti,
-                'id_jenis'              => $request->id_jenis,
-                'jenis'              => $request->jenis,
-                'status_cuti'        => '0',
-                'tanggal_pengajuan'  => date('Y-m-d H:i:s'),
+                'id_cuti' => $id_cuti->id_cuti,
+                'tgl_mulai' => $start,
+                'tgl_selesai' => $end,
             ];
 
-            if (!$cutiModel->create($data)) {
+            if (!$cutiBersalinModel->create($data)) {
                 return isFail('Simpan data gagal');
             }
-    
-            return isOk($message);
+        }
 
+        return isOk($message);
     }
 
-    public function hapusCuti(Request $request){
+    public function hapusCuti(Request $request)
+    {
         $message = 'Hapus cuti berhasil';
         $cutiModel = new \App\Models\RsiaCuti();
 
@@ -142,8 +160,5 @@ class CutiController extends Controller
         }
 
         return isOk($message);
-
-
-
     }
 }
