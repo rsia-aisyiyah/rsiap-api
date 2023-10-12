@@ -64,4 +64,29 @@ class DokterController extends Controller
 
         return isSuccess($spesialis, 'Data Spesialis berhasil dimuat');
     }
+
+    public function getJadwal(Request $request)
+    {
+        $jadwal = \App\Models\Dokter::select('kd_dokter', 'nm_dokter', 'kd_sps')->with(['jadwal' => function($q) {
+            $q->where('kuota', '!=', 0);
+        }, 'jadwal.poliklinik', 'spesialis'])->whereHas('jadwal');
+        $msg = 'Data Jadwal dokter';
+
+        if ($request->kd_dokter) {
+            $msg .= ' berdasarkan kd_dokter ' . $request->kd_dokter;
+            $jadwal->where('kd_dokter', $request->kd_dokter);
+        }
+
+        if ($request->kd_poli) {
+            $msg .= ' berdasarkan kd_poli ' . $request->kd_poli;
+            $jadwal->whereHas('jadwal', function ($query) use ($request) {
+                $query->where('kd_poli', $request->kd_poli);
+            });
+        }
+
+        $msg .= ' berhasil dimuat';
+        $jadwal = $jadwal->get()->groupBy('kd_dokter');
+        
+        return isSuccess($jadwal, 'Data Jadwal berhasil dimuat');
+    }
 }
