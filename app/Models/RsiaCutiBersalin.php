@@ -10,6 +10,8 @@ class RsiaCutiBersalin extends Model
     use HasFactory;
 
     protected $table = 'rsia_cuti_bersalin';
+    protected $guarded = [];
+    public $timestamps = false;
 
     public function cuti()
     {

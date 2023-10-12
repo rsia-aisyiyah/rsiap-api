@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SmtpController;
 use App\Http\Controllers\PushNotification;
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\FileManagerController;
 use App\Http\Controllers\api\JasaMedisController;
+use App\Http\Controllers\PushNotificationPegawai;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,8 +51,15 @@ Route::get('/smtp', [SmtpController::class, 'index']);
 Route::get('/jasa-medis', [JasaMedisController::class, 'index']);
 Route::get('/jasa-pelayanan', [JasaMedisController::class, 'jasaPelayanan']);
 
+//File Manager 
+Route::get('/file-manager', [FileManagerController::class, 'index']);
+
 // Push Notification mobile
 Route::post('/notification/send', [PushNotification::class, 'send']);
+
+
+// Push Notification mobile
+Route::post('/notification/send/pegawai', [PushNotificationPegawai::class, 'send']);
 
 require_once 'partials/api_dokter.php';
 require_once 'partials/api_pasien.php';
