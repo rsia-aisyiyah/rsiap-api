@@ -67,9 +67,9 @@ class DokterController extends Controller
 
     public function getJadwal(Request $request)
     {
-        $jadwal = \App\Models\Dokter::select('kd_dokter', 'nm_dokter', 'kd_sps')->with(['jadwal' => function($q) {
-            $q->where('kuota', '!=', 0);
-        }, 'jadwal.poliklinik', 'spesialis'])->whereHas('jadwal');
+        $jadwal = \App\Models\Dokter::select('kd_dokter', 'nm_dokter', 'kd_sps')->with(['spesialis', 'pegawai' => function ($q) {
+            return $q->select('nik', 'nama', 'photo');
+        }, 'jadwal', 'jadwal.poliklinik'])->whereHas('jadwal');
         $msg = 'Data Jadwal dokter';
 
         if ($request->kd_dokter) {
