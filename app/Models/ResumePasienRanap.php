@@ -20,4 +20,9 @@ class ResumePasienRanap extends Model
     {
         return $this->belongsTo(Dokter::class, 'kd_dokter', 'kd_dokter');
     }
+
+    public function verif()
+    {
+        return $this->hasOne(RsiaVerifResumeRanap::class, 'no_rawat', 'no_rawat');
+    }
 }

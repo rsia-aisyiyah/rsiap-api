@@ -45,7 +45,6 @@ Route::middleware('jwt.verify')->prefix('auth')->group(function ($router) {
     $router->post('room/validate', [AuthController::class, 'roomValidateToken']);
 });
 
-
 // Email SMTP
 Route::get('/smtp', [SmtpController::class, 'index']);
 Route::get('/jasa-medis', [JasaMedisController::class, 'index']);

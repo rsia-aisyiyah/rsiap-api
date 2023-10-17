@@ -17,9 +17,13 @@ Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
     Route::get('ranap/gabung', [PasienRanapController::class, 'gabung']);
 
     // Pasien Rawat Inap
+    Route::get('ranap', [PasienRanapController::class, 'index']);
     Route::get('ranap/now', [PasienRanapController::class, 'now']);
     Route::get('ranap/all', [PasienRanapController::class, 'all']); // <- pasien rawat inap belum pulang
-    Route::get('ranap', [PasienRanapController::class, 'index']);
+
+    // Resume Pasien Ranap
+    Route::get('ranap/resume', [PasienRanapController::class, 'resume']);
+    Route::post('ranap/resume/verify', [PasienRanapController::class, 'verifyResume']);
 
     // Pasien Rawat Jalan
     Route::get('ralan', [PasienRalanController::class, 'index']);

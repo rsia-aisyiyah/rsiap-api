@@ -167,4 +167,62 @@ class PasienRanapController extends Controller
 
         return isSuccess($ranap->paginate(env('PER_PAGE', 20)), 'data pasien belum pulang + rawat gabung berhasil di peroleh');
     }
+
+    public function resume(Request $request)
+    {
+
+        if (!$request->no_rawat) {
+            return isFail('Parameter tidak lengkap');
+        }
+
+        $resume = \App\Models\ResumePasienRanap::with([
+            'verif',
+            'dokter' => function ($q) {
+                $q->select('kd_dokter', 'nm_dokter');
+            }, 
+            'regPeriksa', 
+            'regPeriksa.pasien'
+        ])->where('no_rawat', $request->no_rawat)->first();
+
+        if ($resume) {
+            return isSuccess($resume, 'Data resume pasien berhasil dimuat');
+        } else {
+            return isFail('Data resume pasien tidak ditemukan');
+        }
+    }
+
+    public function verifyResume(Request $request)
+    {
+        $verifikator = $this->payload->get('sub');
+
+        if (!$request->no_rawat) {
+            return isFail('Parameter tidak lengkap');
+        }
+
+        $data = [
+            'no_rawat' => $request->no_rawat,
+            'tgl_verif' => date('Y-m-d'),
+            'jam_verif' => date('H:i:s'),
+            'verifikator' => $verifikator,
+        ];
+
+        $resume = \App\Models\ResumePasienRanap::where('no_rawat', $request->no_rawat)->first();
+        $verif_resume = \App\Models\RsiaVerifResumeRanap::where('no_rawat', $request->no_rawat)->first();
+
+        if ($resume) {
+            if ($verif_resume) {
+                return isFail('Data resume pasien sudah diverifikasi');
+            }
+
+            $verif = \App\Models\RsiaVerifResumeRanap::create($data);
+
+            if ($verif) {
+                return isSuccess($data, 'Data resume pasien berhasil diverifikasi');
+            } else {
+                return isFail('Data resume pasien gagal diverifikasi');
+            }
+        } else {
+            return isFail('Data resume pasien tidak ditemukan');
+        }
+    }
 }
