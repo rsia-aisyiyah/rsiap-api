@@ -31,6 +31,7 @@ Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::post('/presensi/rekap/now', [PresensiController::class, 'rekap_now']);
 
     Route::post('/update-email', [PegawaiController::class, 'updateEmail']);
+    Route::post('/update-profil', [PegawaiController::class, 'updateProfil']);
 
 
     
