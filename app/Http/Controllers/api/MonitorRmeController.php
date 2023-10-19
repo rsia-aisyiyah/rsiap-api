@@ -8,12 +8,6 @@ use Yajra\DataTables\DataTables;
 
 class MonitorRmeController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
     function ugd(Request $request)
     {
         $pasien = \App\Models\RegPeriksa::select('no_rawat', 'no_rkm_medis', 'kd_pj', 'kd_dokter', 'kd_poli', 'tgl_registrasi', 'status_lanjut')

@@ -13,13 +13,6 @@ use Illuminate\Http\Request;
  */ 
 class RsiaKlinisController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     /** @authenticated
      * Get Kualifikasi Staff Klinis
      * 

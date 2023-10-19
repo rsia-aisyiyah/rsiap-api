@@ -7,13 +7,6 @@ use Illuminate\Http\Request;
 
 class JadwalPegawaiController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     public function index(Request $request)
     {
         $pegawai = \App\Models\Pegawai::where('nik', $request->nik)

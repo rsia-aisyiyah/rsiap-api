@@ -10,16 +10,11 @@ use Illuminate\Http\Request;
  * */
 class JasaMedisController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     public function index()
     {
-        $kd_dokter = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $kd_dokter = $payload->get('sub');
+        
         $dokter = \App\Models\JasaMedis::with('pegawai')
             ->where('kd_dokter', $kd_dokter)
             ->orderBy('tahun','Desc')
@@ -31,7 +26,9 @@ class JasaMedisController extends Controller
 
     public function jasaPelayanan()
     {
-        $nik = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $nik = $payload->get('sub');
+        
         $pegawai = \App\Models\JasaPelayanan::with('pegawai')
             ->where('nik', $nik)
             ->where('status_payroll', '1')

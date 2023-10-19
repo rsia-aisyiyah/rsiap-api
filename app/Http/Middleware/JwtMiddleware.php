@@ -18,7 +18,8 @@ class JwtMiddleware
     public function handle(Request $request, Closure $next)
     {
         try {
-            $user = \Tymon\JWTAuth\Facades\JWTAuth::parseToken()->authenticate();
+            $payload = \Tymon\JWTAuth\Facades\JWTAuth::parseToken()->payload(); // <- get payload from token
+            $request->merge(['payload' => $payload]); // <- this code can be used to get payload from request
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
                 return isUnauthenticated('Token is Invalid');

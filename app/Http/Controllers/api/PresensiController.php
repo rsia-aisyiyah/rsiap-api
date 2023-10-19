@@ -8,13 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 class PresensiController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     public function tmp(Request $request)
     {
         if (!$request->nik) {

@@ -7,12 +7,10 @@ use Illuminate\Http\Request;
 class TrackerSqlController extends Controller
 {
     protected $tracker;
-    protected $paylod;
 
     public function __construct()
     {
         $this->tracker = new \App\Models\TrackerSql();
-        $this->paylod = auth()->payload();
     }
 
     public function insertSql($table, $values)
@@ -68,10 +66,11 @@ class TrackerSqlController extends Controller
 
     public function create($sql)
     {
+        $payload = auth()->payload();
         $data = [
             'tanggal' => date('Y-m-d H:i:s'),
             'sqle'    => $sql,
-            'usere'   => $this->paylod->get('sub')
+            'usere'   => $payload->get('sub'),
         ];
 
         try {

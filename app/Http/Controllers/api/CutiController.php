@@ -18,13 +18,6 @@ use function PHPSTORM_META\map;
  * */
 class CutiController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     /** @authenticated
      * Get Cuti Pegawai
      * 

@@ -11,18 +11,18 @@ use Illuminate\Support\Carbon;
  * */
 class PasienController extends Controller
 {
-    protected $payload;
     protected $tracker;
 
     public function __construct()
     {
-        $this->payload = auth()->payload();
         $this->tracker = new \App\Http\Controllers\TrackerSqlController();
     }
 
     public function index()
     {
-        $kd_dokter = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $kd_dokter = $payload->get('sub');
+
         $pasien    = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
             ->where('kd_dokter', $kd_dokter)
             ->orderBy('tgl_registrasi', 'DESC')
@@ -33,7 +33,8 @@ class PasienController extends Controller
 
     public function now()
     {
-        $kd_dokter = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $kd_dokter = $payload->get('sub');
 
         $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
             ->where('kd_dokter', $kd_dokter)
@@ -52,7 +53,8 @@ class PasienController extends Controller
 
     public function metricNow()
     {
-        $kd_dokter = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $kd_dokter = $payload->get('sub');
         $pesialis  = \App\Models\Dokter::getSpesialis($kd_dokter);
 
         // Ranap
@@ -113,10 +115,12 @@ class PasienController extends Controller
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
+        $payload = auth()->payload();
+
         if ($tahun !== null) {
             $message = "Pasien tahun $tahun berhasil dimuat";
             $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
-                ->where('kd_dokter', $this->payload->get('sub'))
+                ->where('kd_dokter', $payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->orderBy('tgl_registrasi', 'DESC')
                 ->orderBy('jam_reg', 'DESC')
@@ -126,7 +130,7 @@ class PasienController extends Controller
         if ($tahun !== null && $bulan !== null) {
             $message = "Pasien bulan $bulan tahun $tahun berhasil dimuat";
             $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
-                ->where('kd_dokter', $this->payload->get('sub'))
+                ->where('kd_dokter', $payload->get('sub'))
                 ->whereYear('tgl_registrasi', $tahun)
                 ->whereMonth('tgl_registrasi', $bulan)
                 ->orderBy('tgl_registrasi', 'DESC')
@@ -138,7 +142,7 @@ class PasienController extends Controller
             $message  = "Pasien tanggal $tanggal bulan $bulan tahun $tahun berhasil dimuat";
             $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
             $pasien   = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
-                ->where('kd_dokter', $this->payload->get('sub'))
+                ->where('kd_dokter', $payload->get('sub'))
                 ->where('tgl_registrasi', $fullDate)
                 ->orderBy('tgl_registrasi', 'DESC')
                 ->orderBy('jam_reg', 'DESC')
@@ -161,9 +165,11 @@ class PasienController extends Controller
      **/
     public function search(Request $request)
     {
+        $payload = auth()->payload();
+
         $message = 'Data berhasil dimuat';
         $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap.kamar.bangsal'])
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
 
@@ -367,6 +373,7 @@ class PasienController extends Controller
 
     public function verifikasiSoap(Request $request)
     {
+        $payload = auth()->payload();
 
         if (!$request->isMethod('post')) {
             return isFail('Method not allowed');
@@ -404,7 +411,7 @@ class PasienController extends Controller
             'jam_rawat'     => $request->jam_rawat,
             'tgl_verif'     => date('Y-m-d'),
             'jam_verif'     => date('H:i:s'),
-            'verifikator'   => $this->payload->get('sub'),
+            'verifikator'   => $payload->get('sub'),
         ];
 
         if (!$verifModel->create($data)) {

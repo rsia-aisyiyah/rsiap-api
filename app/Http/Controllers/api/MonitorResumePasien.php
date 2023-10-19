@@ -8,12 +8,6 @@ use Yajra\DataTables\DataTables;
 
 class MonitorResumePasien extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
     public function ranap(Request $request)
     {
         $ranap = \App\Models\ResumePasienRanap::whereIn('shk', ['belum', 'Belum', 'BELUM', 'sudah', 'Sudah', 'SUDAH'])

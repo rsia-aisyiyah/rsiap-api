@@ -10,16 +10,10 @@ use Illuminate\Http\Request;
  * */
 class PasienRanapController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     public function index()
     {
-        $kd_dokter = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $kd_dokter = $payload->get('sub');
         $pasien    = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('status_lanjut', 'Ranap')
             ->with([
@@ -78,7 +72,8 @@ class PasienRanapController extends Controller
 
     public function now()
     {
-        $kd_dokter = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $kd_dokter = $payload->get('sub');
         $pasien    = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('status_lanjut', 'Ranap')
             ->with([
@@ -109,8 +104,9 @@ class PasienRanapController extends Controller
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
+        $payload = auth()->payload();
         $message = 'Data berhasil dimuat';
-        $pasien  = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
+        $pasien  = \App\Models\RegPeriksa::where('kd_dokter', $payload->get('sub'))
             ->where('status_lanjut', 'Ranap')
             ->with([
                 'pasien', 
@@ -234,7 +230,8 @@ class PasienRanapController extends Controller
 
     public function verifyResume(Request $request)
     {
-        $verifikator = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $verifikator = $payload->get('sub');
 
         if (!$request->no_rawat) {
             return isFail('Parameter tidak lengkap');

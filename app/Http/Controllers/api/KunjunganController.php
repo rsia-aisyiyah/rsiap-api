@@ -10,16 +10,10 @@ use Illuminate\Http\Request;
  * */
 class KunjunganController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     public function index()
     {
-        $kd_dokter = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $kd_dokter = $payload->get('sub');
         $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->orderBy('tgl_registrasi', 'desc')
             ->orderBy('jam_reg', 'desc')
@@ -30,7 +24,8 @@ class KunjunganController extends Controller
 
     public function now()
     {
-        $kd_dokter = $this->payload->get('sub');
+        $payload = auth()->payload();
+        $kd_dokter = $payload->get('sub');
         $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
             ->where('tgl_registrasi', date('Y-m-d'))
             ->paginate(env('PER_PAGE', 20));
@@ -62,17 +57,19 @@ class KunjunganController extends Controller
 
     function rekap(Request $request)
     {
+        $payload = auth()->payload();
+
         if (!$request->isMethod('post')) {
             return isFail('Method not allowed');
         }
 
         $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
 
         $operasi = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->whereHas('operasi')
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
@@ -98,6 +95,7 @@ class KunjunganController extends Controller
     
     function rekapUmum(Request $request)
     {
+        $payload = auth()->payload();
 
         if (!$request->isMethod('post')) {
             return isFail('Method not allowed');
@@ -112,17 +110,17 @@ class KunjunganController extends Controller
         }
 
         $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
-            ->whereHas('ranapDokter', function ($query) use ($start, $end) {
-                $query->where('kd_dokter', $this->payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
+            ->whereHas('ranapDokter', function ($query) use ($start, $end, $payload) {
+                $query->where('kd_dokter', $payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
             })
-            ->orWhereHas('ralanDokter', function ($query) use ($start, $end) {
-                $query->where('kd_dokter', $this->payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
+            ->orWhereHas('ralanDokter', function ($query) use ($start, $end, $payload) {
+                $query->where('kd_dokter', $payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
             })
-            ->orWhereHas('ranapGabungan', function ($query) use ($start, $end) {
-                $query->where('kd_dokter', $this->payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
+            ->orWhereHas('ranapGabungan', function ($query) use ($start, $end, $payload) {
+                $query->where('kd_dokter', $payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
             })
-            ->orWhereHas('ralanGabungan', function ($query) use ($start, $end) {
-                $query->where('kd_dokter', $this->payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
+            ->orWhereHas('ralanGabungan', function ($query) use ($start, $end, $payload) {
+                $query->where('kd_dokter', $payload->get('sub'))->whereBetween('tgl_perawatan', [$start, $end]);
             })
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
@@ -136,7 +134,9 @@ class KunjunganController extends Controller
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
-        $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'));
+        $payload = auth()->payload();
+        
+        $kunjungan = \App\Models\RegPeriksa::where('kd_dokter', $payload->get('sub'));
         if ($tahun !== null) {
             $kunjungan->whereYear('tgl_registrasi', $tahun);
         }

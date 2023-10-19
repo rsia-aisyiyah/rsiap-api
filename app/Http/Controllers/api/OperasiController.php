@@ -11,20 +11,14 @@ use Illuminate\Support\Carbon;
  * */
 class OperasiController extends Controller
 {
-
-    protected $payload;
-
-    function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     function index()
     {
+        $payload = auth()->payload();
+
         $message = 'Seluruh Pasien Operasi berhasil dimuat';
         $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
             ->whereHas('operasi')
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->orderBy('no_rawat', 'DESC')
             ->paginate(env('PER_PAGE', 20));
 
@@ -50,9 +44,11 @@ class OperasiController extends Controller
 
     function filter(Request $request)
     {
+        $payload = auth()->payload();
+        
         $message = 'Seluruh Pasien Operasi';
         $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab'])
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->whereHas('operasi');
 
         if ($request->keywords) {

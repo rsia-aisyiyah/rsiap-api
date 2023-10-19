@@ -10,18 +10,13 @@ use Illuminate\Http\Request;
  * */
 class JadwalOperasiController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     public function index()
     {
+        $payload = auth()->payload();
+        
         $message = 'Data jadwal operasi berhasil dimuat';
         $jadwal  = \App\Models\BookingOperasi::with('regPeriksa', 'regPeriksa.penjab', 'regPeriksa.pasien', 'paketOperasi', 'rsiaDiagnosaOperasi')
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->orderBy('no_rawat', 'DESC')
             ->orderBy('tanggal', 'DESC')
             ->orderBy('jam_mulai', 'DESC')
@@ -32,9 +27,11 @@ class JadwalOperasiController extends Controller
 
     public function now()
     {
+        $payload = auth()->payload();
+        
         $message = 'Data jadwal operasi hari ini berhasil dimuat';
         $jadwal  = \App\Models\BookingOperasi::with('regPeriksa', 'regPeriksa.penjab', 'regPeriksa.pasien', 'paketOperasi', 'rsiaDiagnosaOperasi')
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->where('tanggal', '>=', date('Y-m-d'))
             ->orderBy('no_rawat', 'DESC')
             ->orderBy('tanggal', 'DESC')
@@ -46,9 +43,11 @@ class JadwalOperasiController extends Controller
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
+        $payload = auth()->payload();
+        
         $message = 'Data jadwal operasi ';
         $jadwal  = \App\Models\BookingOperasi::with('regPeriksa', 'regPeriksa.penjab', 'regPeriksa.pasien', 'paketOperasi', 'rsiaDiagnosaOperasi')
-            ->where('kd_dokter', $this->payload->get('sub'));
+            ->where('kd_dokter', $payload->get('sub'));
         if ($tahun !== null) {
             $message .= 'tahun ' . $tahun . ' ';
             $jadwal->whereYear('tanggal', $tahun);

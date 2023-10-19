@@ -14,13 +14,6 @@ use Illuminate\Http\Request;
  * */ 
 class DiklatController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     /** @authenticated
      * Get Diklat Pegawai
      * 

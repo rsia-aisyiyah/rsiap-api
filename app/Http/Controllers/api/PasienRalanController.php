@@ -10,18 +10,12 @@ use Illuminate\Http\Request;
  * */
 class PasienRalanController extends Controller
 {
-    protected $payload;
-
-    public function __construct()
-    {
-        $this->payload = auth()->payload();
-    }
-
     public function index()
     {
+        $payload = auth()->payload();
         $message = 'Seluruh Pasien Rawat Jalan berhasil dimuat';
         $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->where('status_lanjut', 'Ralan')
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC')
@@ -32,11 +26,12 @@ class PasienRalanController extends Controller
 
     public function now()
     {
+        $payload = auth()->payload();
         $message = 'Pasien Rawat Jalan hari ini berhasil dimuat';
 
-        $spesialis = \App\Models\Dokter::getSpesialis($this->payload->get('sub'));
+        $spesialis = \App\Models\Dokter::getSpesialis($payload->get('sub'));
         $pasien    = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->where('tgl_registrasi', date('Y-m-d'))
             ->where('status_lanjut', 'Ralan')
             ->orderByRaw("FIELD(kd_poli, 'BBL', 'P001', 'P009', 'P007', 'LAB', 'OPE', 'U0016', 'P003', 'U0017', 'P008', 'P005', 'PKIA', 'P004', 'P006', 'IGDK', 'P002')");
@@ -54,8 +49,9 @@ class PasienRalanController extends Controller
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
+        $payload = auth()->payload();
         $pasien = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik'])
-            ->where('kd_dokter', $this->payload->get('sub'))
+            ->where('kd_dokter', $payload->get('sub'))
             ->where('status_lanjut', 'Ralan');
 
         if ($tahun !== null) {
