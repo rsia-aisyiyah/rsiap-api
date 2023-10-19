@@ -101,4 +101,48 @@ class PegawaiController extends Controller
         return isOk($message);
 
     }
+
+    public function updateProfil(Request $request){
+        if (!$request->nik) {
+            return isFail('NIK is required', 422);
+        } else if (!$request->email) {
+            return isFail('Email is required', 422);
+        } else if (!$request->alamat) {
+            return isFail('Alamat is required', 422);
+        } else if (!$request->no_telp) {
+            return isFail('No. HP is required', 422);
+        }
+
+        $message = 'Simpan profil berhasil';
+        $emailModel = new \App\Models\EmailPegawai();
+        $pegawaiModel = new \App\Models\Pegawai();
+        $petugasModel = new \App\Models\Petugas();
+
+        $cek_email = $emailModel->where('nik', $request->nik)->first();
+
+        // print_r($request->nik);
+        
+        if ($cek_email) {
+            $emailModel->where('nik',$request->nik)
+            ->update([
+                'email' => $request->email,
+            ]);
+        } else {
+            $emailModel->create([
+                'nik' => $request->nik,
+                'email' => $request->email,
+            ]);
+        }
+
+        $pegawaiModel->where('nik',$request->nik)->update([
+            'alamat' => $request->alamat,
+        ]);
+
+        $petugasModel->where('nip',$request->nik)->update([
+            'no_telp' => $request->no_telp,
+            'alamat' => $request->alamat,
+        ]);
+
+        return isOk($message);
+    }
 }

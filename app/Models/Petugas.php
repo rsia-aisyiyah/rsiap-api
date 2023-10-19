@@ -9,6 +9,8 @@ class Petugas extends Model
 {
     use HasFactory;
     protected $table = 'petugas';
+    protected $guarded = [];
+    public $timestamps = false;
 
     public function pegawai()
     {
