@@ -23,6 +23,7 @@ Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
 
     // Resume Pasien Ranap
     Route::get('ranap/resume', [PasienRanapController::class, 'resume']);
+    Route::post('ranap/resume', [PasienRanapController::class, 'resume']);
     Route::post('ranap/resume/verify', [PasienRanapController::class, 'verifyResume']);
 
     // Pasien Rawat Jalan

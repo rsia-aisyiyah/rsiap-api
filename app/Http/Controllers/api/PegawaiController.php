@@ -76,4 +76,36 @@ class PegawaiController extends Controller
         $data = \App\Models\Dokter::where('kd_dokter', $nik)->first();
         return $data ? true : false;
     }
+
+    public function updateEmail(Request $request){
+        if (!$request->nik) {
+            return isFail('NIK is required', 422);
+        } else if (!$request->email) {
+            return isFail('Email is required', 422);
+        }
+
+       
+
+        $message = 'Simpan email berhasil';
+        $emailModel = new \App\Models\EmailPegawai();
+
+        $cek_email = $emailModel->where('nik', $request->nik)->first();
+
+        // print_r($request->nik);
+        
+        if ($cek_email) {
+            $emailModel->where('nik',$request->nik)
+            ->update([
+                'email' => $request->email,
+            ]);
+        } else {
+            $emailModel->create([
+                'nik' => $request->nik,
+                'email' => $request->email,
+            ]);
+        }
+
+        return isOk($message);
+
+    }
 }

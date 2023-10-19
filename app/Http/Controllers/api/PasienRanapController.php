@@ -30,7 +30,13 @@ class PasienRanapController extends Controller
                     return $q->where('stts_pulang', '<>', 'Pindah Kamar');
                 },
                 'kamarInap.kamar.bangsal',
-                'ranapGabung.regPeriksa.pasien'
+                'ranapGabung.regPeriksa.pasien',
+                'ranapGabung.regPeriksa.resumePasienRanap' => function ($q) {
+                    return $q->with('verif')->select('no_rawat');
+                },
+                'resumePasienRanap' => function ($q) {
+                    return $q->with('verif')->select('no_rawat');
+                }
             ])->whereHas('kamarInap', function ($query) {
                 $query->where('stts_pulang', '<>', 'Pindah Kamar');
             })
@@ -52,7 +58,13 @@ class PasienRanapController extends Controller
                 },
                 'kamarInap.kamar.bangsal',
                 'ranapGabung',
-                'ranapGabung.regPeriksa.pasien'
+                'ranapGabung.regPeriksa.pasien',
+                'ranapGabung.regPeriksa.resumePasienRanap' => function ($q) {
+                    return $q->with('verif')->select('no_rawat');
+                },
+                'resumePasienRanap' => function ($q) {
+                    return $q->with('verif')->select('no_rawat');
+                }
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('tgl_keluar', '0000-00-00');
@@ -77,7 +89,13 @@ class PasienRanapController extends Controller
                     return $q->where('stts_pulang', '-');
                 },
                 'kamarInap.kamar.bangsal',
-                'ranapGabung.regPeriksa.pasien'
+                'ranapGabung.regPeriksa.pasien',
+                'ranapGabung.regPeriksa.resumePasienRanap' => function ($q) {
+                    return $q->with('verif')->select('no_rawat');
+                },
+                'resumePasienRanap' => function ($q) {
+                    return $q->with('verif')->select('no_rawat');
+                }
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('tgl_keluar', '0000-00-00');
@@ -95,9 +113,20 @@ class PasienRanapController extends Controller
         $pasien  = \App\Models\RegPeriksa::where('kd_dokter', $this->payload->get('sub'))
             ->where('status_lanjut', 'Ranap')
             ->with([
-                'pasien', 'penjab', 'poliklinik', 'kamarInap' => function ($q) {
+                'pasien', 
+                'penjab', 
+                'poliklinik', 
+                'kamarInap' => function ($q) {
                     return $q->where('stts_pulang', '<>', 'Pindah Kamar');
-                }, 'kamarInap.kamar.bangsal', 'ranapGabung.regPeriksa.pasien'
+                }, 
+                'kamarInap.kamar.bangsal',
+                'ranapGabung.regPeriksa.pasien',
+                'ranapGabung.regPeriksa.resumePasienRanap' => function ($q) {
+                    return $q->with('verif')->select('no_rawat');
+                },
+                'resumePasienRanap' => function ($q) {
+                    return $q->with('verif')->select('no_rawat');
+                }
             ])
             ->whereHas('kamarInap', function ($query) {
                 $query->where('stts_pulang', '<>', 'Pindah Kamar');
@@ -134,9 +163,15 @@ class PasienRanapController extends Controller
             'kamar',
             'ranapGabung.regPeriksa.dokter',
             'ranapGabung.regPeriksa.pasien',
+            'ranapGabung.regPeriksa.resumePasienRanap' => function ($q) {
+                return $q->with('verif')->select('no_rawat');
+            },
             'kamar.bangsal',
             'regPeriksa.penjab',
             'regPeriksa.kamarInap',
+            'regPeriksa.resumePasienRanap' => function ($q) {
+                return $q->with('verif')->select('no_rawat');
+            },
         ]);
 
         if ($request->stts_pulang == 'Masuk') {
@@ -179,9 +214,15 @@ class PasienRanapController extends Controller
             'verif',
             'dokter' => function ($q) {
                 $q->select('kd_dokter', 'nm_dokter');
-            }, 
+            },
             'regPeriksa', 
-            'regPeriksa.pasien'
+            'regPeriksa.penjab' => function ($q) {
+                $q->select('kd_pj', 'png_jawab', 'status');
+            }, 
+            'regPeriksa.pasien' => function ($q) {
+                $q->select('no_rkm_medis', 'nm_pasien', 'jk', 'tmp_lahir', 'tgl_lahir', 'alamat', 'no_tlp', 'gol_darah', 'tgl_daftar');
+            },
+            'regPeriksa.kamarInap.kamar.bangsal',
         ])->where('no_rawat', $request->no_rawat)->first();
 
         if ($resume) {

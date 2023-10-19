@@ -10,6 +10,9 @@ class EmailPegawai extends Model
     use HasFactory;
 
     protected $table = 'rsia_email_pegawai';
+    protected $guarded = [];
+    public $timestamps = false;
+
 
     public function pegawai()
     {
