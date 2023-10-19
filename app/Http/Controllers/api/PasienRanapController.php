@@ -214,12 +214,14 @@ class PasienRanapController extends Controller
             'verif',
             'dokter' => function ($q) {
                 $q->select('kd_dokter', 'nm_dokter');
-            }, 
+            },
             'regPeriksa', 
-            'regPeriksa.penjab', 
-            'regPeriksa.pasien',
-            'regPeriksa.kamarInap',
-            'regPeriksa.kamarInap.kamar',
+            'regPeriksa.penjab' => function ($q) {
+                $q->select('kd_pj', 'png_jawab', 'status');
+            }, 
+            'regPeriksa.pasien' => function ($q) {
+                $q->select('no_rkm_medis', 'nm_pasien', 'jk', 'tmp_lahir', 'tgl_lahir', 'alamat', 'no_tlp', 'gol_darah', 'tgl_daftar');
+            },
             'regPeriksa.kamarInap.kamar.bangsal',
         ])->where('no_rawat', $request->no_rawat)->first();
 
