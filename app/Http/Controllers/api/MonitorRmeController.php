@@ -257,8 +257,18 @@ class MonitorRmeController extends Controller
                         $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
                     }
                 },
-            ])
-            ->get();
+            ]);
+
+        if ($request->datatables) {
+            if ($request->datatables == 'true' || $request->datatables == 1) {
+                $dokter = $dokter->get();
+                return DataTables::of($dokter)->make(true);
+            } else {
+                $dokter = $dokter->paginate(env('PER_PAGE', 20));
+            }
+        } else {
+            $dokter = $dokter->paginate(env('PER_PAGE', 20));
+        }
 
         return isSuccess($dokter, 'Data berhasil dimuat');
     }
