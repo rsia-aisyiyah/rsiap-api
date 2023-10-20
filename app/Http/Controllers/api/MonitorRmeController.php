@@ -48,7 +48,7 @@ class MonitorRmeController extends Controller
 
         $start = date('Y-m-01');
         $end   = date('Y-m-t');
-        
+
         if ($request->tgl_registrasi) {
             if ($request->tgl_registrasi['start'] != null && $request->tgl_registrasi['end'] != null) {
                 $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
@@ -57,7 +57,7 @@ class MonitorRmeController extends Controller
         }
 
         $pasien->whereBetween('tgl_registrasi', [$start, $end]);
-        
+
         if ($request->pembiayaan && $request->pembiayaan != null && $request->pembiayaan != 'all') {
             $pasien->whereHas('penjab', function ($query) use ($request) {
                 $query->where('png_jawab', 'LIKE', '%' . $request->pembiayaan . '%');
@@ -126,7 +126,7 @@ class MonitorRmeController extends Controller
             if ($request->tgl['start'] != null && $request->tgl['end'] != null) {
                 $start = \Illuminate\Support\Carbon::parse($request->tgl['start'])->format('Y-m-d');
                 $end   = \Illuminate\Support\Carbon::parse($request->tgl['end'])->format('Y-m-d');
-    
+
                 if ($request->status && $request->status != null && $request->status != 'all') {
                     if ($request->status == 'pulang') {
                         $message .= ' berdasarkan tanggal pulang ' . $start . ' sampai ' . $end;
@@ -168,5 +168,98 @@ class MonitorRmeController extends Controller
 
         $pasien = $pasien->paginate(env('PER_PAGE', 20));
         return isSuccess($pasien, 'Data berhasil dimuat');
+    }
+
+    public function pengisianErmSpesialis(Request $request)
+    {
+        $msg = 'Data berhasil dimuat';
+        $dokter = \App\Models\Dokter::select('kd_dokter', 'nm_dokter')
+            ->where('status', '1')
+            ->where('kd_dokter', '<>', '-')
+            ->whereNotIn('kd_sps', ['UMUM', 'S0007'])
+            ->withCount([
+                'regPeriksa as jumlah_reg_periksa' => function ($q) use ($request) {
+                    if ($request->tgl_registrasi) {
+                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                        $q->whereBetween('tgl_registrasi', [$start, $end]);
+                    } else {
+                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+                    }
+                },
+
+                'jumlahGeneralConsent' => function ($q) use ($request) {
+                    if ($request->tgl_registrasi) {
+                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                        $q->whereBetween('tgl_registrasi', [$start, $end]);
+                    } else {
+                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+                    }
+                },
+
+                'jumlahPenilaianMedisRanap' => function ($q) use ($request) {
+                    if ($request->tgl_registrasi) {
+                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                        $q->whereBetween('tgl_registrasi', [$start, $end]);
+                    } else {
+                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+                    }
+                },
+
+                'jumlahPenilaianMedisRanapKandungan' => function ($q) use ($request) {
+                    if ($request->tgl_registrasi) {
+                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                        $q->whereBetween('tgl_registrasi', [$start, $end]);
+                    } else {
+                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+                    }
+                },
+
+                'jumlahPemeriksaanRanap' => function ($q) use ($request) {
+                    if ($request->tgl_registrasi) {
+                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                        $q->whereBetween('tgl_registrasi', [$start, $end]);
+                    } else {
+                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+                    }
+                },
+
+                'jumlahVerifikasiPemeriksaanRanap' => function ($q) use ($request) {
+                    if ($request->tgl_registrasi) {
+                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                        $q->whereBetween('tgl_registrasi', [$start, $end]);
+                    } else {
+                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+                    }
+                },
+
+                'jumlahRekonsiliasiObat' => function ($q) use ($request) {
+                    if ($request->tgl_registrasi) {
+                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                        $q->whereBetween('tgl_registrasi', [$start, $end]);
+                    } else {
+                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+                    }
+                },
+
+                'jumlahSkriningGizi' => function ($q) use ($request) {
+                    if ($request->tgl_registrasi) {
+                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                        $q->whereBetween('tgl_registrasi', [$start, $end]);
+                    } else {
+                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+                    }
+                },
+            ])
+            ->get();
+
+        return isSuccess($dokter, 'Data berhasil dimuat');
     }
 }

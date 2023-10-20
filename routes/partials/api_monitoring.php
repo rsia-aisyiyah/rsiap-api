@@ -12,4 +12,6 @@ Route::middleware('jwt.verify')->prefix('monitor')->group(function ($router) {
     
     Route::post('rme/ugd', [MonitorRmeController::class, 'ugd']);
     Route::post('rme/ranap', [MonitorRmeController::class, 'ranap']);
+
+    Route::get('pengisian/erm/spesialis', [MonitorRmeController::class, 'pengisianErmSpesialis']);
 });
