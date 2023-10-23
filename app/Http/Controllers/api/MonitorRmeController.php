@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 
 class MonitorRmeController extends Controller
 {
@@ -170,106 +171,188 @@ class MonitorRmeController extends Controller
         return isSuccess($pasien, 'Data berhasil dimuat');
     }
 
-    public function pengisianErmSpesialis(Request $request)
+    public function ermSpesialistRanap(Request $request) 
+    {
+        $dokter = \App\Models\Dokter::select('kd_dokter', 'nm_dokter')
+            ->where('status', '1')
+            ->where('kd_dokter', '<>', '-')
+            ->whereIn('kd_sps', ['S0001', 'S0003'])->get();
+
+        $dokter_map = $dokter->map(function ($item) use ($request) {
+            $pasien = \App\Models\RegPeriksa::select('no_rawat', 'status_lanjut')
+                ->where('status_lanjut', 'Ranap')
+                ->where('status_bayar', 'sudah bayar')
+                ->where('kd_dokter', $item->kd_dokter);
+            
+            if ($request->tgl_registrasi) {
+                $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+            } else {
+                $pasien->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+            }
+
+            $penilaian_medis_ranap = \App\Models\PenilaianMedisRanap::whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->count();
+
+            $penilaian_medis_ranap_kandungan = \App\Models\PenilaianMedisRanapKandungan::whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->count();
+
+            $pemeriksaan_ranap = \App\Models\PemeriksaanRanap::whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->whereIn('nip', [$item->kd_dokter])
+                ->count();
+            
+            $verifikasi_pemeriksaan_ranap = \App\Models\RsiaVerifPemeriksaanRanap::whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->count();
+            
+            $resume_pasien_ranap = \App\Models\ResumePasienRanap::whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->count();
+            
+            $verifikasi_resume_pasien_ranap = \App\Models\RsiaVerifResumeRanap::whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->count();
+
+            $item->jumlah_reg_periksa = $pasien->count();
+            $item->jPenilaianMedisRanap = $penilaian_medis_ranap;
+            $item->jPenilaianMedisRanapKandungan = $penilaian_medis_ranap_kandungan;
+            $item->jPemeriksaanRanap = $pemeriksaan_ranap;
+            $item->jVerifikasiPemeriksaanRanap = $verifikasi_pemeriksaan_ranap;
+            $item->jResumePasienRanap = $resume_pasien_ranap;
+            $item->jVerifikasiResumePasienRanap = $verifikasi_resume_pasien_ranap;
+
+            return $item;            
+        });
+
+        if ($request->datatables) {
+            if ($request->datatables == 'true' || $request->datatables == 1) {
+                return DataTables::of($dokter_map)->make(true);
+            } else {
+                $dokter_map = new Paginator($dokter_map, $dokter_map->count(), env('PER_PAGE', 20), $request->page, [
+                    'path' => $request->url(),
+                    'query' => $request->query(),
+                ]);
+            }
+        } else {
+            $dokter_map = new Paginator($dokter_map, $dokter_map->count(), env('PER_PAGE', 20), $request->page, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]);
+        }
+
+        return isSuccess($dokter_map, 'Data berhasil dimuat');
+    }
+
+    public function ermSpesialistRalan(Request $request)
     {
         $msg = 'Data berhasil dimuat';
         $dokter = \App\Models\Dokter::select('kd_dokter', 'nm_dokter')
             ->where('status', '1')
             ->where('kd_dokter', '<>', '-')
-            ->whereNotIn('kd_sps', ['UMUM', 'S0007'])
-            ->withCount([
-                'regPeriksa as jumlah_reg_periksa' => function ($q) use ($request) {
-                    if ($request->tgl_registrasi) {
-                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-                        $q->whereBetween('tgl_registrasi', [$start, $end]);
-                    } else {
-                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
-                    }
-                },
+            ->whereIn('kd_sps', ['S0001', 'S0003'])->get();
 
-                'jumlahGeneralConsent' => function ($q) use ($request) {
-                    if ($request->tgl_registrasi) {
-                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-                        $q->whereBetween('tgl_registrasi', [$start, $end]);
-                    } else {
-                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
-                    }
-                },
+        $dokter_map = $dokter->map(function ($item) use ($request) {
+            $pasien = \App\Models\RegPeriksa::select('no_rawat', 'status_lanjut')
+                ->where('status_lanjut', 'Ralan')
+                ->where('status_bayar', 'sudah bayar')
+                ->where('kd_dokter', $item->kd_dokter);
+            
+            if ($request->tgl_registrasi) {
+                $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+            } else {
+                $pasien->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+            }
 
-                'jumlahPenilaianMedisRanap' => function ($q) use ($request) {
-                    if ($request->tgl_registrasi) {
-                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-                        $q->whereBetween('tgl_registrasi', [$start, $end]);
-                    } else {
-                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
-                    }
-                },
+            // count pemeriksaan ralan where no rawat in reg periksa->no rawat
+            $pemeriksaan_ralan = \App\Models\PemeriksaanRalan::whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->where('nip', $item->kd_dokter)
+                ->get()->groupBy('no_rawat')->count();
 
-                'jumlahPenilaianMedisRanapKandungan' => function ($q) use ($request) {
-                    if ($request->tgl_registrasi) {
-                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-                        $q->whereBetween('tgl_registrasi', [$start, $end]);
-                    } else {
-                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
-                    }
-                },
+            // count penilaian medis ralan where no rawat in reg periksa->no rawat
+            $penilaian_medis_ralan = \App\Models\PenilaianMedisRalan::whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->count();
 
-                'jumlahPemeriksaanRanap' => function ($q) use ($request) {
-                    if ($request->tgl_registrasi) {
-                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-                        $q->whereBetween('tgl_registrasi', [$start, $end]);
-                    } else {
-                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
-                    }
-                },
+            // count reset obat where no rawat in reg periksa->no rawat
+            $resep_obat = \App\Models\ResepObat::where('tgl_peresepan', '<>', '0000-00-00')
+                ->whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->count();
 
-                'jumlahVerifikasiPemeriksaanRanap' => function ($q) use ($request) {
-                    if ($request->tgl_registrasi) {
-                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-                        $q->whereBetween('tgl_registrasi', [$start, $end]);
-                    } else {
-                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
-                    }
-                },
+            $item->jumlah_reg_periksa = $pasien->count();
+            $item->jPemeriksaanRalan  = $pemeriksaan_ralan;
+            $item->jPenilaianMedisRalan = $penilaian_medis_ralan;
+            $item->jResepObat = $resep_obat;
 
-                'jumlahRekonsiliasiObat' => function ($q) use ($request) {
-                    if ($request->tgl_registrasi) {
-                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-                        $q->whereBetween('tgl_registrasi', [$start, $end]);
-                    } else {
-                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
-                    }
-                },
-
-                'jumlahSkriningGizi' => function ($q) use ($request) {
-                    if ($request->tgl_registrasi) {
-                        $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
-                        $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
-                        $q->whereBetween('tgl_registrasi', [$start, $end]);
-                    } else {
-                        $q->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
-                    }
-                },
-            ]);
+            return $item;
+        });
 
         if ($request->datatables) {
             if ($request->datatables == 'true' || $request->datatables == 1) {
-                $dokter = $dokter->get();
-                return DataTables::of($dokter)->make(true);
+                return DataTables::of($dokter_map)->make(true);
             } else {
-                $dokter = $dokter->paginate(env('PER_PAGE', 20));
+                $dokter_map = new Paginator($dokter_map, $dokter_map->count(), env('PER_PAGE', 20), $request->page, [
+                    'path' => $request->url(),
+                    'query' => $request->query(),
+                ]);
             }
         } else {
-            $dokter = $dokter->paginate(env('PER_PAGE', 20));
+            $dokter_map = new Paginator($dokter_map, $dokter_map->count(), env('PER_PAGE', 20), $request->page, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]);
         }
 
-        return isSuccess($dokter, 'Data berhasil dimuat');
+        return isSuccess($dokter_map, 'Data berhasil dimuat');
+    }
+
+    public function ermSpesialistRalanDebug(Request $request)
+    {
+        $msg = 'Data berhasil dimuat';
+        $dokter = \App\Models\Dokter::select('kd_dokter', 'nm_dokter')
+            ->where('status', '1')
+            ->where('kd_dokter', '<>', '-')
+            ->whereIn('kd_sps', ['S0001', 'S0003'])->get();
+
+        $dokter_map = $dokter->map(function ($item) use ($request) {
+            $pasien = \App\Models\RegPeriksa::select('no_rawat', 'status_lanjut')
+                ->where('status_lanjut', 'Ralan')
+                ->where('status_bayar', 'sudah bayar')
+                ->where('kd_dokter', $item->kd_dokter);
+            
+            if ($request->tgl_registrasi) {
+                $start = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['start'])->format('Y-m-d');
+                $end   = \Illuminate\Support\Carbon::parse($request->tgl_registrasi['end'])->format('Y-m-d');
+                $pasien->whereBetween('tgl_registrasi', [$start, $end]);
+            } else {
+                $pasien->whereBetween('tgl_registrasi', [date('Y-m-01'), date('Y-m-t')]);
+            }
+
+            // count pemeriksaan ralan where no rawat in reg periksa->no rawat
+            $pemeriksaan_ralan = \App\Models\PemeriksaanRalan::select('no_rawat')->whereIn('no_rawat', $pasien->pluck('no_rawat')->toArray())
+                ->whereIn('nip', [$item->kd_dokter])
+                ->toSql();
+
+            $item->jumlah_reg_periksa = $pasien->get()->groupBy('no_rawat')->count();
+            $item->jPemeriksaanRalan  = $pemeriksaan_ralan;
+
+            return $item;
+        });
+
+        if ($request->datatables) {
+            if ($request->datatables == 'true' || $request->datatables == 1) {
+                return DataTables::of($dokter_map)->make(true);
+            } else {
+                $dokter_map = new Paginator($dokter_map, $dokter_map->count(), env('PER_PAGE', 20), $request->page, [
+                    'path' => $request->url(),
+                    'query' => $request->query(),
+                ]);
+            }
+        } else {
+            $dokter_map = new Paginator($dokter_map, $dokter_map->count(), env('PER_PAGE', 20), $request->page, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]);
+        }
+
+        return isSuccess($dokter_map, 'Data berhasil dimuat');
     }
 }

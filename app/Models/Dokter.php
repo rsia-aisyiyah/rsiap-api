@@ -63,21 +63,8 @@ class Dokter extends Model
 
     // --------------- 
 
-    // jumlah s
-    public function jumlahGeneralConsent()
-    {
-        return $this->hasManyThrough(
-            RsiaGeneralConsent::class,
-            RegPeriksa::class,
-            'kd_dokter',
-            'no_rawat',
-            'kd_dokter',
-            'no_rawat'
-        );
-    }
-
     // jumlah penilaian_medis_ranap hasManyThrough 
-    public function jumlahPenilaianMedisRanap()
+    public function jPenilaianMedisRanap()
     {
         return $this->hasManyThrough(
             PenilaianMedisRanap::class,
@@ -90,7 +77,7 @@ class Dokter extends Model
     }
 
     // jumlah penilaian_medis_ranap_kandungan hasManyThrough
-    public function jumlahPenilaianMedisRanapKandungan()
+    public function jPenilaianMedisRanapKandungan()
     {
         return $this->hasManyThrough(
             PenilaianMedisRanapKandungan::class,
@@ -103,7 +90,7 @@ class Dokter extends Model
     }
 
     // jumlah pemeriksaan_ranap
-    public function jumlahPemeriksaanRanap()
+    public function jPemeriksaanRanap()
     {
         return $this->hasManyThrough(
             PemeriksaanRanap::class,
@@ -116,7 +103,7 @@ class Dokter extends Model
     }
 
     // jumlah veridikasi_pemeriksaan_ranap
-    public function jumlahVerifikasiPemeriksaanRanap()
+    public function jVerifikasiPemeriksaanRanap()
     {
         return $this->hasManyThrough(
             RsiaVerifPemeriksaanRanap::class,
@@ -128,11 +115,11 @@ class Dokter extends Model
         );
     }
 
-    // jumlah rekonsiliasi_obat
-    public function jumlahRekonsiliasiObat()
+    // jumlah resume pasien ranap
+    public function jResumePasienRanap()
     {
         return $this->hasManyThrough(
-            RekonsiliasiObat::class,
+            ResumePasienRanap::class,
             RegPeriksa::class,
             'kd_dokter',
             'no_rawat',
@@ -141,11 +128,11 @@ class Dokter extends Model
         );
     }
 
-    // jumlah skrining_gizi
-    public function jumlahSkriningGizi()
+    // jumlah verifikasi resume pasien ranap
+    public function jVerifikasiResumePasienRanap()
     {
         return $this->hasManyThrough(
-            RsiaSkriningGizi::class,
+            RsiaVerifResumeRanap::class,
             RegPeriksa::class,
             'kd_dokter',
             'no_rawat',
