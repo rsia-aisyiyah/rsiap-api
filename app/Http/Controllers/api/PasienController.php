@@ -168,7 +168,18 @@ class PasienController extends Controller
         $payload = auth()->payload();
 
         $message = 'Data berhasil dimuat';
-        $pasien  = \App\Models\RegPeriksa::with(['pasien', 'penjab', 'poliklinik', 'kamarInap.kamar.bangsal'])
+        $pasien  = \App\Models\RegPeriksa::with([
+            'pasien', 
+            'penjab', 
+            'poliklinik', 
+            'kamarInap.kamar.bangsal', 
+            'resumePasienRanap' => function ($q) {
+                return $q->with('verif')->select('no_rawat');
+            }, 
+            'ranapGabung.regPeriksa.pasien',
+            'ranapGabung.regPeriksa.resumePasienRanap' => function ($q) {
+                return $q->with('verif')->select('no_rawat');
+            }])
             ->where('kd_dokter', $payload->get('sub'))
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');

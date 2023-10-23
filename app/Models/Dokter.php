@@ -47,4 +47,97 @@ class Dokter extends Model
     {
         return $this->hasMany(Jadwal::class, 'kd_dokter', 'kd_dokter');
     }
+
+    // penilaian_medis_ranap
+    public function penilaianMedisRanap()
+    {
+        return $this->hasMany(PenilaianMedisRanap::class, 'kd_dokter', 'kd_dokter');
+    }
+
+    // penilaian_medis_ranap_kandungan
+    public function penilaianMedisRanapKandungan()
+    {
+        return $this->hasMany(PenilaianMedisRanapKandungan::class, 'kd_dokter', 'kd_dokter');
+    }
+
+
+    // --------------- 
+
+    // jumlah penilaian_medis_ranap hasManyThrough 
+    public function jPenilaianMedisRanap()
+    {
+        return $this->hasManyThrough(
+            PenilaianMedisRanap::class,
+            RegPeriksa::class,
+            'kd_dokter',
+            'no_rawat',
+            'kd_dokter',
+            'no_rawat'
+        );
+    }
+
+    // jumlah penilaian_medis_ranap_kandungan hasManyThrough
+    public function jPenilaianMedisRanapKandungan()
+    {
+        return $this->hasManyThrough(
+            PenilaianMedisRanapKandungan::class,
+            RegPeriksa::class,
+            'kd_dokter',
+            'no_rawat',
+            'kd_dokter',
+            'no_rawat'
+        );
+    }
+
+    // jumlah pemeriksaan_ranap
+    public function jPemeriksaanRanap()
+    {
+        return $this->hasManyThrough(
+            PemeriksaanRanap::class,
+            RegPeriksa::class,
+            'kd_dokter',
+            'no_rawat',
+            'kd_dokter',
+            'no_rawat'
+        );
+    }
+
+    // jumlah veridikasi_pemeriksaan_ranap
+    public function jVerifikasiPemeriksaanRanap()
+    {
+        return $this->hasManyThrough(
+            RsiaVerifPemeriksaanRanap::class,
+            RegPeriksa::class,
+            'kd_dokter',
+            'no_rawat',
+            'kd_dokter',
+            'no_rawat'
+        );
+    }
+
+    // jumlah resume pasien ranap
+    public function jResumePasienRanap()
+    {
+        return $this->hasManyThrough(
+            ResumePasienRanap::class,
+            RegPeriksa::class,
+            'kd_dokter',
+            'no_rawat',
+            'kd_dokter',
+            'no_rawat'
+        );
+    }
+
+    // jumlah verifikasi resume pasien ranap
+    public function jVerifikasiResumePasienRanap()
+    {
+        return $this->hasManyThrough(
+            RsiaVerifResumeRanap::class,
+            RegPeriksa::class,
+            'kd_dokter',
+            'no_rawat',
+            'kd_dokter',
+            'no_rawat'
+        );
+    }
 }

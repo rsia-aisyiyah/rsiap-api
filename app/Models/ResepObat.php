@@ -10,4 +10,6 @@ class ResepObat extends Model
     use HasFactory;
 
     protected $table = 'resep_obat';
+
+    public $timestamps = false;
 }
