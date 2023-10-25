@@ -69,4 +69,6 @@ require_once 'partials/api_kunjungan.php';
 require_once 'partials/api_jadwal_operasi.php';
 require_once 'partials/api_pegawai.php';
 
+require_once 'partials/api_farmasi.php';
+
 require_once 'partials/api_monitoring.php';
