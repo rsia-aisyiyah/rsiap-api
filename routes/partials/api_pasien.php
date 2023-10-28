@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RadiologiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\PasienController;
 use App\Http\Controllers\api\OperasiController;
@@ -11,6 +12,7 @@ Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
     Route::get('/', [PasienController::class, 'index']);
     Route::get('now', [PasienController::class, 'now']);
     Route::get('metric/now', [PasienController::class, 'metricNow']);
+    Route::get('metric/radiologi/now', [PasienController::class, 'metricRadiologiNow']);
     Route::post('search', [PasienController::class, 'search']);
 
     // Pasien Ranap Gabung
@@ -39,6 +41,15 @@ Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
     Route::get('operasi', [OperasiController::class, 'index']);
     Route::post('operasi/data', [OperasiController::class, 'data']);
     Route::post('operasi/filter', [OperasiController::class, 'filter']);
+    
+    // Radiologi
+    Route::prefix('radiologi')->group(function ($r) {
+        $r->get('/', [RadiologiController::class, 'index']);
+        $r->post('hasil', [RadiologiController::class, 'hasil']);
+        $r->get('permintaan', [RadiologiController::class, 'permintaan']);
+        $r->get('permintaan/now', [RadiologiController::class, 'now']);
+    });
+
 
     // Pasien Rawat Inap With Dynamic Parameter
     Route::get('ranap/{tahun}', [PasienRanapController::class, 'byDate']);

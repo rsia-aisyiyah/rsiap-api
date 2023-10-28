@@ -20,10 +20,10 @@ class PasienController extends Controller
 
     public function index()
     {
-        $payload = auth()->payload();
+        $payload   = auth()->payload();
         $kd_dokter = $payload->get('sub');
 
-        $pasien    = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
+        $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
             ->where('kd_dokter', $kd_dokter)
             ->orderBy('tgl_registrasi', 'DESC')
             ->paginate(env('PER_PAGE', 20));
@@ -33,7 +33,7 @@ class PasienController extends Controller
 
     public function now()
     {
-        $payload = auth()->payload();
+        $payload   = auth()->payload();
         $kd_dokter = $payload->get('sub');
 
         $pasien = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
@@ -53,37 +53,40 @@ class PasienController extends Controller
 
     public function metricNow()
     {
-        $payload = auth()->payload();
+        $payload   = auth()->payload();
         $kd_dokter = $payload->get('sub');
         $pesialis  = \App\Models\Dokter::getSpesialis($kd_dokter);
 
-        // Ranap
-        if (str_contains(strtolower($pesialis->nm_sps), 'umum')) {
-            $pasienRanap = \App\Models\RegPeriksa::where('status_lanjut', 'Ranap')
-                ->with([
-                    'kamarInap' => function ($q) {
-                        return $q->where('stts_pulang', '-');
-                    }
-                ])
-                ->whereHas('kamarInap', function ($query) {
-                    $query->where('tgl_keluar', '0000-00-00');
-                    $query->where('stts_pulang', '-');
-                })
-                ->count();
-        } else {
-            $pasienRanap = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
-                ->where('status_lanjut', 'Ranap')
-                ->with([
-                    'kamarInap' => function ($q) {
-                        return $q->where('stts_pulang', '-');
-                    }
-                ])
-                ->whereHas('kamarInap', function ($query) {
-                    $query->where('tgl_keluar', '0000-00-00');
-                    $query->where('stts_pulang', '-');
-                })
-                ->count();
+        if (!$pesialis) {
+            return isFail('Spesialis tidak ditemukan');
         }
+
+        // Ranap
+        $baseQuery = \App\Models\RegPeriksa::where('status_lanjut', 'Ranap')
+            ->with([
+                'kamarInap' => function ($q) {
+                    return $q->where('stts_pulang', '-');
+                }
+            ])
+            ->whereHas('kamarInap', function ($query) {
+                $query->where('tgl_keluar', '0000-00-00');
+                $query->where('stts_pulang', '-');
+            });
+
+        switch (true) {
+            case str_contains(strtolower($pesialis->nm_sps), 'umum'):
+                $pasienRanap = $baseQuery->count();
+                break;
+
+            case str_contains(strtolower($pesialis->nm_sps), 'radiologi');
+                $pasienRanap = $baseQuery->where('kd_dokter', $kd_dokter)->count();
+                break;
+
+            default:
+                $pasienRanap = $baseQuery->where('kd_dokter', $kd_dokter)->count();
+                break;
+        }
+
 
         // Ralan
         $pasienRalan = \App\Models\RegPeriksa::where('kd_dokter', $kd_dokter)
@@ -111,6 +114,27 @@ class PasienController extends Controller
         ];
 
         return isSuccess($data, 'Data metric berhasil dimuat');
+    }
+
+    public function metricRadiologiNow(Request $request)
+    {
+        $kd_dokter = $request->payload->get('sub');
+
+        $msg        = 'Data metric radiologi bulan ini berhasil dimuat';
+        $permintaan = \App\Models\PermintaanRadiologi::select("*")
+            ->whereBetween('tgl_permintaan', [date('Y-m-01'), date('Y-m-t')])
+            ->where('tgl_sampel', "0000-00-00")->count();
+
+        $pasien = \App\Models\PermintaanRadiologi::select("*")
+            ->whereBetween('tgl_permintaan', [date('Y-m-01'), date('Y-m-t')])
+            ->where("tgl_sampel", "<>", "0000-00-00")->count();
+
+        $data = [
+            'permintaan_radiologi' => $permintaan,
+            'pasien_radiologi'     => $pasien
+        ];
+
+        return isSuccess($data, $msg);
     }
 
     function byDate($tahun = null, $bulan = null, $tanggal = null)
@@ -169,17 +193,18 @@ class PasienController extends Controller
 
         $message = 'Data berhasil dimuat';
         $pasien  = \App\Models\RegPeriksa::with([
-            'pasien', 
-            'penjab', 
-            'poliklinik', 
-            'kamarInap.kamar.bangsal', 
-            'resumePasienRanap' => function ($q) {
+            'pasien',
+            'penjab',
+            'poliklinik',
+            'kamarInap.kamar.bangsal',
+            'resumePasienRanap'                        => function ($q) {
                 return $q->with('verif')->select('no_rawat');
-            }, 
+            },
             'ranapGabung.regPeriksa.pasien',
             'ranapGabung.regPeriksa.resumePasienRanap' => function ($q) {
                 return $q->with('verif')->select('no_rawat');
-            }])
+            }
+        ])
             ->where('kd_dokter', $payload->get('sub'))
             ->orderBy('tgl_registrasi', 'DESC')
             ->orderBy('jam_reg', 'DESC');
@@ -368,10 +393,10 @@ class PasienController extends Controller
                     $q->select('nip', 'nama');
                 }
             ])->where('no_rawat', $request->no_rawat)
-            ->whereHas('pegawai', function ($q) {
-                return $q->where('jbtn', 'not like', '%direktur%')
-                    ->where('jbtn', 'not like', '%spesialis%');
-            })->get();
+                ->whereHas('pegawai', function ($q) {
+                    return $q->where('jbtn', 'not like', '%direktur%')
+                        ->where('jbtn', 'not like', '%spesialis%');
+                })->get();
         } else {
             $message = 'Pemeriksaan Ralan untuk chaart berhasil dimuat';
             $data    = \App\Models\PemeriksaanRalan::select('tgl_perawatan', 'jam_rawat', 'suhu_tubuh', 'nadi', 'spo2', 'respirasi')
@@ -434,10 +459,10 @@ class PasienController extends Controller
             $this->tracker->insertSql($verifModel, $data);
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
-                '#'         => "tracker",
-                'success'   => false,
-                'message'   => 'Verifikasi SOAP gagal',
-                'error'     => $e->getMessage()
+                '#'       => "tracker",
+                'success' => false,
+                'message' => 'Verifikasi SOAP gagal',
+                'error'   => $e->getMessage()
             ], 500);
         }
 
