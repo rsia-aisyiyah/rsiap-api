@@ -22,4 +22,18 @@ class PermintaanRadiologi extends Model
             ['no_rawat', 'tgl_hasil', 'jam_hasil']
         );
     }
+
+    public function gambar()
+    {
+        return $this->hasMany(
+            GambarRadiologi::class,
+            ['no_rawat', 'tgl_periksa', 'jam'],
+            ['no_rawat', 'tgl_hasil', 'jam_hasil']
+        );
+    }
+
+    public function regPeriksa()
+    {
+        return $this->belongsTo(RegPeriksa::class, 'no_rawat');
+    }
 }
