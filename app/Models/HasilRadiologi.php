@@ -14,6 +14,14 @@ class HasilRadiologi extends Model
 
     public $timestamps = false;
 
+    public function regPeriksa()
+    {
+        return $this->belongsTo(
+            RegPeriksa::class,
+            'no_rawat', 'no_rawat'
+        );
+    }
+
     public function permintaan()
     {
         return $this->belongsTo(

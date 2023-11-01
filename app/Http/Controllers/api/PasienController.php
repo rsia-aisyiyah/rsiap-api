@@ -108,8 +108,8 @@ class PasienController extends Controller
             ->count();
 
         $data = [
-            'pasien_ralan'   => $pasienRalan,
-            'pasien_ranap'   => $pasienRanap,
+            'rawat_jalan'   => $pasienRalan,
+            'rawat_inap'   => $pasienRanap,
             'jadwal_operasi' => $jadwalOperasi
         ];
 
