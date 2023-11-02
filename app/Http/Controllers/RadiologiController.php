@@ -39,6 +39,39 @@ class RadiologiController extends Controller
         return isSuccess($data, "Berhasil");
     }
 
+    public function now(Request $request)
+    {
+        $msg = "Data Permintaan radiologi";
+        $data = \App\Models\PermintaanRadiologi::select("*")->with([
+            'hasil' => function ($q) {
+                return $q->select('no_rawat', 'tgl_periksa', 'jam');
+            },
+            'regPeriksa' => function ($q) {
+                return $q->select('no_rawat', 'no_rkm_medis', 'kd_pj', 'status_lanjut')->with([
+                    'pasien' => function ($q) {
+                        return $q->select('no_rkm_medis', 'nm_pasien', 'tgl_lahir', 'jk', 'alamat');
+                    }
+                ])->with(["penjab" => function ($q) {
+                    return $q->select('kd_pj', 'png_jawab');
+                }]);
+            }
+        ]);
+
+
+        if ($request->tgl) {
+            $msg .= " tanggal: " . $request->tgl;
+            $data = $data->whereDate('tgl_permintaan', date('Y-m-d', strtotime($request->tgl)));
+        } else {
+            $msg .= " bulan ini";
+            $data = $data->whereDate('tgl_permintaan', date('Y-m-d'));
+        }
+
+        $msg .= " berhasil diambil";
+        $data = $data->where("tgl_sampel", "<>", "0000-00-00")->orderBy('tgl_permintaan', "DESC")->paginate(env('PER_PAGE', 10));
+
+        return isSuccess($data, "Berhasil");
+    }
+
     // Permintaan Radiologi
     public function permintaan(Request $request)
     {
@@ -68,7 +101,7 @@ class RadiologiController extends Controller
     }
 
     // Permintaan Radiologi Hari Ini
-    public function now(Request $request)
+    public function permintaanNow(Request $request)
     {
         $data = \App\Models\PermintaanRadiologi::select("*");
         $data = $data->whereDate('tgl_permintaan', date('Y-m-d'))->where('tgl_sampel', "0000-00-00")->get();

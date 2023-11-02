@@ -122,11 +122,13 @@ class PasienController extends Controller
 
         $msg        = 'Data metric radiologi bulan ini berhasil dimuat';
         $permintaan = \App\Models\PermintaanRadiologi::select("*")
-            ->whereBetween('tgl_permintaan', [date('Y-m-01'), date('Y-m-t')])
+            // ->whereBetween('tgl_permintaan', [date('Y-m-01'), date('Y-m-t')])
+            ->whereDate('tgl_permintaan', date('Y-m-d'))
             ->where('tgl_sampel', "0000-00-00")->count();
 
         $pasien = \App\Models\PermintaanRadiologi::select("*")
-            ->whereBetween('tgl_permintaan', [date('Y-m-01'), date('Y-m-t')])
+            // ->whereBetween('tgl_permintaan', [date('Y-m-01'), date('Y-m-t')])
+            ->whereDate('tgl_permintaan', date('Y-m-d'))
             ->where("tgl_sampel", "<>", "0000-00-00")->count();
 
         $data = [
