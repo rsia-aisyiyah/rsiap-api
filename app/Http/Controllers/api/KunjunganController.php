@@ -132,6 +132,34 @@ class KunjunganController extends Controller
         return isSuccess($this->checkData($data), "Data rekap pasen dokter umum pada $start - $end berhasil dimuat");
     }
 
+    function rekapRadiologi(Request $request)
+    {
+        $kd_dokter = $request->payload->get('sub');
+        $pasien = \App\Models\PeriksaRadiologi::where('kd_dokter', $kd_dokter);
+
+        if ($request->tgl) {
+            $start = \Illuminate\Support\Carbon::parse($request->tgl['start'])->format('Y-m-d');
+            $end   = \Illuminate\Support\Carbon::parse($request->tgl['end'])->format('Y-m-d');
+        } else {
+            $start = date('Y-m-01');
+            $end   = date('Y-m-t');
+        }
+
+        $pasien->whereBetween('tgl_periksa', [$start, $end])->whereHas('hasil', function ($query) {
+            $query->where('hasil', '!=', '')->where('hasil', '!=', ' ')->where('hasil', '!=', '-')->where('hasil', '!=', '0');
+        })->with(['regPeriksa' => function($q) {
+            $q->select('no_rawat', 'kd_pj')->with(['penjab' => function ($qq) {
+                $qq->select('kd_pj', 'png_jawab');
+            }]);
+        }])->orderBy('tgl_periksa', 'DESC')->orderBy('jam', 'DESC');
+
+        $data = $pasien->get()->groupBy('status')->map(function ($item, $key) {
+            return $this->getTotal(collect($item)->pluck('regPeriksa'));
+        });
+
+        return isSuccess($data, "Data rekap pasen dokter radiologi pada $start - $end berhasil dimuat");
+    }
+
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         $payload = auth()->payload();
