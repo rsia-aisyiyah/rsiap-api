@@ -23,6 +23,15 @@ class PermintaanRadiologi extends Model
         );
     }
 
+    public function periksa()
+    {
+        return $this->belongsTo(
+            PeriksaRadiologi::class,
+            ['no_rawat', 'tgl_hasil', 'jam_hasil'],
+            ['no_rawat', 'tgl_periksa', 'jam'],
+        );
+    }
+
     public function gambar()
     {
         return $this->hasMany(

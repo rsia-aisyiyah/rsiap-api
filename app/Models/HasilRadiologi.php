@@ -31,6 +31,15 @@ class HasilRadiologi extends Model
         );
     }
 
+    public function periksa()
+    {
+        return $this->belongsTo(
+            PeriksaRadiologi::class,
+            ['no_rawat', 'tgl_periksa', 'jam'],
+            ['no_rawat', 'tgl_periksa', 'jam']
+        );
+    }
+
     public function gambar()
     {
         return $this->hasMany(
