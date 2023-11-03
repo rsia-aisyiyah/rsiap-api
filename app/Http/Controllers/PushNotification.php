@@ -117,7 +117,7 @@ class PushNotification extends Controller
     {
         // requirements data
         $requirements = ['topic', 'title', 'body', 'data'];
-        $data         = [];
+        $require_data = ['no_rawat', 'action', 'kategori', 'penjab'];
 
         // check request requirements
         foreach ($requirements as $requirement) {
@@ -126,32 +126,16 @@ class PushNotification extends Controller
                 if ($requirement == "data") {
                     // if data is not an array
                     if (!is_array($request->data)) {
-                        $msg = "data bukan object";
+                        $msg = $requirement . " must be an object, at least add no_rawat to data, ex: {\"no_rawat\": \"123456\"}";
                         return isFail($msg);
                     }
 
-                    // if empty data
-                    if (empty((array) $request->data)) {
-                        $msg = "data tidak boleh kosong";
-                        return isFail($msg);
-                    }
-
-                    // if no no_rawat in data
-                    if (!isset($request->data['no_rawat'])) {
-                        $msg = "no_rawat harus ada di data";
-                        return isFail($msg);
-                    }
-
-                    // if no_rawat is empty
-                    if (empty($request->data['no_rawat'])) {
-                        $msg = "no_rawat tidak boleh kosong";
-                        return isFail($msg);
-                    }
-
-                    // if no_rawat is not string
-                    if (!is_string($request->data['no_rawat'])) {
-                        $msg = "no_rawat harus string";
-                        return isFail($msg);
+                    // check data requirements
+                    foreach ($require_data as $data) {
+                        if (!array_key_exists($data, $request->data)) {
+                            $msg = $data . " is required in data";
+                            return isFail($msg);
+                        }
                     }
                 }
 

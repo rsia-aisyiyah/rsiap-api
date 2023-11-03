@@ -22,3 +22,6 @@ firebase_credentials.json
 
 # scribe api documentation
 .scribe
+
+# my log files
+*.log
