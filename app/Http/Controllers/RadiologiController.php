@@ -10,10 +10,11 @@ class RadiologiController extends Controller
     public function index(Request $request)
     {
         $msg = "Data Permintaan radiologi";
-        $data = \App\Models\PermintaanRadiologi::select("*")->with([
-            'hasil' => function ($q) {
-                return $q->select('no_rawat', 'tgl_periksa', 'jam');
-            },
+        $kd_dokter = $request->payload->get('sub');
+        $data = \App\Models\PeriksaRadiologi::select("*")->with([
+            'hasil',
+            'permintaan',
+            'jenis',
             'regPeriksa' => function ($q) {
                 return $q->select('no_rawat', 'no_rkm_medis', 'kd_pj', 'status_lanjut')->with([
                     'pasien' => function ($q) {
@@ -21,22 +22,27 @@ class RadiologiController extends Controller
                     }
                 ])->with(["penjab" => function ($q) {
                     return $q->select('kd_pj', 'png_jawab');
-                }]);
+                },]);
             }
-        ]);
+        ])->where('kd_dokter', $kd_dokter);
 
         if ($request->tgl) {
             $msg .= " tanggal: " . $request->tgl['start'] . " - " . $request->tgl['end'];
-            $data = $data->whereBetween('tgl_permintaan', [$request->tgl['start'], $request->tgl['end']]);
+            $data = $data->whereBetween('tgl_periksa', [$request->tgl['start'], $request->tgl['end']]);
         } else {
             $msg .= " bulan ini";
-            $data = $data->whereBetween('tgl_permintaan', [date('Y-m-01'), date('Y-m-t')]);
+            $data = $data->whereBetween('tgl_periksa', [date('Y-m-01'), date('Y-m-t')]);
+        }
+
+        if ($request->status) {
+            $msg .= " dengan status $request->status";
+            $data = $data->where('status', $request->status);
         }
 
         $msg .= " berhasil diambil";
-        $data = $data->where("tgl_sampel", "<>", "0000-00-00")->orderBy('tgl_permintaan', "DESC")->paginate(env('PER_PAGE', 10));
+        $data = $data->orderBy('tgl_periksa', "DESC")->orderBy('jam', "DESC")->paginate(env('PER_PAGE', 10));
 
-        return isSuccess($data, "Berhasil");
+        return isSuccess($data, $msg);
     }
 
     public function now(Request $request)
@@ -139,7 +145,7 @@ class RadiologiController extends Controller
             return isFail("Missing parameter jam");
         }
 
-        $data = $data->with('hasil', 'gambar')->get();
+        $data = $data->with('hasil', 'gambar', 'periksa.jenis')->get();
 
         return isSuccess($data, "Data hasil pemeriksaan radiologi no_rawat: $request->no_rawat tanggal: $request->tanggal jam: $request->jam berhasil diambil");
     }

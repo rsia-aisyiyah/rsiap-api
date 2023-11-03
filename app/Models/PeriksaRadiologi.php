@@ -14,12 +14,40 @@ class PeriksaRadiologi extends Model
 
     public $timestamps = false;
 
+
     public function hasil()
     {
-        return $this->hasMany(
+        return $this->belongsTo(
             HasilRadiologi::class,
             ['no_rawat', 'tgl_periksa', 'jam'],
             ['no_rawat', 'tgl_periksa', 'jam']
+        );
+    }
+
+    public function jenis()
+    {
+        return $this->hasOne(
+            JenisPerawatanRadiologi::class,
+            'kd_jenis_prw',
+            'kd_jenis_prw',
+        );
+    }
+
+    public function permintaan()
+    {
+        return $this->belongsTo(
+            PermintaanRadiologi::class,
+            ['no_rawat', 'tgl_periksa', 'jam'],
+            ['no_rawat', 'tgl_hasil', 'jam_hasil']
+        );
+    }
+
+    public function gambar()
+    {
+        return $this->belongsTo(
+            GambarRadiologi::class,
+            ['no_rawat', 'tgl_periksa', 'jam'],
+            ['no_rawat', 'tgl_periksa', 'jam'],
         );
     }
 
