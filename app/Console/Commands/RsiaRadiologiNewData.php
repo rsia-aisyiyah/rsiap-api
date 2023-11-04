@@ -45,7 +45,10 @@ class RsiaRadiologiNewData extends Command
         $spesialis = new \App\Models\Spesialis;
 
         // permintaan count data where tgl_hasil dan jam_hasil = 0000-00-00 00:00:00 and save the result to file on project root directory named radiologi.conf
-        $all = $permintaan->select("*")->whereMonth("tgl_permintaan", date('m'))->where('tgl_sampel', '!=', '0000-00-00')->where('tgl_hasil', '!=', '0000-00-00')->count();
+        $all = $permintaan->select("*")
+            ->whereMonth("tgl_permintaan", date('m'))
+            ->where('tgl_sampel', '!=', '0000-00-00')
+            ->where('tgl_hasil', '!=', '0000-00-00')->count();
 
         $dokter = $spesialis->with(['dokter' => function ($q) {
             $q->select('kd_dokter', 'nm_dokter', 'kd_sps');
@@ -77,21 +80,30 @@ class RsiaRadiologiNewData extends Command
                 $pasien = $permintaan->with('hasil', 'gambar')
                     ->whereMonth("tgl_permintaan", date('m'))
                     ->where('tgl_sampel', '!=', '0000-00-00')
-                    ->limit($gap)->orderBy('no_rawat', 'DESC')->get();
+                    ->orderBy('tgl_permintaan', 'DESC')
+                    ->orderBy('jam_permintaan', 'DESC')
+                    ->limit($gap)->get();
 
                     
                 $pasien = $pasien->filter(function ($value, $key) {
-                    return $value->gambar == null || $value->gambar->isNotEmpty();
+                    return ($value->gambar != null || $value->gambar->isNotEmpty()) && ($value->hasil == null || in_array($value->hasil->hasil, ['-', '', ' ']));
                 });
+
+                $this->info($pasien->count());
 
                 if (!$pasien->isEmpty()) {
                     foreach ($pasien as $key => $value) {
+
                         $this->info($value->no_rawat);
+                        $this->info($value->tgl_hasil);
+                        $this->info($value->jam_hasil);
+                        $this->newLine();
+
                         foreach ($dokter->dokter as $k => $v) {
                             $msg = \Kreait\Firebase\Messaging\CloudMessage::withTarget('topic', $v->kd_dokter)
                                 ->withNotification([
                                     'topic' => $v->kd_dokter,
-                                    'title' => 'Notifikasi Pemeriksaan Radiologi',
+                                    'title' => 'TEST Notifikasi Pemeriksaan Radiologi',
                                     'body'  => 'Terdapat pasien baru dengan no rawat ' . $value->no_rawat . ' mohon untuk segera di cek',
                                 ])->withData([
                                     "jam" => $value->jam_hasil,
@@ -103,13 +115,13 @@ class RsiaRadiologiNewData extends Command
                                 ]);
     
                             // send notification
-                            $messaging->send($msg);
-    
+                            // $messaging->send($msg);
+
                             // log
-                            $this->info("Send notification to " . $v->kd_dokter);
-    
-                            // sleep for 1 second
-                            sleep(1);
+                            // $this->info("Send notification to " . $v->kd_dokter);
+
+                            // sleep for 3 second
+                            // sleep(3);
                         }
                     }
     
@@ -121,7 +133,11 @@ class RsiaRadiologiNewData extends Command
                     fwrite($file, json_encode($data));
                     fclose($file);
                 } else {
-
+                    $data['old_data'] = $all;
+                    
+                    $file = fopen(public_path('radiologi.json'), 'w');
+                    fwrite($file, json_encode($data));
+                    fclose($file);
                 }
 
             }
