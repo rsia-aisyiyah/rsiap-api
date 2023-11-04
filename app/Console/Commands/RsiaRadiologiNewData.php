@@ -115,13 +115,13 @@ class RsiaRadiologiNewData extends Command
                                 ]);
     
                             // send notification
-                            // $messaging->send($msg);
+                            $messaging->send($msg);
 
                             // log
-                            // $this->info("Send notification to " . $v->kd_dokter);
+                            $this->info("Send notification to " . $v->kd_dokter);
 
                             // sleep for 3 second
-                            // sleep(3);
+                            sleep(3);
                         }
                     }
     
