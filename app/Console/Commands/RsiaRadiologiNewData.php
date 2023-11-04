@@ -103,8 +103,8 @@ class RsiaRadiologiNewData extends Command
                             $msg = \Kreait\Firebase\Messaging\CloudMessage::withTarget('topic', $v->kd_dokter)
                                 ->withNotification([
                                     'topic' => $v->kd_dokter,
-                                    'title' => 'TEST Notifikasi Pemeriksaan Radiologi',
-                                    'body'  => 'Terdapat pasien baru dengan no rawat ' . $value->no_rawat . ' mohon untuk segera di cek',
+                                    'title' => 'Notifikasi Pemeriksaan Radiologi',
+                                    'body'  => 'Terdapat pasien baru dengan no rawat ' . $value->no_rawat . ' mohon untuk segera untuk ditindak lanjuti',
                                 ])->withData([
                                     "jam" => $value->jam_hasil,
                                     "tanggal" => $value->tgl_hasil,
