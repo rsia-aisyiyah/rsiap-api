@@ -51,8 +51,6 @@ class PegawaiController extends Controller
             $pegawai->with('dpt');
             $pegawai->with('stts_kerja');
             $pegawai->with('rsia_email_pegawai');
-            $pegawai->with('berkas_pegawai');
-            $pegawai->with('berkas_pegawai.master_berkas_pegawai');
         }
 
         $pegawai = $pegawai->first();

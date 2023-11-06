@@ -7,7 +7,9 @@ use App\Http\Controllers\api\PegawaiController;
 use App\Http\Controllers\api\PresensiController;
 use App\Http\Controllers\api\RsiaKlinisController;
 use App\Http\Controllers\api\JadwalPegawaiController;
+use App\Http\Controllers\api\BerkasController;
 use App\Http\Controllers\api\JasaMedisController;
+use App\Models\RsiaBerkasPegawai;
 
 Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::get('/', [PegawaiController::class, 'index']);
@@ -15,6 +17,8 @@ Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::post('/jadwal/now', [JadwalPegawaiController::class, 'now']);
     Route::post('/jadwal/filter', [JadwalPegawaiController::class, 'filter']);
     Route::post('/detail', [PegawaiController::class, 'detail']);
+    Route::post('/berkas-pegawai', [BerkasController::class, 'index']);
+
     
     Route::post('/cuti', [CutiController::class, 'index']);
     Route::post('/cuti/post', [CutiController::class, 'simpanCuti']);
