@@ -59,4 +59,22 @@ class PeriksaRadiologi extends Model
             'no_rawat', 'no_rawat'
         );
     }
+
+    public function dokter()
+    {
+        return $this->belongsTo(
+            Dokter::class,
+            'dokter_perujuk', 
+            'kd_dokter'
+        );
+    }
+
+    public function petugas()
+    {
+        return $this->belongsTo(
+            Petugas::class,
+            'nip', 
+            'nip'
+        );
+    }
 }

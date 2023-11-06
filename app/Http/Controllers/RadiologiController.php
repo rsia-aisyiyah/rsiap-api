@@ -34,6 +34,15 @@ class RadiologiController extends Controller
             $data = $data->whereBetween('tgl_periksa', [date('Y-m-01'), date('Y-m-t')]);
         }
 
+        if ($request->penjab) {
+            $msg .= " dengan penjab: $request->penjab";
+            $data = $data->whereHas('regPeriksa', function ($q) use ($request) {
+                $q->whereHas('penjab', function ($q) use ($request) {
+                    $q->where('png_jawab', 'like', "%$request->penjab%");
+                });
+            });
+        }
+
         if ($request->status) {
             $msg .= " dengan status $request->status";
             $data = $data->where('status', $request->status);
@@ -60,6 +69,8 @@ class RadiologiController extends Controller
                 ])->with(["penjab" => function ($q) {
                     return $q->select('kd_pj', 'png_jawab');
                 }]);
+            }, 'permintaanPemeriksaan.jenis' => function ($q) {
+                return $q->select('kd_jenis_prw', 'nm_perawatan');
             }
         ]);
 
@@ -90,6 +101,8 @@ class RadiologiController extends Controller
             ])->with(["penjab" => function ($q) {
                 return $q->select('kd_pj', 'png_jawab');
             }]);
+        }, 'permintaanPemeriksaan.jenis' => function ($q) {
+            return $q->select('kd_jenis_prw', 'nm_perawatan');
         }]);
 
         if ($request->tgl) {
@@ -109,7 +122,18 @@ class RadiologiController extends Controller
     // Permintaan Radiologi Hari Ini
     public function permintaanNow(Request $request)
     {
-        $data = \App\Models\PermintaanRadiologi::select("*");
+        $data = \App\Models\PermintaanRadiologi::select("*")->with(['permintaanPemeriksaan.jenis' => function ($q) {
+            return $q->select('kd_jenis_prw', 'nm_perawatan');
+        }, 'regPeriksa' => function ($q) {
+            return $q->select('no_rawat', 'no_rkm_medis', 'kd_pj', 'status_lanjut')->with([
+                'pasien' => function ($q) {
+                    return $q->select('no_rkm_medis', 'nm_pasien', 'tgl_lahir', 'jk', 'alamat');
+                }
+            ])->with(["penjab" => function ($q) {
+                return $q->select('kd_pj', 'png_jawab');
+            }]);
+        }]);
+
         $data = $data->whereDate('tgl_permintaan', date('Y-m-d'))->where('tgl_sampel', "0000-00-00")->get();
 
         return isSuccess($data, "Data permintaan radiologi hari ini berhasil diambil");
@@ -145,7 +169,13 @@ class RadiologiController extends Controller
             return isFail("Missing parameter jam");
         }
 
-        $data = $data->with('hasil', 'gambar', 'periksa.jenis')->get();
+        $data = $data->with(['hasil', 'gambar', 'periksa.jenis' => function ($q) {
+            return $q->select('kd_jenis_prw', 'nm_perawatan');
+        }, 'periksa.dokter' => function ($q) {
+            return $q->select('kd_dokter', 'nm_dokter');
+        }, 'periksa.petugas' => function ($q) {
+            return $q->select('nip', 'nama');
+        }])->get();
 
         return isSuccess($data, "Data hasil pemeriksaan radiologi no_rawat: $request->no_rawat tanggal: $request->tanggal jam: $request->jam berhasil diambil");
     }
