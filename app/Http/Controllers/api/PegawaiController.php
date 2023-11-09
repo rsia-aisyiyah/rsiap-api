@@ -22,10 +22,32 @@ class PegawaiController extends Controller
      * 
      * Untuk mengambil semua data pegawai, end point ini membutuhkan otorisasi JWT Token. jadikan bearer token dengan value token yang didapat dari login. 
      * */
-    public function index()
+    public function index(Request $request)
     {
-        $pegawai = \App\Models\Pegawai::get();
-        return isSuccess($pegawai);
+        $pegawai = \App\Models\Pegawai::select('nik', 'nama', 'jk', 'jbtn', 'departemen')->with('dpt');
+
+        if ($request->aktif) {
+            $pegawai->where('stts_aktif', $request->aktif);
+        } else {
+            $pegawai->where('stts_aktif', 'AKTIF');
+        }
+
+        $pegawai = $pegawai->whereHas('petugas', function($q) {
+            return $q->where('status', '!=', '0')->where("kd_jbtn", "!=", "-");
+        })->orderBy('nama', 'ASC');
+
+
+        if ($request->datatables) {
+            if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
+                return \Yajra\DataTables\DataTables::of($pegawai)->make(true);
+            } else {
+                return $pegawai->paginate(env('PER_PAGE', 10));
+            }
+        } else {
+            return $pegawai->paginate(env('PER_PAGE', 10));
+        }
+
+        return isSuccess($pegawai, 'Berhasil mengambil data pegawai');
     }
 
     /** @authenticated

@@ -22,7 +22,7 @@ class AuthController extends Controller
             ->first();
 
         if (!$user) {
-            return isUnauthenticated('Unauthorized');
+            return isUnauthenticated('User or password is wrong');
         }
 
         $payloadable = [
@@ -63,6 +63,7 @@ class AuthController extends Controller
         }
         
         $token = auth()->claims($payloadable)->login($user);
+
         if (!$token) {
             return isUnauthenticated('Unauthorized');
         }
@@ -74,7 +75,9 @@ class AuthController extends Controller
     {
         // get payload from token
         $payload = auth()->payload()->toArray();
-        $pegawai = Pegawai::where('pegawai.nik', $payload['sub'])
+        $pegawai = Pegawai::select('nik', 'nama', 'photo', 'departemen')
+            ->where('pegawai.nik', $payload['sub'])
+            ->with('dpt')
             ->first();
 
         return isSuccess($pegawai, 'Data berhasil dimuat');
