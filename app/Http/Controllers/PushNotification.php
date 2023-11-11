@@ -52,7 +52,6 @@ class PushNotification extends Controller
             return $check;
         }
 
-
         // build notification message
         $message = self::buildNotification($check->getData()->data);
 
@@ -118,11 +117,11 @@ class PushNotification extends Controller
         // requirements data
         $requirements = ['topic', 'title', 'body', 'data'];
         $require_data = ['no_rawat', 'action', 'kategori', 'penjab'];
+        $data_notif = [];
 
         // check request requirements
         foreach ($requirements as $requirement) {
             if ($request->has($requirement)) {
-
                 if ($requirement == "data") {
                     // if data is not an array
                     if (!is_array($request->data)) {
@@ -139,7 +138,9 @@ class PushNotification extends Controller
                     }
                 }
 
-                $data[$requirement] = $request->$requirement;
+                // replace single quote and double quote with empty string
+                $request->merge([$requirement => str_replace(['\'', '"'], '', $request->get($requirement))]);
+                $data_notif[$requirement] = $request->get($requirement);
             } else {
                 if ($requirement == 'data') {
                     $msg = $requirement . " is required and must be an object, at least add no_rawat to data, ex: {\"no_rawat\": \"123456\"}";
@@ -150,6 +151,6 @@ class PushNotification extends Controller
         }
 
         // return success response if requirements met
-        return isSuccess($data, 'request requirements met');
+        return isSuccess($data_notif, 'requirements met');        
     }
 }
