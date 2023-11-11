@@ -11,7 +11,9 @@ class Pegawai extends Model
 
     protected $table = 'pegawai';
     protected $primaryKey = 'id';
+
     protected $guarded = [];
+    
     public $timestamps = false;
 
     public function dokter()
@@ -52,6 +54,11 @@ class Pegawai extends Model
     public function kualifikasi_staff_klinis()
     {
         return $this->hasOne(KualifikasiStaff::class, 'nik', 'nik');
+    }
+
+    public function rsia_departemen_jm()
+    {
+        return $this->hasOne(RsiaDepartemenJm::class, 'nik', 'nik');
     }
 
     public function cuti()

@@ -63,13 +63,12 @@ Route::post('/notification/send', [PushNotification::class, 'send']);
 // Push Notification mobile
 Route::post('/notification/send/pegawai', [PushNotificationPegawai::class, 'send']);
 
-require_once 'partials/api_dokter.php';
-require_once 'partials/api_pasien.php';
-require_once 'partials/api_kunjungan.php';
-require_once 'partials/api_jadwal_operasi.php';
-require_once 'partials/api_pegawai.php';
-require_once 'partials/api_pendidikan.php';
 
-require_once 'partials/api_farmasi.php';
-
-require_once 'partials/api_monitoring.php';
+$files = scandir(__DIR__ . '/partials');
+foreach ($files as $file) {
+    // if file is not a directory
+    if (!is_dir(__DIR__ . '/partials/' . $file)) {
+        // require_once the file
+        require_once __DIR__ . '/partials/' . $file;
+    }
+}
