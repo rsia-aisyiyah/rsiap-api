@@ -49,9 +49,7 @@ class RsiaRadiologiUncompleteData extends Command
 
         // get all permintaan with hasil. 
         $all_permintaan = $permintaan->with('hasil')
-            ->whereMonth('tgl_sampel', date('m'))
-            ->whereYear('tgl_sampel', date('Y'))
-            ->where('tgl_sampel', '!=', '0000-00-00 00:00:00')
+            ->where('tgl_sampel', date('Y-m-d'))
             ->orderBy('tgl_sampel', 'DESC')
             ->get();
 
