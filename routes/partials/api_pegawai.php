@@ -18,12 +18,13 @@ Route::middleware('jwt.verify', 'cors')->prefix('pegawai')->group(function ($rou
 Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::get('/', [PegawaiController::class, 'index']);
     Route::get('/get/{nik}', [PegawaiController::class, 'get']);
+    Route::get('/get/simple', [PegawaiController::class, 'simple']);
+
     Route::get('/get_lsdt', [PegawaiController::class, 'get_lsdt']);
 
     Route::post('/store', [PegawaiController::class, 'store']);
     Route::post('/detail', [PegawaiController::class, 'detail']);
     Route::post('/update', [PegawaiController::class, 'update']);
-
     Route::delete('/destroy', [PegawaiController::class, 'destroy']);
 
     Route::post('/jadwal', [JadwalPegawaiController::class, 'index']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @group Pegawai
@@ -23,7 +24,34 @@ class PegawaiController extends Controller
      * */
     public function index(Request $request)
     {
-        $pegawai = \App\Models\Pegawai::select('nik', 'nama', 'jk', 'jbtn', 'departemen')->with('dpt');
+        $pegawai = \App\Models\Pegawai::select();
+
+        if ($request->select) {
+            // select is select=nik,nama
+            $select_ready = [];
+            $select = explode(',', $request->select);
+            foreach ($select as $key => $value) {
+                $select_ready[] = $value;
+            }
+            
+            $select_ready[] = 'departemen';
+
+            $pegawai->select($select_ready);
+        } else {
+            $pegawai->select('nik', 'nama', 'jk', 'jbtn', 'departemen');
+        }
+
+        if ($request->with) {
+            $with_ready = [];
+            $with = explode(',', $request->with);
+            foreach ($with as $key => $value) {
+                $with_ready[] = $value;
+            }
+
+            $pegawai->with($with_ready);
+        } else {
+            $pegawai->with('dpt');
+        }
 
         if ($request->aktif) {
             $pegawai->where('stts_aktif', $request->aktif);
@@ -40,10 +68,10 @@ class PegawaiController extends Controller
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
                 return \Yajra\DataTables\DataTables::of($pegawai)->make(true);
             } else {
-                return $pegawai->paginate(env('PER_PAGE', 10));
+                $pegawai = $pegawai->paginate(env('PER_PAGE', 10));
             }
         } else {
-            return $pegawai->paginate(env('PER_PAGE', 10));
+            $pegawai = $pegawai->paginate(env('PER_PAGE', 10));
         }
 
         return isSuccess($pegawai, 'Berhasil mengambil data pegawai');
@@ -58,6 +86,17 @@ class PegawaiController extends Controller
         if (!$pegawai) {
             return isFail('Pegawai not found', 404);
         }
+
+        return isSuccess($pegawai, 'Berhasil mengambil data pegawai');
+    }
+
+    public function get_simple()
+    {
+        $pegawai = \App\Models\Pegawai::select('nik', 'nama');
+
+        $pegawai = $pegawai->whereHas('petugas', function ($q) {
+            return $q->where('status', '!=', '0')->where("kd_jbtn", "!=", "-");
+        })->orderBy('nama', 'ASC');
 
         return isSuccess($pegawai, 'Berhasil mengambil data pegawai');
     }
@@ -128,17 +167,35 @@ class PegawaiController extends Controller
 
     public function profile_upload(Request $request)
     {
-        return $request->all();
         $pegawai = \App\Models\Pegawai::where('nik', $request->nik)->first();
 
         if (!$pegawai) {
             return isFail('Pegawai not found', 404);
         }
 
-        $pegawai->foto = $request->foto;
+        // get file
+        $file = $request->file('photo');
+
+        if (!$file) {
+            return isFail('Photo is required', 422);
+        }
+
+        $st = new Storage();
+        $old_photo = $pegawai->photo;
+        if ($old_photo && $st::disk('sftp')->exists('rsiap/file/pegawai-dev/' . $old_photo)) {
+            $st::disk('sftp')->delete('rsiap/file/pegawai-dev/' . $old_photo);
+        }
+
+        // random name file
+        $file_name = rand() . uniqid() . '.' . $file->getClientOriginalExtension();
+
+        $st::disk('sftp')->put('rsiap/file/pegawai-dev/' . $file_name, file_get_contents($file));
+
+        // update pegawai
+        $pegawai->photo = $file_name;
         $pegawai->save();
 
-        return isSuccess($pegawai, 'Berhasil mengubah foto profil');
+        return isSuccess($pegawai, 'Berhasil mengupload photo');
     }
 
     public function destroy(Request $request)
@@ -154,8 +211,8 @@ class PegawaiController extends Controller
             return isFail('Pegawai not found', 404);
         }
 
+        $pegawai_photo = $pegawai->photo;
         $rsia_departemen_jm = \App\Models\RsiaDepartemenJm::where('id_jm', $pegawai->id)->first();
-
 
         if (!$petugas) {
             return isFail('Petugas not found', 404);
@@ -173,6 +230,11 @@ class PegawaiController extends Controller
             $pegawai->where('nik', $request->nik)->delete();
 
             \Illuminate\Support\Facades\DB::commit();
+
+            $st = new Storage();
+            if ($pegawai_photo && $st::disk('sftp')->exists('rsiap/file/pegawai-dev/' . $pegawai_photo)) {
+                $st::disk('sftp')->delete('rsiap/file/pegawai-dev/' . $pegawai_photo);
+            }
 
             return isOk('Berhasil menghapus data pegawai');
         } catch (\Throwable $th) {
