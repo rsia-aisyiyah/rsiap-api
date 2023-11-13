@@ -53,6 +53,17 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
         ],
 
+        'sftp' => [
+            'driver'   => 'sftp',
+            'host'     => env('FTP_HOST'),
+            'username' => env('FTP_USERNAME'),
+            'password' => env('FTP_PASSWORD'),
+            'port'     => env('FTP_PORT', 22),
+            'root'     => env('FTP_ROOT', '/home/sysadmin'),
+            'passive'  => env('FTP_PASSIVE', true),
+            'ssl'      => env('FTP_SSL', true),
+            'timeout'  => env('FTP_TIMEOUT', 60),
+        ],
     ],
 
     /*

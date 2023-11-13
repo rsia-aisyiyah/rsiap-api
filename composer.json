@@ -17,6 +17,7 @@
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
+        "league/flysystem-sftp": "^1.1",
         "tymon/jwt-auth": "^1",
         "yajra/laravel-datatables": "^1.5"
     },

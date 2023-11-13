@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        \Illuminate\Support\Facades\Storage::extend('sftp', function ($app, $config) {
+            return new \League\Flysystem\Filesystem(new \League\Flysystem\Sftp\SftpAdapter($config));
+        });    
     }
 }
