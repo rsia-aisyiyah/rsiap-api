@@ -11,6 +11,12 @@ class BerkasPegawai extends Model
 
     protected $table = 'berkas_pegawai';
 
+    protected $guarded = [];
+
+    public $timestamps = false;
+
+
+    
     public function pegawai()
     {
         return $this->hasMany(Pegawai::class, 'nik', 'nik');
