@@ -121,7 +121,9 @@ class BerkasController extends Controller
                 $st::disk('sftp')->delete('webapps/penggajian/' . $request->berkas);
             }
 
-            return isSuccess($berkas, "berkas pegawai berhasil dihapus");
+            return isSuccess([
+                "nik" => $request->nik,
+            ], "berkas pegawai berhasil dihapus");
         } catch (\Exception $e) {
             // Handle the exception
             return isFail("Gagal menghapus berkas pegawai: " . $e->getMessage(), 500);
