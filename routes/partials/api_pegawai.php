@@ -32,6 +32,7 @@ Route::middleware('jwt.verify')->prefix('pegawai')->group(function ($router) {
     Route::post('/jadwal/filter', [JadwalPegawaiController::class, 'filter']);
     Route::post('/get/berkas', [BerkasController::class, 'get_berkas']);
     Route::post('/upload/berkas', [BerkasController::class, 'upload']);
+    Route::post('/delete/berkas', [BerkasController::class, 'delete']);
 
     Route::get('/berkas/kategori', [BerkasController::class, 'get_kategori']);
     Route::get('/berkas/nama-berkas', [BerkasController::class, 'get_nama_berkas']);

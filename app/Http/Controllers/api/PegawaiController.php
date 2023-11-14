@@ -182,14 +182,14 @@ class PegawaiController extends Controller
 
         $st = new Storage();
         $old_photo = $pegawai->photo;
-        if ($old_photo && $st::disk('sftp')->exists('rsiap/file/pegawai-dev/' . $old_photo)) {
-            $st::disk('sftp')->delete('rsiap/file/pegawai-dev/' . $old_photo);
+        if ($old_photo && $st::disk('sftp')->exists(env('IMAGE_SAVE_LOCATION') . $old_photo)) {
+            $st::disk('sftp')->delete(env('IMAGE_SAVE_LOCATION') . $old_photo);
         }
 
         // random name file
         $file_name = rand() . uniqid() . '.' . $file->getClientOriginalExtension();
 
-        $st::disk('sftp')->put('rsiap/file/pegawai-dev/' . $file_name, file_get_contents($file));
+        $st::disk('sftp')->put(env('IMAGE_SAVE_LOCATION') . $file_name, file_get_contents($file));
 
         // update pegawai
         $pegawai->photo = $file_name;
@@ -232,8 +232,8 @@ class PegawaiController extends Controller
             \Illuminate\Support\Facades\DB::commit();
 
             $st = new Storage();
-            if ($pegawai_photo && $st::disk('sftp')->exists('rsiap/file/pegawai-dev/' . $pegawai_photo)) {
-                $st::disk('sftp')->delete('rsiap/file/pegawai-dev/' . $pegawai_photo);
+            if ($pegawai_photo && $st::disk('sftp')->exists(env('IMAGE_SAVE_LOCATION') . $pegawai_photo)) {
+                $st::disk('sftp')->delete(env('IMAGE_SAVE_LOCATION') . $pegawai_photo);
             }
 
             return isOk('Berhasil menghapus data pegawai');
