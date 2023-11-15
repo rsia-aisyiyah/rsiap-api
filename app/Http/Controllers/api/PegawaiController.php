@@ -17,6 +17,13 @@ use Illuminate\Support\Facades\Storage;
  * */
 class PegawaiController extends Controller
 {
+    protected $tracker;
+
+    public function __construct()
+    {
+        $this->tracker = new \App\Http\Controllers\TrackerSqlController();
+    }
+
     /** @authenticated
      * Get List Pegawai
      * 
@@ -116,6 +123,8 @@ class PegawaiController extends Controller
                 $model = new $modelClass;
                 $model->fill($data);
                 $model->save();
+
+                $this->tracker->insertSql($model, $data);
             }
 
             \Illuminate\Support\Facades\DB::commit();
@@ -154,6 +163,8 @@ class PegawaiController extends Controller
                     $model->save();
                 }
 
+                $caluse = $key == 'petugas' ? ['nip' => $n] : ($key == 'rsia_departemen_jm' ? ['id_jm' => $d] : ['nik' => $n]);
+                $this->tracker->updateSql($model, $data, $caluse);
             }
 
             \Illuminate\Support\Facades\DB::commit();
@@ -195,6 +206,8 @@ class PegawaiController extends Controller
         $pegawai->photo = $file_name;
         $pegawai->save();
 
+        $this->tracker->updateSql($pegawai, ['photo' => $file_name], ['nik' => $request->nik]);
+
         return isSuccess($pegawai, 'Berhasil mengupload photo');
     }
 
@@ -226,8 +239,14 @@ class PegawaiController extends Controller
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
             $rsia_departemen_jm->where('id_jm', $pegawai->id)->delete();
+            $this->tracker->deleteSql($rsia_departemen_jm, ['id_jm' => $pegawai->id]);
+
             $petugas->where('nip', $request->nik)->delete();
+            $this->tracker->deleteSql($petugas, ['nip' => $request->nik]);
+
             $pegawai->where('nik', $request->nik)->delete();
+            $this->tracker->deleteSql($pegawai, ['nik' => $request->nik]);
+
 
             \Illuminate\Support\Facades\DB::commit();
 
