@@ -26,6 +26,11 @@ class Pegawai extends Model
         return $this->hasOne(Bidang::class, 'nama', 'jnj_jabatan');
     }
 
+    public function bidang_detail()
+    {
+        return $this->hasOne(Bidang::class, 'nama', 'jnj_jabatan');
+    }
+
     public function pendidikan()
     {
         return $this->hasOne(Pendidikan::class, 'tingkat', 'pendidikan');
