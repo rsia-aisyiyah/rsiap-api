@@ -41,6 +41,15 @@ class PermintaanRadiologi extends Model
         );
     }
 
+    public function permintaanPemeriksaan()
+    {
+        return $this->hasOne(
+            PermintaanPemeriksaanRadiologi::class,
+            'noorder',
+            'noorder'
+        );
+    }
+
     public function regPeriksa()
     {
         return $this->belongsTo(RegPeriksa::class, 'no_rawat');

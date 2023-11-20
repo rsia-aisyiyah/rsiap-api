@@ -82,6 +82,9 @@ class RsiaRadiologiNewData extends Command
                     ->where('tgl_sampel', '!=', '0000-00-00')
                     ->orderBy('tgl_permintaan', 'DESC')
                     ->orderBy('jam_permintaan', 'DESC')
+                    ->with(['permintaanPemeriksaan.jenis' => function ($q) {
+                        return $q->select('kd_jenis_prw', 'nm_perawatan');
+                    }]) 
                     ->limit($gap)->get();
 
                     
@@ -104,7 +107,7 @@ class RsiaRadiologiNewData extends Command
                                 ->withNotification([
                                     'topic' => $v->kd_dokter,
                                     'title' => 'Notifikasi Pemeriksaan Radiologi',
-                                    'body'  => 'Terdapat pasien baru dengan no rawat ' . $value->no_rawat . ' mohon untuk segera untuk ditindak lanjuti',
+                                    'body'  => "Terdapat pasien baru dengan \nNo Rawat : " . $value->no_rawat . ", \nPemeriksaan : " . $value->permintaanPemeriksaan->jenis->nm_perawatan . " \n\nmohon untuk segera ditindak lanjuti",
                                 ])->withData([
                                     "jam" => $value->jam_hasil,
                                     "tanggal" => $value->tgl_hasil,
