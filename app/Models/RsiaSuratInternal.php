@@ -16,4 +16,20 @@ class RsiaSuratInternal extends Model
     protected $primaryKey = 'no_surat';
 
     public $timestamps = false;
+
+    
+    
+    protected $casts = [
+        'no_surat' => 'string'
+    ];
+
+    public function pj_detail()
+    {
+        return $this->hasOne(Petugas::class, 'nip', 'pj');
+    }
+
+    public function penerima()
+    {
+        return $this->hasMany(RsiaSuratInternalPenerima::class, 'no_surat', 'no_surat');
+    }
 }

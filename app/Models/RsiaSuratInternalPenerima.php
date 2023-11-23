@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class RsiaSuratInternalPenerima extends Model
+{
+    use HasFactory;
+
+    protected $table = 'rsia_surat_internal_penerima';
+
+    protected $guarded = [];
+
+    public $timestamps = false;
+
+
+    protected $casts = [
+        'no_surat' => 'string'
+    ];
+
+    public function petugas()
+    {
+        return $this->hasOne(Petugas::class, 'nip', 'penerima');
+    }
+}
