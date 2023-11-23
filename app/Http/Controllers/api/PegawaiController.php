@@ -71,6 +71,14 @@ class PegawaiController extends Controller
         })->orderBy('nama', 'ASC');
 
 
+        // keyword
+        if ($request->keyword) {
+            $pegawai->where(function ($q) use ($request) {
+                $q->where('nik', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('nama', 'LIKE', '%' . $request->keyword . '%');
+            });
+        }
+
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
                 return \Yajra\DataTables\DataTables::of($pegawai)->make(true);
