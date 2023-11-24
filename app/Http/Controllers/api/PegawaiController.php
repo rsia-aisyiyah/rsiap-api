@@ -75,7 +75,12 @@ class PegawaiController extends Controller
         if ($request->keyword) {
             $pegawai->where(function ($q) use ($request) {
                 $q->where('nik', 'LIKE', '%' . $request->keyword . '%')
-                    ->orWhere('nama', 'LIKE', '%' . $request->keyword . '%');
+                    ->orWhere('jbtn', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('bidang', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('nama', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhereHas('dpt', function ($q) use ($request) {
+                        $q->where('nama', 'LIKE', '%' . $request->keyword . '%');
+                    });
             });
         }
 

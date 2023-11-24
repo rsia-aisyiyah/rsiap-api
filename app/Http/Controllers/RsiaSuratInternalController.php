@@ -13,6 +13,18 @@ class RsiaSuratInternalController extends Controller
         }]);
         $data = $rsia_surat_internal->orderBy('no_surat', 'desc');
 
+        if ($request->keyword) {
+            $data = $data->where(function ($q) use ($request) {
+                $q->where('no_surat', 'like', '%' . $request->keyword . '%')
+                    ->orWhere('perihal', 'like', '%' . $request->keyword . '%')
+                    ->orWhere('tempat', 'like', '%' . $request->keyword . '%')
+                    ->orWhere('pj', 'like', '%' . $request->keyword . '%')
+                    ->orWhereHas('pj_detail', function ($q) use ($request) {
+                        $q->where('nama', 'like', '%' . $request->keyword . '%');
+                    });
+            });
+        }
+
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
                 $data = $data->get();
@@ -54,7 +66,7 @@ class RsiaSuratInternalController extends Controller
         return isSuccess($data, "Data berhasil ditemukan");
     }
 
-    public function create(Request $request) 
+    public function create(Request $request)
     {
         // get last surat by nomor surat
         $data = \App\Models\RsiaSuratInternal::select('no_surat')->orderBy('no_surat', 'desc')->first();
@@ -82,11 +94,11 @@ class RsiaSuratInternalController extends Controller
         if (!$request->tanggal) {
             return isFail("Tanggal tidak boleh kosong");
         }
-        
+
         if (!$request->tempat) {
             return isFail("Tempat tidak boleh kosong");
         }
-        
+
 
         // insert data
         $rsia_surat_internal = new \App\Models\RsiaSuratInternal;

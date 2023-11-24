@@ -26,6 +26,11 @@ class Pegawai extends Model
         return $this->hasOne(Bidang::class, 'nama', 'jnj_jabatan');
     }
 
+    public function berkas()
+    {
+        return $this->hasMany(BerkasPegawai::class, 'nik', 'nik');
+    }
+
     public function bidang_detail()
     {
         return $this->hasOne(Bidang::class, 'nama', 'jnj_jabatan');
