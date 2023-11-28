@@ -24,4 +24,9 @@ class RsiaSuratInternalPenerima extends Model
     {
         return $this->hasOne(Petugas::class, 'nip', 'penerima');
     }
+
+    public function pegawai()
+    {
+        return $this->hasOne(Pegawai::class, 'nik', 'penerima');
+    }
 }

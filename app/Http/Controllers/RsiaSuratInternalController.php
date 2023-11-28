@@ -66,6 +66,27 @@ class RsiaSuratInternalController extends Controller
         return isSuccess($data, "Data berhasil ditemukan");
     }
 
+    public function detail(Request $request)
+    {
+        if (!$request->nomor) {
+            return isFail("No surat tidak boleh kosong");
+        }
+        
+        $surat = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor)->with(['pj_detail' => function ($q) {
+            $q->select('nip', 'nama');
+        }])->first();
+
+        if (!$surat) {
+            return isFail("Data tidak ditemukan");
+        }
+
+        $surat->penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->nomor)->with(['pegawai' => function ($q) {
+            $q->select('nik', 'nama', 'jbtn', 'bidang');
+        }])->get();
+
+        return isSuccess($surat, "Data berhasil ditemukan");
+    }
+
     public function create(Request $request)
     {
         // get last surat by nomor surat
@@ -99,17 +120,47 @@ class RsiaSuratInternalController extends Controller
             return isFail("Tempat tidak boleh kosong");
         }
 
+        // if (!$request->karyawan) {
+        //     return isFail("Penerima tidak boleh kosong");
+        // }
 
-        // insert data
-        $rsia_surat_internal = new \App\Models\RsiaSuratInternal;
-        $rsia_surat_internal->no_surat = $nomor_surat;
-        $rsia_surat_internal->perihal = $request->perihal;
-        $rsia_surat_internal->tempat = $request->tempat;
-        $rsia_surat_internal->pj = $request->pj;
-        $rsia_surat_internal->tanggal = $request->tanggal;
-        $rsia_surat_internal->status = 'pengajuan';
+        try {
+            // Start a database transaction
+            \Illuminate\Support\Facades\DB::beginTransaction();
 
-        $rsia_surat_internal->save();
+            $rsia_surat_internal = \App\Models\RsiaSuratInternal::create([
+                'no_surat' => $nomor_surat,
+                'perihal' => $request->perihal,
+                'tempat' => $request->tempat,
+                'pj' => $request->pj,
+                'tanggal' => $request->tanggal,
+                'status' => 'pengajuan',
+            ]);
+
+            $penerima = $request->karyawan ? $request->karyawan : [];
+            foreach ($penerima as $key => $value) {
+                $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
+                $rsia_surat_internal_penerima->no_surat = $nomor_surat;
+                $rsia_surat_internal_penerima->penerima = $value;
+
+                $rsia_surat_internal_penerima->save();
+            }
+
+            // Commit the transaction if everything is successful
+            \Illuminate\Support\Facades\DB::commit();
+
+            return isSuccess([
+                'no_surat' => $nomor_surat,
+                'surat' => $rsia_surat_internal->toArray()
+            ], "Surat berhasil dibuat");
+        } catch (\Exception $e) {
+            // An error occurred, rollback the transaction
+            \Illuminate\Support\Facades\DB::rollback();
+
+            return isFail("Error: " . $e->getMessage());
+        }
+
+
 
         return isSuccess([
             'no_surat' => $nomor_surat,
@@ -139,6 +190,16 @@ class RsiaSuratInternalController extends Controller
         $data = $rsia_surat_internal->delete();
 
         return isSuccess($data, "Data berhasil dihapus");
+    }
+
+    // metrics
+    public function metrics(Request $request)
+    {
+        // get count all data group by status
+        $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('status', \Illuminate\Support\Facades\DB::raw('count(*) as total'));
+        $data = $rsia_surat_internal->groupBy('status')->get();
+
+        return isSuccess($data, "Data berhasil ditemukan");
     }
 
     private function colSuratInternal($model, $request)

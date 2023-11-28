@@ -3,9 +3,15 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt.verify')->prefix('surat')->group(function ($router) {
-    $router->get('internal', [\App\Http\Controllers\RsiaSuratInternalController::class, 'index']);
-    $router->get('get/by', [\App\Http\Controllers\RsiaSuratInternalController::class, 'get_by']);
+    $router->group(['prefix' => 'internal'], function () use ($router) {
+        $router->get('/', [\App\Http\Controllers\RsiaSuratInternalController::class, 'index']);
+        $router->get('/detail', [\App\Http\Controllers\RsiaSuratInternalController::class, 'detail']);
+        $router->post('/detail', [\App\Http\Controllers\RsiaSuratInternalController::class, 'detail']);
+        $router->post('/create', [\App\Http\Controllers\RsiaSuratInternalController::class, 'create']);
+        $router->post('/update', [\App\Http\Controllers\RsiaSuratInternalController::class, 'update']);
+        $router->delete('/destroy', [\App\Http\Controllers\RsiaSuratInternalController::class, 'destroy']);
 
-    $router->post('create', [\App\Http\Controllers\RsiaSuratInternalController::class, 'create']);
-    $router->delete('destroy', [\App\Http\Controllers\RsiaSuratInternalController::class, 'destroy']);
+        $router->get('/metrics', [\App\Http\Controllers\RsiaSuratInternalController::class, 'metrics']);
+    });
+    $router->get('get/by', [\App\Http\Controllers\RsiaSuratInternalController::class, 'get_by']);
 });
