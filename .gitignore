@@ -25,3 +25,6 @@ firebase_credentials.json
 
 # my log files
 *.log
+
+# radiologi radiologi.json
+/public/radiologi.json
