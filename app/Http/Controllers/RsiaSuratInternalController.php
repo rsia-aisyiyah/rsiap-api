@@ -39,6 +39,21 @@ class RsiaSuratInternalController extends Controller
         return isSuccess($data, "Data berhasil ditemukan");
     }
 
+    public function getCalendar(Request $request)
+    {
+        // get this month and  return [title is perihal, date is tanggal]
+        $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('perihal as title', 'tanggal as date')
+            ->whereMonth('tanggal', date('m'))
+            ->get();
+        
+        // date is datetime format, make it date format
+        // foreach ($rsia_surat_internal as $key => $value) {
+        //     $value->date = date('Y-m-d', strtotime($value->date));
+        // }
+
+        return isSuccess($rsia_surat_internal, "Data berhasil ditemukan");
+    }
+
     public function get_by(Request $request)
     {
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::with(['pj_detail' => function ($q) {
