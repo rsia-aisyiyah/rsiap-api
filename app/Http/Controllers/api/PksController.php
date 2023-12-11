@@ -11,7 +11,7 @@ class PksController extends Controller
     {
         $pks = \App\Models\RsiaPks::with('pj_detail')->where('status', "1");
 
-        if ($request->has('keyword') || $request->has('keywords')) {
+        if ($request->keyword) {
             $keywords = $request->keyword ?? $request->keywords;
             $pks = $pks->where('no_pks_internal', 'like', '%' . $keywords . '%')
                 ->orWhere('no_pks_eksternal', 'like', '%' . $keywords . '%')
@@ -21,8 +21,7 @@ class PksController extends Controller
                 });
         }
 
-        // perpage
-        if ($request->has('perpage')) {
+        if ($request->perpage) {
             $pks = $pks->orderBy('id', 'DESC')->paginate(env('PER_PAGE', $request->perpage));
         } else {
             $pks = $pks->orderBy('id', 'DESC')->paginate(env('PER_PAGE', 10));
@@ -184,7 +183,7 @@ class PksController extends Controller
             return isFail('Data PKS tidak ditemukan', 404);
         }
 
-        $pks->update(['status' => 0]);
+        $pks->update(['status' => '0']);
         return isSuccess($pks, 'Data PKS berhasil dihapus');
     }
 
