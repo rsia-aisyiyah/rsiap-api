@@ -8,11 +8,12 @@ class RsiaSpoController extends Controller
 {
     public function index(Request $request)
     {
-        $rsia_spo = \App\Models\RsiaSpo::select("*");
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->where('status', '1');
 
         if ($request->keyword) {
             $rsia_spo = $rsia_spo->where('judul', 'LIKE', '%' . $request->keyword . '%')
-                ->orWhere('unit', 'LIKE', '%' . $request->keyword . '%');
+                ->orWhere('unit', 'LIKE', '%' . $request->keyword . '%')
+                ->orWhere('nomor', 'LIKE', '%' . $request->keyword . '%');
         }
 
         if ($request->jenis) {
@@ -127,6 +128,25 @@ class RsiaSpoController extends Controller
         return isSuccess($rsia_spo, 'Surat Eksternal berhasil diupdate');
     }
 
+    public function delete(Request $request)
+    {
+        if (!$request->nomor) {
+            return isFail('Surat Eksternal tidak ditemukan', 404);
+        }
+
+        $id = $request->nomor;
+        $id = str_replace('_', '/', $id);
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->where('nomor', $id)->first();
+
+        if (!$rsia_spo) {
+            return isFail('Surat Eksternal tidak ditemukan', 404);
+        }
+
+        $rsia_spo->update(['status' => '0']);
+
+        return isSuccess($rsia_spo, 'Surat Eksternal berhasil dihapus');
+    }
+
     public function destroy(Request $request)
     {
         if (!$request->nomor) {
@@ -143,5 +163,16 @@ class RsiaSpoController extends Controller
         $rsia_spo->delete();
 
         return isSuccess(null, 'Surat Eksternal berhasil dihapus');
+    }
+
+    public function getLastNomor(Request $request)
+    {
+        $data = [
+            'medis' => \App\Models\RsiaSpo::select('nomor')->where('nomor', 'LIKE', '%/A/%')->orderBy('nomor', 'desc')->first()->nomor,
+            'penunjang' => \App\Models\RsiaSpo::select('nomor')->where('nomor', 'LIKE', '%/B/%')->orderBy('nomor', 'desc')->first()->nomor,
+            'umum' => \App\Models\RsiaSpo::select('nomor')->where('nomor', 'LIKE', '%/C/%')->orderBy('nomor', 'desc')->first()->nomor,
+        ];
+
+        return isSuccess($data, 'Data Surat Eksternal berhasil ditampilkan');
     }
 }

@@ -9,7 +9,7 @@ class PksController extends Controller
 {
     public function index(Request $request)
     {
-        $pks = \App\Models\RsiaPks::with('pj_detail');
+        $pks = \App\Models\RsiaPks::with('pj_detail')->where('status', "1");
 
         if ($request->has('keyword') || $request->has('keywords')) {
             $keywords = $request->keyword ?? $request->keywords;
@@ -170,6 +170,22 @@ class PksController extends Controller
         }
 
         return isSuccess($pks, 'Data PKS berhasil diupdate');
+    }
+
+    public function delete($id)
+    {
+        if (!$id) {
+            return isFail('Data PKS tidak ditemukan', 404);
+        }
+
+        $pks = \App\Models\RsiaPks::find($id);
+
+        if (!$pks) {
+            return isFail('Data PKS tidak ditemukan', 404);
+        }
+
+        $pks->update(['status' => 0]);
+        return isSuccess($pks, 'Data PKS berhasil dihapus');
     }
 
     public function destroy($id)
