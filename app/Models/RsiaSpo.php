@@ -18,4 +18,10 @@ class RsiaSpo extends Model
     public $incrementing = false;
 
     public $timestamps = false;
+
+    // unit to departemen
+    public function departemen()
+    {
+        return $this->hasOne(Departemen::class, 'dep_id', 'unit');
+    }
 }

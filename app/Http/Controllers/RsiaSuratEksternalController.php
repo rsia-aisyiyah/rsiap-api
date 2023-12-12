@@ -140,13 +140,12 @@ class RsiaSuratEksternalController extends Controller
     */
     public function update(Request $request)
     {
-        if (!$request->nomor || !$request->id) {
+        if (!$request->nomor) {
             return isFail('Data Surat Eksternal tidak ditemukan');
         }
 
         $nomor = $request->nomor;
-        $id = $request->id;
-        $suratEksternal = \App\Models\RsiaSuratEksternal::find($id);
+        $suratEksternal = \App\Models\RsiaSuratEksternal::find($nomor);
 
         if (!$suratEksternal) {
             return isFail('Data Surat Eksternal tidak ditemukan');
