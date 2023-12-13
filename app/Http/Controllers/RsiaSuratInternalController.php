@@ -42,10 +42,16 @@ class RsiaSuratInternalController extends Controller
     public function getCalendar(Request $request)
     {
         // get this month and  return [title is perihal, date is tanggal]
-        $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('perihal as title', 'tanggal as date')
-            ->whereMonth('tanggal', date('m'))
-            ->get();
-        
+        $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('perihal as title', 'tanggal as date');
+
+        if ($request->month && $request->year) {
+            $rsia_surat_internal = $rsia_surat_internal->whereMonth('tanggal', $request->month)->whereYear('tanggal', $request->year);
+        } else {
+            $rsia_surat_internal = $rsia_surat_internal->whereMonth('tanggal', date('m'))->whereYear('tanggal', date('Y'));
+        }
+
+        $rsia_surat_internal = $rsia_surat_internal->get();
+
         // date is datetime format, make it date format
         // foreach ($rsia_surat_internal as $key => $value) {
         //     $value->date = date('Y-m-d', strtotime($value->date));
@@ -188,7 +194,7 @@ class RsiaSuratInternalController extends Controller
         if (!$request->nomor) {
             return isFail("No surat tidak boleh kosong");
         }
-        
+
         $update_data = [
             'pj' => $request->pj,
             'perihal' => $request->perihal,
