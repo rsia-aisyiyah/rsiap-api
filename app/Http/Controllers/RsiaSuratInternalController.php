@@ -44,15 +44,18 @@ class RsiaSuratInternalController extends Controller
         // get this month and  return [title is perihal, date is tanggal]
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('no_surat', 'tempat', 'pj', 'perihal as title', 'tanggal as date', 'tanggal', 'status')->with('pj_detail');
 
-        if ($request->month && $request->year) {
-            $rsia_surat_internal = $rsia_surat_internal->whereMonth('tanggal', $request->month)->whereYear('tanggal', $request->year);
+        if ($request->start && $request->end) {
+            $start = date('Y-m-d', strtotime($request->start . ' +1 day'));
+            $msg = "Data berhasil ditemukan dari tanggal " . $start . " sampai " . $request->end;
+            $rsia_surat_internal = $rsia_surat_internal->whereBetween('tanggal', [$start, $request->end]);
         } else {
+            $msg = "Data berhasil ditemukan dari tanggal " . date('Y-m-d') . " sampai " . date('Y-m-d');
             $rsia_surat_internal = $rsia_surat_internal->whereMonth('tanggal', date('m'))->whereYear('tanggal', date('Y'));
         }
 
         $rsia_surat_internal = $rsia_surat_internal->get();
 
-        return isSuccess($rsia_surat_internal, "Data berhasil ditemukan");
+        return isSuccess($rsia_surat_internal, $msg);
     }
 
     public function get_by(Request $request)
