@@ -53,7 +53,7 @@ class RsiaSpoController extends Controller
 
         $id = $request->nomor;
         $id = str_replace('_', '/', $id);
-        $rsia_spo = \App\Models\RsiaSpo::select("*")->where('nomor', $id)->first();
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->with('detail', 'departemen')->where('nomor', $id)->first();
 
         if (!$rsia_spo) {
             return isFail('Surat Eksternal tidak ditemukan', 404);

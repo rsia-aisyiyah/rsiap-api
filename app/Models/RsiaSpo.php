@@ -24,4 +24,9 @@ class RsiaSpo extends Model
     {
         return $this->hasOne(Departemen::class, 'dep_id', 'unit');
     }
+
+    public function detail()
+    {
+        return $this->hasOne(RsiaSpoDetail::class, 'nomor', 'nomor');
+    }
 }

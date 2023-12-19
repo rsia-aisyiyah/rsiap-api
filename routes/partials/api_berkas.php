@@ -23,5 +23,9 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
         
         // $router->delete('/destroy', [\App\Http\Controllers\RsiaSpoController::class, 'destroy']);
         $router->get('/last-nomor', [\App\Http\Controllers\RsiaSpoController::class, 'getLastNomor']);
+        
+        $router->group(['prefix' => 'detail'], function () use ($router) {
+            $router->post('/store', [\App\Http\Controllers\api\RsiaSpoDetailController::class, 'store']);
+        });
     });
 });
