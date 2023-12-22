@@ -15,6 +15,23 @@ class RsiaSpoDetailController extends Controller
     //     prosedur: '<ol><li>User yang mempunya hak akses ke elektronik rekam medis , melakukan log in sesuai dengan ID dan password masingmasing.&nbsp;</li><li>User memilih data yang akan diubah ( hanya bisa memilih data yang diisi sesuai user login ).&nbsp;</li><li>User melakukan perubahan data elektronik rekam medis&nbsp;</li><li>Info perubahan dan tanggal perubahan akan tampil dibawah data yang sudah diubah</li></ol>'
     // }
 
+    public function index(Request $request)
+    {
+        $spo_detail = \App\Models\RsiaSpoDetail::select("*");
+        
+        if (!$request->nomor) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        $spo_detail = $spo_detail->where('nomor', $request->nomor)->first();
+        
+        if (!$spo_detail) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        return isSuccess($spo_detail, 'Data SPO berhasil ditampilkan');
+    }
+
     public function store(Request $request)
     {
         $data = $request->except('payload');
@@ -22,7 +39,7 @@ class RsiaSpoDetailController extends Controller
         // check if nomor exists
         $rsia_spo = \App\Models\RsiaSpo::select("*")->where('nomor', $data['nomor'])->first();
         if (!$rsia_spo) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
         // check if nomor on detail
@@ -36,11 +53,11 @@ class RsiaSpoDetailController extends Controller
         // if exists, update
         if ($rsia_spo_detail) {
             $rsia_spo_detail->update($data);
-            return isSuccess($rsia_spo_detail, 'Data Surat Eksternal berhasil diupdate');
+            return isSuccess($rsia_spo_detail, 'Data SPO berhasil diupdate');
         }
 
         // if not exists, create
         $rsia_spo_detail = \App\Models\RsiaSpoDetail::create($data);
-        return isSuccess($rsia_spo_detail, 'Data Surat Eksternal berhasil ditambahkan');
+        return isSuccess($rsia_spo_detail, 'Data SPO berhasil ditambahkan');
     }
 }

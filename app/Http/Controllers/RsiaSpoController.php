@@ -8,7 +8,12 @@ class RsiaSpoController extends Controller
 {
     public function index(Request $request)
     {
-        $rsia_spo = \App\Models\RsiaSpo::with("departemen")->select("*")->where('status', '1');
+        $rsia_spo = \App\Models\RsiaSpo::with([
+            "departemen",
+            "detail" => function ($q) {
+                $q->select('nomor');
+            }
+        ])->select("*")->where('status', '1');
 
         if ($request->keyword) {
             $rsia_spo = $rsia_spo->where('judul', 'LIKE', '%' . $request->keyword . '%')

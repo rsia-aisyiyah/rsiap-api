@@ -25,6 +25,7 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
         $router->get('/last-nomor', [\App\Http\Controllers\RsiaSpoController::class, 'getLastNomor']);
         
         $router->group(['prefix' => 'detail'], function () use ($router) {
+            $router->get('/', [\App\Http\Controllers\api\RsiaSpoDetailController::class, 'index']);
             $router->post('/store', [\App\Http\Controllers\api\RsiaSpoDetailController::class, 'store']);
         });
     });
