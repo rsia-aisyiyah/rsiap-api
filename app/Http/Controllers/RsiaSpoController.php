@@ -16,7 +16,7 @@ class RsiaSpoController extends Controller
         ])->select("*")->where('status', '1');
 
         if ($request->keyword) {
-            $rsia_spo = $rsia_spo->where('judul', 'LIKE', '%' . $request->keyword . '%')
+            $rsia_spo = $rsia_spo->where('status', '1')->where('judul', 'LIKE', '%' . $request->keyword . '%')
                 ->orWhere('unit', 'LIKE', '%' . $request->keyword . '%')
                 ->orWhere('nomor', 'LIKE', '%' . $request->keyword . '%');
         }
@@ -31,10 +31,10 @@ class RsiaSpoController extends Controller
                 $jenis = $jenis . '/';
             }
 
-            $rsia_spo = $rsia_spo->where('nomor', 'LIKE', '%' . $jenis . '%');
+            $rsia_spo = $rsia_spo->where('status', '1')->where('nomor', 'LIKE', '%' . $jenis . '%');
         }
 
-        $rsia_spo = $rsia_spo->orderBy('nomor', 'desc');
+        $rsia_spo = $rsia_spo->where('status', '1')->orderBy('nomor', 'desc');
 
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
@@ -47,13 +47,13 @@ class RsiaSpoController extends Controller
             $data = $rsia_spo->paginate(env('PER_PAGE', 10));
         }
 
-        return isSuccess($data, 'Data Surat Eksternal berhasil ditampilkan');
+        return isSuccess($data, 'SPO berhasil ditampilkan');
     }
 
     public function show(Request $request)
     {
         if (!$request->nomor) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
         $id = $request->nomor;
@@ -61,10 +61,10 @@ class RsiaSpoController extends Controller
         $rsia_spo = \App\Models\RsiaSpo::select("*")->with('detail', 'departemen')->where('nomor', $id)->first();
 
         if (!$rsia_spo) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
-        return isSuccess($rsia_spo, 'Detail Surat Eksternal berhasil ditampilkan');
+        return isSuccess($rsia_spo, 'Detail SPO berhasil ditampilkan');
     }
 
     public function store(Request $request)
@@ -91,13 +91,13 @@ class RsiaSpoController extends Controller
         }
         \Illuminate\Support\Facades\DB::commit();
 
-        return isSuccess($rsia_spo, 'Surat Eksternal berhasil ditambahkan');
+        return isSuccess($rsia_spo, 'SPO berhasil ditambahkan');
     }
 
     public function update(Request $request)
     {
         if (!$request->nomor) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
         $id = $request->nomor;
@@ -105,7 +105,7 @@ class RsiaSpoController extends Controller
         $rsia_spo = \App\Models\RsiaSpo::select("*")->where('nomor', $id)->first();
 
         if (!$rsia_spo) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
         $rules = [
@@ -130,13 +130,13 @@ class RsiaSpoController extends Controller
         }
         \Illuminate\Support\Facades\DB::commit();
 
-        return isSuccess($rsia_spo, 'Surat Eksternal berhasil diupdate');
+        return isSuccess($rsia_spo, 'SPO berhasil diupdate');
     }
 
     public function delete(Request $request)
     {
         if (!$request->nomor) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
         $id = $request->nomor;
@@ -144,30 +144,30 @@ class RsiaSpoController extends Controller
         $rsia_spo = \App\Models\RsiaSpo::select("*")->where('nomor', $id)->first();
 
         if (!$rsia_spo) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
         $rsia_spo->update(['status' => '0']);
 
-        return isSuccess($rsia_spo, 'Surat Eksternal berhasil dihapus');
+        return isSuccess($rsia_spo, 'SPO berhasil dihapus');
     }
 
     public function destroy(Request $request)
     {
         if (!$request->nomor) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
         $id = $request->nomor;
         $rsia_spo = \App\Models\RsiaSpo::select("*")->where('nomor', $id)->first();
 
         if (!$rsia_spo) {
-            return isFail('Surat Eksternal tidak ditemukan', 404);
+            return isFail('SPO tidak ditemukan', 404);
         }
 
         $rsia_spo->delete();
 
-        return isSuccess(null, 'Surat Eksternal berhasil dihapus');
+        return isSuccess(null, 'SPO berhasil dihapus');
     }
 
     public function getLastNomor(Request $request)
@@ -178,6 +178,6 @@ class RsiaSpoController extends Controller
             'umum' => \App\Models\RsiaSpo::select('nomor')->where('nomor', 'LIKE', '%/C/%')->orderBy('nomor', 'desc')->first()->nomor,
         ];
 
-        return isSuccess($data, 'Data Surat Eksternal berhasil ditampilkan');
+        return isSuccess($data, 'Data SPO berhasil ditampilkan');
     }
 }
