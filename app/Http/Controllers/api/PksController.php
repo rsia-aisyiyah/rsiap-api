@@ -53,7 +53,7 @@ class PksController extends Controller
             'pj' => 'required',
             'tanggal_awal' => 'required',
             // 'status' => 'required',
-            'file' => 'required|mimes:pdf|max:2048',
+            'file' => 'required|mimes:pdf|max:20480',
         ];
 
         // validate
@@ -103,7 +103,7 @@ class PksController extends Controller
             'judul' => 'required',
             'pj' => 'required',
             'tanggal_awal' => 'required',
-            'file' => 'mimes:pdf|max:2048',
+            'file' => 'mimes:pdf|max:20480',
         ];
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
