@@ -29,4 +29,13 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
             $router->post('/store', [\App\Http\Controllers\api\RsiaSpoDetailController::class, 'store']);
         });
     });
+
+    $router->group(['prefix' => 'sk'], function () use ($router) {
+        $router->get('/', [\App\Http\Controllers\RsiaSkController::class, 'index']);
+        $router->post('/store', [\App\Http\Controllers\RsiaSkController::class, 'store']);
+        $router->post('/update', [\App\Http\Controllers\RsiaSkController::class, 'update']);
+        $router->post('/delete', [\App\Http\Controllers\RsiaSkController::class, 'delete']);
+
+        $router->delete('/destroy', [\App\Http\Controllers\RsiaSkController::class, 'destroy']);
+    });
 });
