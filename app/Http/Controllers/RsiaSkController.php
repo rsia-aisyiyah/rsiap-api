@@ -149,26 +149,25 @@ class RsiaSkController extends Controller
             'jenis' => 'required',
             'tgl_terbit' => 'required',
         ]);
-
+    
         if ($validator->fails()) {
             return isFail($validator->errors(), 422);
         }
-
+    
         // find sk where nomor, jenis, tgl_terbit
         $rsia_sk = \App\Models\RsiaSk::where('nomor', $request->nomor)
             ->where('jenis', $request->jenis)
             ->where('tgl_terbit', $request->tgl_terbit)
             ->first();
-
+    
         if (!$rsia_sk) {
             return isFail('SK tidak ditemukan', 404);
         }
-
-        // update status to 0
+    
         $rsia_sk->update([
             'status' => '0',
         ]);
-
+    
         // return success
         return isSuccess($rsia_sk, 'Data berhasil dihapus');
     }
