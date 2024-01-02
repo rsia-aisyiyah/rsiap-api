@@ -29,27 +29,30 @@ class BerkasController extends Controller
             return isFail('nik is required', 422);
         }
 
-        $berkas = \App\Models\BerkasPegawai::with('master_berkas_pegawai')
+        // $berkas = \App\Models\BerkasPegawai::with('master_berkas_pegawai')
+        $pegawai = \App\Models\Pegawai::select('id', 'nik', 'nama', 'jbtn', 'bidang')->with(['berkas', 'berkas.master_berkas_pegawai'])
             ->where('nik', $request->nik);
 
         if ($request->kode) {
-            $berkas = $berkas->where('kode_berkas', $request->kode);
-            $berkas = $berkas->first();
+            $pegawai = $pegawai->whereHas('berkas', function ($query) use ($request) {
+                $query->where('kode_berkas', $request->kode);
+            });
+            $pegawai = $pegawai->first();
 
-            if (!$berkas) {
+            if (!$pegawai) {
                 return isFail('Pegawai not found', 404);
             }
     
-            return isSuccess($berkas, "berkas pegawai berhasil diambil");
+            return isSuccess($pegawai, "pegawai dan berkas berhasil diambil");
         }
 
-        $berkas = $berkas->get();
+        $pegawai = $pegawai->first();
 
-        if (!$berkas) {
+        if (!$pegawai) {
             return isFail('Pegawai not found', 404);
         }
 
-        return isSuccess($berkas, "berkas pegawai berhasil diambil");
+        return isSuccess($pegawai, "pegawai dan berkas berhasil diambil");
     }
 
     public function upload(Request $request)
@@ -122,7 +125,7 @@ class BerkasController extends Controller
             }
 
             return isSuccess([
-                'nik' => $request->nik,
+                "nik" => $request->nik,
             ], "berkas pegawai berhasil dihapus");
         } catch (\Exception $e) {
             // Handle the exception

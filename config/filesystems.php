@@ -59,7 +59,7 @@ return [
             'username' => env('FTP_USERNAME'),
             'password' => env('FTP_PASSWORD'),
             'port'     => env('FTP_PORT', 22),
-            'root'     => env('FTP_ROOT', '/home/sysadmin'),
+            'root'     => env('FTP_ROOT', '/var/www/html'),
             'passive'  => env('FTP_PASSIVE', true),
             'ssl'      => env('FTP_SSL', true),
             'timeout'  => env('FTP_TIMEOUT', 60),

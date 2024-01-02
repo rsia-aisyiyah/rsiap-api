@@ -21,6 +21,7 @@ class BerkasPegawai extends Model
     {
         return $this->hasMany(Pegawai::class, 'nik', 'nik');
     }
+    
     public function master_berkas_pegawai()
     {
         return $this->hasOne(MasterBerkasPegawai::class, 'kode', 'kode_berkas')->orderBy('master_berkas_pegawai.no_urut', 'asc');
