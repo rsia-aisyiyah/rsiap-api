@@ -18,6 +18,10 @@ class RsiaSuratMasukController extends Controller
                 ->orWhere('tempat', 'like', '%' . $request->keyword . '%');
         }
 
+        if ($request->via) {
+            $surat_masuk = $surat_masuk->where('status', '1')->where('ket', 'like', '%' . $request->via . '%');
+        }
+
         // data table or pagination
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
