@@ -51,7 +51,7 @@ class RsiaSuratMasukController extends Controller
     public function store(Request $request)
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'no_simrs' => 'required',
+            'no_simrs' => 'required|date_format:Y-m-d',
             'pengirim' => 'required',
             'perihal' => 'required',
             'ket' => 'required',
