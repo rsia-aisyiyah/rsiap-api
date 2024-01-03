@@ -30,5 +30,16 @@ Route::middleware('jwt.verify')->prefix('surat')->group(function ($router) {
         $router->get('/last-nomor', [\App\Http\Controllers\RsiaSuratEksternalController::class, 'getLastNomor']);
     });
 
+    // surat masuk
+    $router->group(['prefix' => 'masuk'], function () use ($router) {
+        $router->get('/', [\App\Http\Controllers\RsiaSuratMasukController::class, 'index']);
+        $router->get('/detail/{no}', [\App\Http\Controllers\RsiaSuratMasukController::class, 'detail']);
+        $router->post('/create', [\App\Http\Controllers\RsiaSuratMasukController::class, 'store']);
+        $router->post('/update', [\App\Http\Controllers\RsiaSuratMasukController::class, 'update']);
+        $router->delete('/delete/{no}', [\App\Http\Controllers\RsiaSuratMasukController::class, 'delete']);
+
+        $router->delete('/destroy/{no}', [\App\Http\Controllers\RsiaSuratMasukController::class, 'destroy']);
+    });
+
     $router->get('get/by', [\App\Http\Controllers\RsiaSuratInternalController::class, 'get_by']);
 });
