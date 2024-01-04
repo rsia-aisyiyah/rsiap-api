@@ -11,7 +11,7 @@ class RsiaSuratInternalController extends Controller
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select("*")->with(['pj_detail' => function ($q) {
             $q->select('nip', 'nama');
         }]);
-        $data = $rsia_surat_internal->orderBy('no_surat', 'desc');
+        $data = $rsia_surat_internal->orderBy('tanggal', 'desc');
 
         if ($request->keyword) {
             $data = $data->where(function ($q) use ($request) {
@@ -109,18 +109,25 @@ class RsiaSuratInternalController extends Controller
     public function create(Request $request)
     {
         // get last surat by nomor surat
-        $data = \App\Models\RsiaSuratInternal::select('no_surat')->orderBy('no_surat', 'desc')->first();
-        $data = explode('/', $data->no_surat);
+        $data = \App\Models\RsiaSuratInternal::select('no_surat')
+            ->orderBy('no_surat', 'desc')
+            ->whereYear('tanggal', date('Y'))
+            ->first();
 
-        if (!$data) {
-            return isFail("Problem to get last data");
+        if ($data) {
+            $data = explode('/', $data->no_surat);
+        } else {
+            $data = [0];
         }
+
 
         // last number
         $date_now = date('dmy');
         $last_number = $data[0];
         $last_number = str_pad($last_number + 1, 3, '0', STR_PAD_LEFT);
         $nomor_surat = $last_number . '/A/S-RSIA/' . $date_now;
+
+        return isFail($nomor_surat);
 
         // check request
         if (!$request->perihal) {
@@ -189,12 +196,18 @@ class RsiaSuratInternalController extends Controller
 
     public function update(Request $request)
     {
-        if (!$request->nomor) {
+        if (!$request->old_nomor) {
             return isFail("No surat tidak boleh kosong");
+        }
+
+        $dataSurat = \App\Models\RsiaSuratInternal::where('no_surat', $request->old_nomor)->first();
+        if (!$dataSurat) {
+            return isFail("Data tidak ditemukan");
         }
 
         $update_data = [
             'pj' => $request->pj,
+            'no_surat' => $request->no_surat,
             'perihal' => $request->perihal,
             'tempat' => $request->tempat,
             'tanggal' => $request->tanggal,
@@ -215,8 +228,10 @@ class RsiaSuratInternalController extends Controller
         }
 
         // Update the main record
-        $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
-        $data = $rsia_surat_internal->update($update_data);
+        // $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
+        // $data = $rsia_surat_internal->update($update_data);
+
+        $data = $dataSurat->update($update_data);
 
         // Update the PJ record
         // $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
