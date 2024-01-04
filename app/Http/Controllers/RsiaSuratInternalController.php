@@ -11,7 +11,7 @@ class RsiaSuratInternalController extends Controller
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select("*")->with(['pj_detail' => function ($q) {
             $q->select('nip', 'nama');
         }]);
-        $data = $rsia_surat_internal->orderBy('tanggal', 'desc');
+        $data = $rsia_surat_internal->orderBy('tanggal', 'desc')->orderBy('no_surat', 'desc');
 
         if ($request->keyword) {
             $data = $data->where(function ($q) use ($request) {
@@ -120,14 +120,11 @@ class RsiaSuratInternalController extends Controller
             $data = [0];
         }
 
-
         // last number
         $date_now = date('dmy');
         $last_number = $data[0];
         $last_number = str_pad($last_number + 1, 3, '0', STR_PAD_LEFT);
         $nomor_surat = $last_number . '/A/S-RSIA/' . $date_now;
-
-        return isFail($nomor_surat);
 
         // check request
         if (!$request->perihal) {

@@ -20,7 +20,7 @@ class RsiaSuratEksternalController extends Controller
      * */ 
     public function index(Request $request)
     {
-        $suratEksternal = \App\Models\RsiaSuratEksternal::with("pj_detail")->orderBy('no_surat', 'desc');
+        $suratEksternal = \App\Models\RsiaSuratEksternal::with("pj_detail")->orderBy('tanggal', 'desc')->orderBy('no_surat', 'desc');
 
         if ($request->keyword) {
             $suratEksternal = $suratEksternal->where('no_surat', 'like', "%{$request->keyword}%")
@@ -221,7 +221,11 @@ class RsiaSuratEksternalController extends Controller
      * */ 
     public function getLastNomor()
     {
-        $lastNomor = \App\Models\RsiaSuratEksternal::select('no_surat')->orderBy('no_surat', 'desc')->first();
+        $lastNomor = \App\Models\RsiaSuratEksternal::select('no_surat')
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('no_surat', 'desc')
+            ->whereYear('tanggal', date('Y'))
+            ->first();
 
         if (!$lastNomor) {
             return isFail('Data Surat Eksternal tidak ditemukan');
