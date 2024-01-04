@@ -121,6 +121,9 @@ class RsiaSuratMasukController extends Controller
             return isFail([], 'Data tidak ditemukan', 404);
         }
 
+        // get file berkas
+        $file = $request->file('berkas');
+
         $data = [
             'no_simrs' => $request->no_simrs,
             'no_surat' => $request->no_surat,
@@ -138,6 +141,37 @@ class RsiaSuratMasukController extends Controller
         try {
             $surat_masuk->update($data);
             \Illuminate\Support\Facades\DB::commit();
+
+            if ($file) {
+                // validate file mime type and max size 28mb
+                $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                    'berkas' => 'mimes:pdf,jpg,jpeg,png|max:28672',
+                ]);
+    
+                if ($validator->fails()) {
+                    return isFail($validator->errors(), 422);
+                }
+
+                $fileName = strtotime(now()) . '-' . str_replace([' ', '_'], '-', $file->getClientOriginalName());
+                $oldData = $surat_masuk->berkas;
+
+                // update file from surat masuk
+                $surat_masuk->update(['berkas' => $fileName]);
+
+                // move file to folder /webapps/rsia_surat_masuk using sftp
+                $st = new \Illuminate\Support\Facades\Storage();
+                if (!$st::disk('sftp')->exists(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION'))) {
+                    $st::disk('sftp')->makeDirectory(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION'));
+                }
+
+                // move file
+                $st::disk('sftp')->put(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $fileName, file_get_contents($file));
+
+                // delete old file
+                if ($st::disk('sftp')->exists(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $oldData)) {
+                    $st::disk('sftp')->delete(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $oldData);
+                }
+            }
         } catch (\Throwable $th) {
             \Illuminate\Support\Facades\DB::rollback();
             return isFail($th->getMessage(), 500);
