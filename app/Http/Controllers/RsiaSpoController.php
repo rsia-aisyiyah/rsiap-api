@@ -173,9 +173,9 @@ class RsiaSpoController extends Controller
     public function getLastNomor(Request $request)
     {
         $data = [
-            'medis' => \App\Models\RsiaSpo::select('nomor')->where('nomor', 'LIKE', '%/A/%')->orderBy('nomor', 'desc')->first()->nomor,
-            'penunjang' => \App\Models\RsiaSpo::select('nomor')->where('nomor', 'LIKE', '%/B/%')->orderBy('nomor', 'desc')->first()->nomor,
-            'umum' => \App\Models\RsiaSpo::select('nomor')->where('nomor', 'LIKE', '%/C/%')->orderBy('nomor', 'desc')->first()->nomor,
+            'medis' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/A/%')->orderBy('nomor', 'desc')->first()->nomor,
+            'penunjang' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/B/%')->orderBy('nomor', 'desc')->first()->nomor,
+            'umum' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/C/%')->orderBy('nomor', 'desc')->first()->nomor,
         ];
 
         return isSuccess($data, 'Data SPO berhasil ditampilkan');

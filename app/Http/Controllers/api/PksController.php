@@ -32,8 +32,14 @@ class PksController extends Controller
 
     public function getLastNomor(Request $request)
     {
-        $internal = \App\Models\RsiaPks::select('no_pks_internal')->where('no_pks_internal', 'like', '%/A/%')->orderBy('id', 'DESC')->first();
-        $eksternal = \App\Models\RsiaPks::select('no_pks_internal')->where('no_pks_internal', 'like', '%/B/%')->orderBy('id', 'DESC')->first();
+        if ($request->tanggal_awal) {
+            $year = date('Y', strtotime($request->tanggal_awal));
+        } else {
+            $year = date('Y');
+        }
+
+        $internal = \App\Models\RsiaPks::select('no_pks_internal')->whereYear('tanggal_awal', $year)->where('no_pks_internal', 'like', '%/A/%')->orderBy('id', 'DESC')->first();
+        $eksternal = \App\Models\RsiaPks::select('no_pks_internal')->whereYear('tanggal_awal', $year)->where('no_pks_internal', 'like', '%/B/%')->orderBy('id', 'DESC')->first();
 
         $pks = [
             'internal' => $internal ? $internal->no_pks_internal : null,
