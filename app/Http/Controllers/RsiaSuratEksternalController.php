@@ -33,6 +33,11 @@ class RsiaSuratEksternalController extends Controller
                 });
         }
 
+        // tanggal
+        if ($request->tanggal) {
+            $suratEksternal = $suratEksternal->where('tanggal', $request->tanggal);
+        }
+
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
                 $data = $suratEksternal->get();

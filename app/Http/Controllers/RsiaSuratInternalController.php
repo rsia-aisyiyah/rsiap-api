@@ -25,6 +25,15 @@ class RsiaSuratInternalController extends Controller
             });
         }
 
+        if ($request->tanggal) {
+            $data = $data->where('tanggal', $request->tanggal);
+        }
+
+        // status
+        if ($request->status) {
+            $data = $data->where('status', $request->status);
+        }
+
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
                 $data = $data->get();
@@ -42,7 +51,9 @@ class RsiaSuratInternalController extends Controller
     public function getCalendar(Request $request)
     {
         // get this month and  return [title is perihal, date is tanggal]
-        $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('no_surat', 'tempat', 'pj', 'perihal as title', 'tanggal as date', 'tanggal', 'status')->with('pj_detail');
+        $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('no_surat', 'tempat', 'pj', 'perihal as title', 'tanggal as date', 'tanggal', 'status')
+            ->whereHas('penerima')
+            ->with('pj_detail');
 
         if ($request->start && $request->end) {
             $start = date('Y-m-d', strtotime($request->start . ' +1 day'));

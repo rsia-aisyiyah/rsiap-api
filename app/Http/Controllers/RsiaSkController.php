@@ -12,7 +12,7 @@ class RsiaSkController extends Controller
 
         if ($request->keyword) {
             $rsia_sk = $rsia_sk->where('status', '1')
-                ->where('nomor', 'like', "%{$request->keyword}%")
+                // ->where('nomor', 'like', "%{$request->keyword}%")
                 ->orWhere('judul', 'like', "%{$request->keyword}%")
                 ->orWhere('pj', 'like', "%{$request->keyword}%")
                 ->orWhereHas('penanggungjawab', function ($query) use ($request) {
@@ -23,6 +23,10 @@ class RsiaSkController extends Controller
         // jenis
         if ($request->jenis) {
             $rsia_sk = $rsia_sk->where('jenis', $request->jenis);
+        }
+
+        if ($request->tgl_terbit) {
+            $rsia_sk = $rsia_sk->where('tgl_terbit', $request->tgl_terbit);
         }
 
         // order by tgl_terbit desc and nomor desc

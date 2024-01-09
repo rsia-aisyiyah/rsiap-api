@@ -22,6 +22,16 @@ class RsiaSuratMasukController extends Controller
             $surat_masuk = $surat_masuk->where('status', '1')->where('ket', 'like', '%' . $request->via . '%');
         }
 
+        // no_simrs is date
+        if ($request->no_simrs) {
+            $surat_masuk = $surat_masuk->where('status', '1')->where('no_simrs', $request->no_simrs);
+        }
+
+        // tgl_surat is date
+        if ($request->tgl_surat) {
+            $surat_masuk = $surat_masuk->where('status', '1')->where('tgl_surat', $request->tgl_surat);
+        }
+
         // data table or pagination
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
