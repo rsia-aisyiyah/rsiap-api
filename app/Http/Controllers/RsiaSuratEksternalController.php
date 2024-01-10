@@ -168,8 +168,8 @@ class RsiaSuratEksternalController extends Controller
             return isFail($validator->errors());
         }
 
-        $request->merge(['no_surat' => $request->nomor]);
-        $suratEksternal->update($request->except('payload', 'no_surat', 'nomor'));
+        // $request->merge(['no_surat' => $request->nomor]);
+        $suratEksternal->update($request->except('payload', 'old_no_surat', 'nomor'));
 
         return isSuccess($suratEksternal, 'Data Surat Eksternal berhasil diubah');
     }
