@@ -21,6 +21,11 @@ class RsiaSpoController extends Controller
                 ->orWhere('nomor', 'LIKE', '%' . $request->keyword . '%');
         }
 
+        // tgl_terbit
+        if ($request->tgl_terbit) {
+            $rsia_spo = $rsia_spo->where('status', '1')->whereBetween('tgl_terbit', $request->tgl_terbit);
+        }
+
         if ($request->jenis) {
             $jenis = $request->jenis;
             if (substr($jenis, 0, 1) != '/') {
