@@ -22,9 +22,9 @@ class PksController extends Controller
         }
 
         if ($request->perpage) {
-            $pks = $pks->orderBy('id', 'DESC')->paginate(env('PER_PAGE', $request->perpage));
+            $pks = $pks->orderBy('tanggal_awal', 'DESC')->orderBy('no_pks_internal', 'DESC')->paginate(env('PER_PAGE', $request->perpage));
         } else {
-            $pks = $pks->orderBy('id', 'DESC')->paginate(env('PER_PAGE', 10));
+            $pks = $pks->orderBy('tanggal_awal', 'DESC')->orderBy('no_pks_internal', 'DESC')->paginate(env('PER_PAGE', 10));
         }
 
         return isSuccess($pks, 'Data PKS ditemukan');

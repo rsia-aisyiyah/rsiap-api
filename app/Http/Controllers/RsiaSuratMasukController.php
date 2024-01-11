@@ -35,13 +35,13 @@ class RsiaSuratMasukController extends Controller
         // data table or pagination
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
-                $data = $surat_masuk->get();
+                $data = $surat_masuk->orderBy('no_simrs', 'DESC')->get();
                 return \Yajra\DataTables\DataTables::of($data)->make(true);
             } else {
-                $data = $surat_masuk->paginate(env('PER_PAGE', 10));
+                $data = $surat_masuk->orderBy('no_simrs', 'DESC')->paginate(env('PER_PAGE', 10));
             }
         } else {
-            $data = $surat_masuk->paginate(env('PER_PAGE', 10));
+            $data = $surat_masuk->orderBy('no_simrs', 'DESC')->paginate(env('PER_PAGE', 10));
         }
 
         return isSuccess($data, 'Data berhasil ditemukan');

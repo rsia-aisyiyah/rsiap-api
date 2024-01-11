@@ -30,7 +30,7 @@ class RsiaSkController extends Controller
         }
 
         // order by tgl_terbit desc and nomor desc
-        $rsia_sk = $rsia_sk->orderBy('tgl_terbit', 'DESC')->orderBy('nomor', 'DESC');
+        $rsia_sk = $rsia_sk->orderBy('jenis', 'DESC')->orderBy('tgl_terbit', 'DESC')->orderBy('nomor', 'DESC');
 
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
