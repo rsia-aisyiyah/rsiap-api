@@ -9,16 +9,22 @@ class PksController extends Controller
 {
     public function index(Request $request)
     {
-        $pks = \App\Models\RsiaPks::with('pj_detail')->where('status', "1");
+        $pks = \App\Models\RsiaPks::with('pj_detail');
+
+        if ($request->jenis) {
+            $jenis = '/' . $request->jenis . '/';
+            $pks = $pks->where('no_pks_internal', 'like', '%' . $jenis . '%');
+        }
 
         if ($request->keyword) {
             $keywords = $request->keyword ?? $request->keywords;
-            $pks = $pks->where('no_pks_internal', 'like', '%' . $keywords . '%')
-                ->orWhere('no_pks_eksternal', 'like', '%' . $keywords . '%')
-                ->orWhere('judul', 'like', '%' . $keywords . '%')
-                ->orWhereHas('pj_detail', function ($query) use ($keywords) {
-                    $query->where('nama', 'like', '%' . $keywords . '%');
-                });
+            $pks = $pks->where(function($query) use ($keywords) {
+                $query->where('no_pks_eksternal', 'like', '%' . $keywords . '%')
+                    ->orWhere('judul', 'like', '%' . $keywords . '%')
+                    ->orWhereHas('pj_detail', function ($query) use ($keywords) {
+                        $query->where('nama', 'like', '%' . $keywords . '%');
+                    });
+            });
         }
 
         if ($request->perpage) {
@@ -59,7 +65,7 @@ class PksController extends Controller
             'pj' => 'required',
             'tanggal_awal' => 'required',
             // 'status' => 'required',
-            'file' => 'mimes:pdf|max:20480',
+            'file' => 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,image,jpeg,jpg,png|max:102400',
         ];
 
         // validate
@@ -81,12 +87,8 @@ class PksController extends Controller
             if (!$st::disk('sftp')->exists(env('DOCUMENT_PKS_SAVE_LOCATION'))) {
                 $st::disk('sftp')->makeDirectory(env('DOCUMENT_PKS_SAVE_LOCATION'));
             }
-            // move file
-            $st::disk('sftp')->put(env('DOCUMENT_PKS_SAVE_LOCATION') . $file_name, file_get_contents($file));
         }
 
-        
-        // move 
         // final data
         $final_data = [
             'no_pks_internal' => $request->no_pks_internal,
@@ -99,6 +101,14 @@ class PksController extends Controller
         ];
 
         $pks = \App\Models\RsiaPks::create($final_data);
+        // if pks saved
+        if ($pks) {
+            // if file exists
+            if ($file) {
+                $st::disk('sftp')->put(env('DOCUMENT_PKS_SAVE_LOCATION') . $file_name, file_get_contents($file));
+            }
+        }
+
         return isSuccess($pks, 'Data PKS berhasil ditambahkan');
     }
 
@@ -115,7 +125,7 @@ class PksController extends Controller
             'judul' => 'required',
             'pj' => 'required',
             'tanggal_awal' => 'required',
-            'file' => 'mimes:pdf|max:20480',
+            'file' => 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,image,jpeg,jpg,png|max:102400',
         ];
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
