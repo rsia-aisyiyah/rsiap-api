@@ -59,7 +59,7 @@ class PksController extends Controller
             'pj' => 'required',
             'tanggal_awal' => 'required',
             // 'status' => 'required',
-            'file' => 'required|mimes:pdf|max:20480',
+            'file' => 'mimes:pdf|max:20480',
         ];
 
         // validate
@@ -70,17 +70,23 @@ class PksController extends Controller
             return isFail($validator->errors(), 422);
         }
 
+        
         $file = $request->file('file');
-        $file_name = strtotime(now()) . '-' . str_replace([' ', '_'], '-', $file->getClientOriginalName());
+
+        if ($file) {
+            $file_name = strtotime(now()) . '-' . str_replace([' ', '_'], '-', $file->getClientOriginalName());
+            
+            $st = new \Illuminate\Support\Facades\Storage();
+            // if directory not exists create it
+            if (!$st::disk('sftp')->exists(env('DOCUMENT_PKS_SAVE_LOCATION'))) {
+                $st::disk('sftp')->makeDirectory(env('DOCUMENT_PKS_SAVE_LOCATION'));
+            }
+            // move file
+            $st::disk('sftp')->put(env('DOCUMENT_PKS_SAVE_LOCATION') . $file_name, file_get_contents($file));
+        }
+
         
         // move 
-        $st = new \Illuminate\Support\Facades\Storage();
-        // if directory not exists create it
-        if (!$st::disk('sftp')->exists(env('DOCUMENT_PKS_SAVE_LOCATION'))) {
-            $st::disk('sftp')->makeDirectory(env('DOCUMENT_PKS_SAVE_LOCATION'));
-        }
-        // move file
-        $st::disk('sftp')->put(env('DOCUMENT_PKS_SAVE_LOCATION') . $file_name, file_get_contents($file));
         // final data
         $final_data = [
             'no_pks_internal' => $request->no_pks_internal,
@@ -88,7 +94,7 @@ class PksController extends Controller
             'judul' => $request->judul,
             'tanggal_awal' => $request->tanggal_awal,
             'tanggal_akhir' => $request->tanggal_akhir ?? "0000-00-00",
-            'berkas' => $file_name,
+            'berkas' => $file_name ?? "",
             'pj' => $request->pj,
         ];
 
