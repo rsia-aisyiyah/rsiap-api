@@ -305,9 +305,21 @@ class RsiaSkController extends Controller
         if (!$rsia_sk) {
             return isFail('SK tidak ditemukan', 404);
         }
+        
+        // get file name
+        $file = $rsia_sk->berkas;
 
         // delete sk
         $rsia_sk->delete();
+
+        // delete file if exists
+        if ($file && $file !== "") {
+            $st = new \Illuminate\Support\Facades\Storage();
+
+            if ($file && $st::disk('sftp')->exists(env('DOCUMENT_SK_SAVE_LOCATION') . $file)) {
+                $st::disk('sftp')->delete(env('DOCUMENT_SK_SAVE_LOCATION') . $file);
+            }
+        }
 
         // return success
         return isSuccess($rsia_sk, 'Data berhasil dihapus');
