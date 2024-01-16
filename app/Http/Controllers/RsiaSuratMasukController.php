@@ -65,17 +65,24 @@ class RsiaSuratMasukController extends Controller
             'pengirim' => 'required',
             'perihal' => 'required',
             'ket' => 'required',
-            'berkas' => 'required|mimes:pdf,jpg,jpeg,png|max:28672',
+            'berkas' => 'mimes:pdf,jpg,jpeg,png|max:28672',
         ]);
 
         if ($validator->fails()) {
             return isFail($validator->errors(), 422);
         }
 
-        // get file berkas 
+        // get file berkas
         $file = $request->file('berkas');
-        $file_name = strtotime(now()) . '-' . str_replace([' ', '_'], '-', $file->getClientOriginalName());
-        
+        if ($file) {
+            $file_name = strtotime(now()) . '-' . str_replace([' ', '_'], '-', $file->getClientOriginalName());
+
+            $st = new \Illuminate\Support\Facades\Storage();
+            if (!$st::disk('sftp')->exists(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION'))) {
+                $st::disk('sftp')->makeDirectory(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION'));
+            }
+        }
+
         $data = [
             'no_simrs' => $request->no_simrs,
             'no_surat' => $request->no_surat,
@@ -85,7 +92,7 @@ class RsiaSuratMasukController extends Controller
             'pelaksanaan' => $request->pelaksanaan,
             'tempat' => $request->tempat,
             'ket' => $request->ket,
-            'berkas' => $file_name,
+            'berkas' => $file_name ?? "",
             'status' => '1',
         ];
 
@@ -99,14 +106,10 @@ class RsiaSuratMasukController extends Controller
             return isFail($th->getMessage(), 500);
         }
 
-        // move file to folder /webapps/rsia_surat_masuk using sftp
-        $st = new \Illuminate\Support\Facades\Storage();
-        if (!$st::disk('sftp')->exists(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION'))) {
-            $st::disk('sftp')->makeDirectory(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION'));
+        if ($file) {
+            // move file
+            $st::disk('sftp')->put(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $file_name, file_get_contents($file));
         }
-
-        // move file
-        $st::disk('sftp')->put(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $file_name, file_get_contents($file));
 
         return isSuccess($surat_masuk, 'Data berhasil ditambahkan');
     }
@@ -119,6 +122,7 @@ class RsiaSuratMasukController extends Controller
             'pengirim' => 'required',
             'perihal' => 'required',
             'ket' => 'required',
+            'berkas' => 'mimes:pdf,jpg,jpeg,png|max:28672',
         ]);
 
         if ($validator->fails()) {
@@ -157,7 +161,7 @@ class RsiaSuratMasukController extends Controller
                 $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
                     'berkas' => 'mimes:pdf,jpg,jpeg,png|max:28672',
                 ]);
-    
+
                 if ($validator->fails()) {
                     return isFail($validator->errors(), 422);
                 }
@@ -178,7 +182,7 @@ class RsiaSuratMasukController extends Controller
                 $st::disk('sftp')->put(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $fileName, file_get_contents($file));
 
                 // delete old file
-                if ($st::disk('sftp')->exists(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $oldData)) {
+                if ($oldData && $st::disk('sftp')->exists(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $oldData)) {
                     $st::disk('sftp')->delete(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $oldData);
                 }
             }
@@ -187,7 +191,7 @@ class RsiaSuratMasukController extends Controller
             return isFail($th->getMessage(), 500);
         }
 
-        return isSuccess($surat_masuk, 'Data berhasil diubah');        
+        return isSuccess($surat_masuk, 'Data berhasil diubah');
     }
 
     // delete = update status to 0
@@ -221,12 +225,6 @@ class RsiaSuratMasukController extends Controller
             return isFail([], 'Data tidak ditemukan', 404);
         }
 
-        $st = new \Illuminate\Support\Facades\Storage();
-
-        if ($st::disk('sftp')->exists(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $surat_masuk->berkas)) {
-            $st::disk('sftp')->delete(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $surat_masuk->berkas);
-        }
-
         // transaction if surat masuk success created
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
@@ -235,6 +233,12 @@ class RsiaSuratMasukController extends Controller
         } catch (\Throwable $th) {
             \Illuminate\Support\Facades\DB::rollback();
             return isFail($th->getMessage(), 500);
+        }
+
+        $st = new \Illuminate\Support\Facades\Storage();
+        // Periksa apakah file ada sebelum menghapus
+        if ($surat_masuk->berkas && $st::disk('sftp')->exists(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $surat_masuk->berkas)) {
+            $st::disk('sftp')->delete(env('DOCUMENT_SURAT_MASUK_SAVE_LOCATION') . $surat_masuk->berkas);
         }
 
         return isSuccess($surat_masuk, 'Data berhasil dihapus');

@@ -120,7 +120,7 @@ class BerkasController extends Controller
                 ->delete();
             
             // if berkas exist on storage delete it 
-            if ($st::disk('sftp')->exists('webapps/penggajian/' . $request->berkas)) {
+            if ($request->berkas && $st::disk('sftp')->exists('webapps/penggajian/' . $request->berkas)) {
                 $st::disk('sftp')->delete('webapps/penggajian/' . $request->berkas);
             }
 

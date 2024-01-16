@@ -185,7 +185,7 @@ class PksController extends Controller
         // delete old berkas
         if ($request->hasFile('file')) {
             $st = new \Illuminate\Support\Facades\Storage();
-            if ($st::disk('sftp')->exists(env('DOCUMENT_PKS_SAVE_LOCATION') . $old_berkas)) {
+            if ($old_berkas && $st::disk('sftp')->exists(env('DOCUMENT_PKS_SAVE_LOCATION') . $old_berkas)) {
                 $st::disk('sftp')->delete(env('DOCUMENT_PKS_SAVE_LOCATION') . $old_berkas);
             }
         }
@@ -219,7 +219,7 @@ class PksController extends Controller
 
         $st = new \Illuminate\Support\Facades\Storage();
 
-        if ($st::disk('sftp')->exists(env('DOCUMENT_PKS_SAVE_LOCATION') . $pks->berkas)) {
+        if ($pks->berkas && $st::disk('sftp')->exists(env('DOCUMENT_PKS_SAVE_LOCATION') . $pks->berkas)) {
             $st::disk('sftp')->delete(env('DOCUMENT_PKS_SAVE_LOCATION') . $pks->berkas);
         }
 
