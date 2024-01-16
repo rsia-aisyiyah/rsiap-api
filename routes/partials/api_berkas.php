@@ -9,7 +9,7 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
         $router->post('/{id}', [\App\Http\Controllers\api\PksController::class, 'update']);
         $router->delete('/{id}', [\App\Http\Controllers\api\PksController::class, 'delete']);
         
-        // $router->delete('/destroy', [\App\Http\Controllers\api\PksController::class, 'destroy']);
+        $router->delete('/{id}/destroy', [\App\Http\Controllers\api\PksController::class, 'destroy']);
         $router->get('/last-nomor', [\App\Http\Controllers\api\PksController::class, 'getLastNomor']);
     });
 
