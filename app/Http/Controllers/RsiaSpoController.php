@@ -23,7 +23,7 @@ class RsiaSpoController extends Controller
 
         // tgl_terbit
         if ($request->tgl_terbit) {
-            $rsia_spo = $rsia_spo->where('status', '1')->whereBetween('tgl_terbit', $request->tgl_terbit);
+            $rsia_spo = $rsia_spo->where('status', '1')->where('tgl_terbit', $request->tgl_terbit);
         }
 
         if ($request->jenis) {
