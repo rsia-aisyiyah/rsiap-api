@@ -27,6 +27,11 @@ class Pasien extends Model implements JWTSubject
         return $this->hasMany(RegPeriksa::class, 'no_rkm_medis', 'no_rkm_medis');
     }
 
+    function spesialis()
+    {
+        return $this->belongsTo(Spesialis::class, 'kd_sps', 'kd_sps');
+    }
+
     /**
 	 * Get the identifier that will be stored in the subject claim of the JWT.
 	 * @return mixed
@@ -42,9 +47,4 @@ class Pasien extends Model implements JWTSubject
 	public function getJWTCustomClaims() {
         return [];
 	}
-
-    function spesialis()
-    {
-        return $this->belongsTo(Spesialis::class, 'kd_sps', 'kd_sps');
-    }
 }
