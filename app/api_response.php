@@ -67,8 +67,8 @@ function isError(string $message = 'Internal Server Error')
 function debugReturn($data, $message = "Debug", $code = 200)
 {
     return response()->json([
-        'success'   => true,
         'debug'     => true,
+        'date'      => date('Y-m-d H:i:s'),
         'message'   => $message,
         'data'      => $data
     ], $code);
