@@ -221,20 +221,6 @@ class RsiaSuratInternalController extends Controller
             'tanggal' => $request->tanggal,
         ];
 
-        // Delete all penerima
-        $rsia_surat_internal_penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->nomor);
-        $rsia_surat_internal_penerima->delete();
-
-        // Insert new penerima
-        $penerima = $request->penerima ? $request->penerima : [];
-        foreach ($penerima as $key => $value) {
-            $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
-            $rsia_surat_internal_penerima->no_surat = $request->nomor;
-            $rsia_surat_internal_penerima->penerima = $value;
-
-            $rsia_surat_internal_penerima->save();
-        }
-
         // Update the main record
         // $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
         // $data = $rsia_surat_internal->update($update_data);
@@ -244,6 +230,20 @@ class RsiaSuratInternalController extends Controller
         // Update the PJ record
         // $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
         // $data = $rsia_surat_internal->update($update_pj);
+
+        // Delete all penerima
+        $rsia_surat_internal_penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->old_nomor);
+        $rsia_surat_internal_penerima->delete();
+
+        // Insert new penerima
+        $penerima = $request->penerima ? $request->penerima : [];
+        foreach ($penerima as $key => $value) {
+            $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
+            $rsia_surat_internal_penerima->no_surat = $request->old_nomor;
+            $rsia_surat_internal_penerima->penerima = $value;
+
+            $rsia_surat_internal_penerima->save();
+        }
 
         return isSuccess($data, "Data berhasil diupdate");
     }
