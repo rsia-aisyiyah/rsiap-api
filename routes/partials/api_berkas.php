@@ -39,3 +39,9 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
         $router->delete('/destroy', [\App\Http\Controllers\RsiaSkController::class, 'destroy']);
     });
 });
+
+Route::prefix('berkas')->group(function ($router) {
+    $router->group(['prefix' => 'spo'], function () use ($router) {
+        $router->get('/render/{nomor}', [\App\Http\Controllers\RsiaSpoController::class, 'renderPdf']);
+    });
+});
