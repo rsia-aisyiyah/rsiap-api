@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class RsiaSpoController extends Controller
 {
@@ -184,5 +185,42 @@ class RsiaSpoController extends Controller
         ];
 
         return isSuccess($data, 'Data SPO berhasil ditampilkan');
+    }
+
+    public function renderPdf($nomor)
+    {
+        $rn = str_replace('--', '/', $nomor);
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->with('detail')->where('nomor', $rn)->first();
+
+        if (!$rsia_spo) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        $spo = $rsia_spo;
+        $detail = [];
+
+        foreach ($spo->detail->toArray() as $key => $value) {
+            if ($key != 'nomor') {
+                $detail[$key] = html_entity_decode($value);
+            }
+        }
+
+        // return view ('print.spo', compact('spo'));
+        $html = view('print.spo', compact('spo', 'detail'))->render();
+
+        $pdf = PDF::loadHtml($html)->setPaper('a4', 'portrait')->setWarnings(false)->setOptions([
+            'isPhpEnabled' => true,
+            'isRemoteEnabled' => true,
+            'isHtml5ParserEnabled' => true,
+            'dpi' => 300,
+            'defaultFont' => 'sans-serif',
+            'isFontSubsettingEnabled' => true,
+            'isJavascriptEnabled' => true,
+        ]);
+
+        // return $pdf->stream('spo.pdf');
+
+        $filename = strtoupper(str_replace(' ', '_', $spo->judul) . '_SPO') . '.pdf';
+        return $pdf->download($filename);
     }
 }
