@@ -40,7 +40,7 @@ class RsiaSpoController extends Controller
             $rsia_spo = $rsia_spo->where('status', '1')->where('nomor', 'LIKE', '%' . $jenis . '%');
         }
 
-        $rsia_spo = $rsia_spo->where('status', '1')->orderBy('nomor', 'desc');
+        $rsia_spo = $rsia_spo->where('status', '1')->orderBy('tgl_terbit', 'desc')->orderBy('nomor', 'desc');
 
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
@@ -178,10 +178,16 @@ class RsiaSpoController extends Controller
 
     public function getLastNomor(Request $request)
     {
+        $q = \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->orderBy('nomor', 'desc');
+
+        $medis = (clone $q)->where('nomor', 'LIKE', '%/A/%')->first();
+        $penunjang = (clone $q)->where('nomor', 'LIKE', '%/B/%')->first();
+        $umum = (clone $q)->where('nomor', 'LIKE', '%/C/%')->first();
+
         $data = [
-            'medis' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/A/%')->orderBy('nomor', 'desc')->first()->nomor,
-            'penunjang' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/B/%')->orderBy('nomor', 'desc')->first()->nomor,
-            'umum' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/C/%')->orderBy('nomor', 'desc')->first()->nomor,
+            'medis' => $medis ? $medis->nomor : null,
+            'penunjang' => $penunjang ? $penunjang->nomor : null,
+            'umum' => $umum ? $umum->nomor : null,
         ];
 
         return isSuccess($data, 'Data SPO berhasil ditampilkan');
