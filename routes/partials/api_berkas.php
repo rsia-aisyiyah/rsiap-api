@@ -38,6 +38,16 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
         
         $router->delete('/destroy', [\App\Http\Controllers\RsiaSkController::class, 'destroy']);
     });
+
+
+    $router->group(['prefix' => 'memo/internal'], function () use ($router) {
+        $router->get('/', [\App\Http\Controllers\api\MemoInternalController::class, 'index']);
+        $router->post('/store', [\App\Http\Controllers\api\MemoInternalController::class, 'store']);
+        $router->post('/update', [\App\Http\Controllers\api\MemoInternalController::class, 'update']);
+        $router->post('/delete', [\App\Http\Controllers\api\MemoInternalController::class, 'delete']);
+        
+        $router->delete('/destroy', [\App\Http\Controllers\api\MemoInternalController::class, 'destroy']);
+    });
 });
 
 Route::prefix('berkas')->group(function ($router) {
