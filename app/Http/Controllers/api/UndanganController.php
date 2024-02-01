@@ -13,6 +13,7 @@ class UndanganController extends Controller
         $data = \App\Models\RsiaSuratInternalPenerima::select("*")
             ->with('surat')   
             ->where('penerima', $nip)
+            ->orderBy('no_surat', 'DESC')
             ->paginate(env('PER_PAGE', 10));
 
         return isSuccess($data, "Berhasil mendapatkan data");
