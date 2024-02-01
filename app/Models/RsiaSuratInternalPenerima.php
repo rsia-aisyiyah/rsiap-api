@@ -29,4 +29,10 @@ class RsiaSuratInternalPenerima extends Model
     {
         return $this->hasOne(Pegawai::class, 'nik', 'penerima');
     }
+
+    // surat
+    public function surat()
+    {
+        return $this->belongsTo(RsiaSuratInternal::class, 'no_surat', 'no_surat');
+    }
 }
