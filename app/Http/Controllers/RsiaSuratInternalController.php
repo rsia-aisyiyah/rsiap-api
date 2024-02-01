@@ -183,13 +183,14 @@ class RsiaSuratInternalController extends Controller
                 $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
                 $nm = $nm_pegawai ? $nm_pegawai->nama : '';
 
-                $body = "Halo $nm, anda mendapatkan undangan dengan detail sebagai berikut: \n\n";
-                $body .= "Perihal \t\t: " . $request->perihal . "\n";
+                $body = "👋 Halo $nm, anda mendapatkan undangan perihal: \n\n";
+                $body .= "$request->perihal \n\n";
                 $body .= "Tempat \t: " . $request->tempat . "\n";
-                $body .= "Tanggal \t: " . date('D, d M Y', strtotime($request->tanggal)) . "\n";
+                $body .= "Tanggal \t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('dddd, D MMMM Y') . "\n";
+                $body .= "Jam \t\t\t\t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('HH:mm') . "\n";
 
                 \App\Http\Controllers\PushNotificationPegawai::sendTo(
-                    "Undangan baru untuk anda.",
+                    "Undangan baru untuk anda 📨",
                     $body,
                     [
                         'routes' => 'undangan',
@@ -238,6 +239,23 @@ class RsiaSuratInternalController extends Controller
             return isFail("Data tidak ditemukan");
         }
 
+        // check request
+        if (!$request->perihal) {
+            return isFail("Perihal tidak boleh kosong");
+        }
+
+        if (!$request->pj) {
+            return isFail("PJ tidak boleh kosong");
+        }
+
+        if (!$request->tanggal) {
+            return isFail("Tanggal tidak boleh kosong");
+        }
+
+        if (!$request->tempat) {
+            return isFail("Tempat tidak boleh kosong");
+        }
+
         $update_data = [
             'pj' => $request->pj,
             'no_surat' => $request->no_surat,
@@ -270,24 +288,25 @@ class RsiaSuratInternalController extends Controller
             $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
             $nm = $nm_pegawai ? $nm_pegawai->nama : '';
 
-            // $body = "Halo $nm, anda mendapatkan undangan dengan detail sebagai berikut: \n\n";
-            // $body .= "Perihal \t\t: " . $request->perihal . "\n";
-            // $body .= "Tempat \t: " . $request->tempat . "\n";
-            // $body .= "Tanggal \t: " . date('D, d M Y', strtotime($request->tanggal)) . "\n";
+            $body = "👋 Halo $nm, anda mendapatkan undangan perihal: \n\n";
+            $body .= "$request->perihal \n\n";
+            $body .= "Tempat \t: " . $request->tempat . "\n";
+            $body .= "Tanggal \t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('dddd, D MMMM Y') . "\n";
+            $body .= "Jam \t\t\t\t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('HH:mm') . "\n";
 
-            // \App\Http\Controllers\PushNotificationPegawai::sendTo(
-            //     "Undangan baru untuk anda.",
-            //     $body,
-            //     [
-            //         'routes' => 'undangan',
-            //         'kategori' => 'surat_internal',
-            //         'no_surat' => $request->old_nomor,
-            //         'perihal' => $request->perihal,
-            //         'tempat' => $request->tempat,
-            //         'tanggal' => $request->tanggal,
-            //     ],
-            //     $value,
-            // );
+            \App\Http\Controllers\PushNotificationPegawai::sendTo(
+                "Undangan baru untuk anda 📨",
+                $body,
+                [
+                    'routes' => 'undangan',
+                    'kategori' => 'surat_internal',
+                    'no_surat' => $request->old_nomor,
+                    'perihal' => $request->perihal,
+                    'tempat' => $request->tempat,
+                    'tanggal' => $request->tanggal,
+                ],
+                $value,
+            );
 
             $rsia_surat_internal_penerima->save();
         }
