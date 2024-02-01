@@ -25,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Support\Facades\Storage::extend('sftp', function ($app, $config) {
             return new \League\Flysystem\Filesystem(new \League\Flysystem\Sftp\SftpAdapter($config));
-        });    
+        });
+
+        // carbon indonesia
+        \Carbon\Carbon::setLocale('id');
+        setlocale(LC_TIME, 'id_ID.utf8');
+        setlocale(LC_ALL, 'IND');
     }
 }

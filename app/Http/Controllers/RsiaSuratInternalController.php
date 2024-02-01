@@ -11,7 +11,10 @@ class RsiaSuratInternalController extends Controller
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select("*")->with(['pj_detail' => function ($q) {
             $q->select('nip', 'nama');
         }]);
-        $data = $rsia_surat_internal->orderBy('tanggal', 'desc')->orderBy('no_surat', 'desc');
+
+        $data = $rsia_surat_internal->orderBy('tanggal', 'desc')
+            ->orderBy('no_surat', 'desc')
+            ->whereDoesntHave('memo');
 
         if ($request->keyword) {
             $data = $data->where(function ($q) use ($request) {
@@ -177,6 +180,29 @@ class RsiaSuratInternalController extends Controller
                 $rsia_surat_internal_penerima->no_surat = $nomor_surat;
                 $rsia_surat_internal_penerima->penerima = $value;
 
+                $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
+                $nm = $nm_pegawai ? $nm_pegawai->nama : '';
+
+                $body = "👋 Halo $nm, anda mendapatkan undangan perihal: \n\n";
+                $body .= "$request->perihal \n\n";
+                $body .= "Tempat \t: " . $request->tempat . "\n";
+                $body .= "Tanggal \t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('dddd, D MMMM Y') . "\n";
+                $body .= "Jam \t\t\t\t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('HH:mm') . "\n";
+
+                \App\Http\Controllers\PushNotificationPegawai::sendTo(
+                    "Undangan baru untuk anda 📨",
+                    $body,
+                    [
+                        'routes' => 'undangan',
+                        'kategori' => 'surat_internal',
+                        'no_surat' => $request->old_nomor,
+                        'perihal' => $request->perihal,
+                        'tempat' => $request->tempat,
+                        'tanggal' => $request->tanggal,
+                    ],
+                    $value,
+                );
+
                 $rsia_surat_internal_penerima->save();
             }
 
@@ -213,6 +239,23 @@ class RsiaSuratInternalController extends Controller
             return isFail("Data tidak ditemukan");
         }
 
+        // check request
+        if (!$request->perihal) {
+            return isFail("Perihal tidak boleh kosong");
+        }
+
+        if (!$request->pj) {
+            return isFail("PJ tidak boleh kosong");
+        }
+
+        if (!$request->tanggal) {
+            return isFail("Tanggal tidak boleh kosong");
+        }
+
+        if (!$request->tempat) {
+            return isFail("Tempat tidak boleh kosong");
+        }
+
         $update_data = [
             'pj' => $request->pj,
             'no_surat' => $request->no_surat,
@@ -241,6 +284,29 @@ class RsiaSuratInternalController extends Controller
             $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
             $rsia_surat_internal_penerima->no_surat = $request->old_nomor;
             $rsia_surat_internal_penerima->penerima = $value;
+
+            $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
+            $nm = $nm_pegawai ? $nm_pegawai->nama : '';
+
+            $body = "👋 Halo $nm, anda mendapatkan undangan perihal: \n\n";
+            $body .= "$request->perihal \n\n";
+            $body .= "Tempat \t: " . $request->tempat . "\n";
+            $body .= "Tanggal \t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('dddd, D MMMM Y') . "\n";
+            $body .= "Jam \t\t\t\t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('HH:mm') . "\n";
+
+            \App\Http\Controllers\PushNotificationPegawai::sendTo(
+                "Undangan baru untuk anda 📨",
+                $body,
+                [
+                    'routes' => 'undangan',
+                    'kategori' => 'surat_internal',
+                    'no_surat' => $request->old_nomor,
+                    'perihal' => $request->perihal,
+                    'tempat' => $request->tempat,
+                    'tanggal' => $request->tanggal,
+                ],
+                $value,
+            );
 
             $rsia_surat_internal_penerima->save();
         }
