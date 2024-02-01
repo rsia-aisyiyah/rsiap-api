@@ -11,7 +11,10 @@ class RsiaSuratInternalController extends Controller
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select("*")->with(['pj_detail' => function ($q) {
             $q->select('nip', 'nama');
         }]);
-        $data = $rsia_surat_internal->orderBy('tanggal', 'desc')->orderBy('no_surat', 'desc');
+
+        $data = $rsia_surat_internal->orderBy('tanggal', 'desc')
+            ->orderBy('no_surat', 'desc')
+            ->whereDoesntHave('memo');
 
         if ($request->keyword) {
             $data = $data->where(function ($q) use ($request) {
@@ -177,6 +180,28 @@ class RsiaSuratInternalController extends Controller
                 $rsia_surat_internal_penerima->no_surat = $nomor_surat;
                 $rsia_surat_internal_penerima->penerima = $value;
 
+                $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
+                $nm = $nm_pegawai ? $nm_pegawai->nama : '';
+
+                $body = "Halo $nm, anda mendapatkan undangan dengan detail sebagai berikut: \n\n";
+                $body .= "Perihal \t\t: " . $request->perihal . "\n";
+                $body .= "Tempat \t: " . $request->tempat . "\n";
+                $body .= "Tanggal \t: " . date('D, d M Y', strtotime($request->tanggal)) . "\n";
+
+                \App\Http\Controllers\PushNotificationPegawai::sendTo(
+                    "Undangan baru untuk anda.",
+                    $body,
+                    [
+                        'routes' => 'undangan',
+                        'kategori' => 'surat_internal',
+                        'no_surat' => $request->old_nomor,
+                        'perihal' => $request->perihal,
+                        'tempat' => $request->tempat,
+                        'tanggal' => $request->tanggal,
+                    ],
+                    $value,
+                );
+
                 $rsia_surat_internal_penerima->save();
             }
 
@@ -241,6 +266,28 @@ class RsiaSuratInternalController extends Controller
             $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
             $rsia_surat_internal_penerima->no_surat = $request->old_nomor;
             $rsia_surat_internal_penerima->penerima = $value;
+
+            $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
+            $nm = $nm_pegawai ? $nm_pegawai->nama : '';
+
+            // $body = "Halo $nm, anda mendapatkan undangan dengan detail sebagai berikut: \n\n";
+            // $body .= "Perihal \t\t: " . $request->perihal . "\n";
+            // $body .= "Tempat \t: " . $request->tempat . "\n";
+            // $body .= "Tanggal \t: " . date('D, d M Y', strtotime($request->tanggal)) . "\n";
+
+            // \App\Http\Controllers\PushNotificationPegawai::sendTo(
+            //     "Undangan baru untuk anda.",
+            //     $body,
+            //     [
+            //         'routes' => 'undangan',
+            //         'kategori' => 'surat_internal',
+            //         'no_surat' => $request->old_nomor,
+            //         'perihal' => $request->perihal,
+            //         'tempat' => $request->tempat,
+            //         'tanggal' => $request->tanggal,
+            //     ],
+            //     $value,
+            // );
 
             $rsia_surat_internal_penerima->save();
         }
