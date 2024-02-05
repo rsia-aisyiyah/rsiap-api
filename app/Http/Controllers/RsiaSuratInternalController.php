@@ -12,7 +12,7 @@ class RsiaSuratInternalController extends Controller
             $q->select('nip', 'nama');
         }]);
 
-        $data = $rsia_surat_internal->orderBy('tanggal', 'desc')
+        $data = $rsia_surat_internal->orderBy('tgl_terbit', 'desc')
             ->orderBy('no_surat', 'desc')
             ->whereDoesntHave('memo');
 
@@ -28,8 +28,8 @@ class RsiaSuratInternalController extends Controller
             });
         }
 
-        if ($request->tanggal) {
-            $data = $data->where('tanggal', $request->tanggal);
+        if ($request->tgl_terbit) {
+            $data = $data->where('tgl_terbit', $request->tgl_terbit);
         }
 
         // status
@@ -125,7 +125,7 @@ class RsiaSuratInternalController extends Controller
         // get last surat by nomor surat
         $data = \App\Models\RsiaSuratInternal::select('no_surat')
             ->orderBy('no_surat', 'desc')
-            ->whereYear('tanggal', date('Y'))
+            ->whereYear('tgl_terbit', date('Y'))
             ->first();
 
         if ($data) {
@@ -134,8 +134,12 @@ class RsiaSuratInternalController extends Controller
             $data = [0];
         }
 
+        if (!$request->tgl_terbit) {
+            return isFail("Tanggal terbit tidak boleh kosong");
+        }
+
         // last number
-        $date_now = date('dmy');
+        $date_now = $request->tgl_terbit ? date('dmy', strtotime($request->tgl_terbit)) : date('dmy');
         $last_number = $data[0];
         $last_number = str_pad($last_number + 1, 3, '0', STR_PAD_LEFT);
         $nomor_surat = $last_number . '/A/S-RSIA/' . $date_now;
@@ -171,6 +175,7 @@ class RsiaSuratInternalController extends Controller
                 'tempat' => $request->tempat,
                 'pj' => $request->pj,
                 'tanggal' => $request->tanggal,
+                'tgl_terbit' => $request->tgl_terbit,
                 'status' => 'pengajuan',
             ]);
 
@@ -198,6 +203,7 @@ class RsiaSuratInternalController extends Controller
                         'no_surat' => $request->old_nomor,
                         'perihal' => $request->perihal,
                         'tempat' => $request->tempat,
+                        'tgl_terbit' => $request->tgl_terbit,
                         'tanggal' => $request->tanggal,
                     ],
                     $value,
@@ -248,6 +254,10 @@ class RsiaSuratInternalController extends Controller
             return isFail("PJ tidak boleh kosong");
         }
 
+        if (!$request->tgl_terbit) {
+            return isFail("Tanggal terbit tidak boleh kosong");
+        }
+
         if (!$request->tanggal) {
             return isFail("Tanggal tidak boleh kosong");
         }
@@ -262,6 +272,7 @@ class RsiaSuratInternalController extends Controller
             'perihal' => $request->perihal,
             'tempat' => $request->tempat,
             'tanggal' => $request->tanggal,
+            'tgl_terbit' => $request->tgl_terbit,
         ];
 
         // Update the main record
@@ -304,6 +315,7 @@ class RsiaSuratInternalController extends Controller
                     'perihal' => $request->perihal,
                     'tempat' => $request->tempat,
                     'tanggal' => $request->tanggal,
+                    'tgl_terbit' => $request->tgl_terbit,
                 ],
                 $value,
             );
@@ -356,12 +368,12 @@ class RsiaSuratInternalController extends Controller
 
     private function colSuratInternal($model, $request)
     {
-        $col = ['no_surat', 'penerima', 'pj', 'status', 'month(tanggal)', 'year(tanggal)', 'date(tanggal)'];
+        $col = ['no_surat', 'penerima', 'pj', 'status', 'month(tgl_terbit)', 'year(tgl_terbit)', 'date(tgl_terbit)'];
 
         $new_model = $model->where(function ($q) use ($col, $request) {
             foreach ($col as $key => $value) {
                 if ($request->has($value)) {
-                    if ($value == 'month(tanggal)' || $value == 'year(tanggal)' || $value == 'date(tanggal)') {
+                    if ($value == 'month(tgl_terbit)' || $value == 'year(tgl_terbit)' || $value == 'date(tgl_terbit)') {
                         $q->whereRaw($value . ' = ?', [$request->input($value)]);
                     } else {
                         $q->where($value, $request->input($value));
