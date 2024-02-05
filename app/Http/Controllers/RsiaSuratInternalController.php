@@ -198,7 +198,7 @@ class RsiaSuratInternalController extends Controller
                     "Undangan baru untuk anda 📨",
                     $body,
                     [
-                        'routes' => 'undangan',
+                        'route' => 'undangan',
                         'kategori' => 'surat_internal',
                         'no_surat' => $request->old_nomor,
                         'perihal' => $request->perihal,
@@ -309,7 +309,7 @@ class RsiaSuratInternalController extends Controller
                 "Undangan baru untuk anda 📨",
                 $body,
                 [
-                    'routes' => 'undangan',
+                    'route' => 'undangan',
                     'kategori' => 'surat_internal',
                     'no_surat' => $request->old_nomor,
                     'perihal' => $request->perihal,
