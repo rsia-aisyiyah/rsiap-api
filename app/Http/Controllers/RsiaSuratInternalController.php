@@ -176,6 +176,7 @@ class RsiaSuratInternalController extends Controller
                 'pj' => $request->pj,
                 'tanggal' => $request->tanggal,
                 'tgl_terbit' => $request->tgl_terbit,
+                'catatan' => $request->catatan ?? '-',
                 'status' => 'pengajuan',
             ]);
 
@@ -193,6 +194,12 @@ class RsiaSuratInternalController extends Controller
                 $body .= "Tempat \t: " . $request->tempat . "\n";
                 $body .= "Tanggal \t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('dddd, D MMMM Y') . "\n";
                 $body .= "Jam \t\t\t\t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('HH:mm') . "\n";
+
+                // if request->catatan && not empty or null or -
+                if ($request->catatan && $request->catatan != '-' && $request->catatan != '') {
+                    $body .= "\n";
+                    $body .= "Catatan \t: " . $request->catatan . "\n";
+                }
 
                 \App\Http\Controllers\PushNotificationPegawai::sendTo(
                     "Undangan baru untuk anda 📨",
@@ -273,6 +280,7 @@ class RsiaSuratInternalController extends Controller
             'tempat' => $request->tempat,
             'tanggal' => $request->tanggal,
             'tgl_terbit' => $request->tgl_terbit,
+            'catatan' => $request->catatan ?? '-',
         ];
 
         // Update the main record
@@ -304,6 +312,12 @@ class RsiaSuratInternalController extends Controller
             $body .= "Tempat \t: " . $request->tempat . "\n";
             $body .= "Tanggal \t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('dddd, D MMMM Y') . "\n";
             $body .= "Jam \t\t\t\t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('HH:mm') . "\n";
+
+            // if request->catatan && not empty or null or -
+            if ($request->catatan && $request->catatan != '-' && $request->catatan != '') {
+                $body .= "\n";
+                $body .= "Catatan \t: " . $request->catatan . "\n";
+            }
 
             \App\Http\Controllers\PushNotificationPegawai::sendTo(
                 "Undangan baru untuk anda 📨",
