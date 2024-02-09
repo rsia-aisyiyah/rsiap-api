@@ -13,7 +13,7 @@ class Pegawai extends Model
     protected $primaryKey = 'id';
 
     protected $guarded = [];
-    
+
     public $timestamps = false;
 
     public function dokter()
@@ -85,8 +85,14 @@ class Pegawai extends Model
     {
         return $this->hasOne(EmailPegawai::class, 'nik', 'nik');
     }
+
     public function stts_kerja()
     {
         return $this->hasOne(StatusKerja::class, 'stts', 'stts_kerja');
+    }
+
+    public function jenjang_jabatan()
+    {
+        return $this->hasOne(JenjangJabatan::class, 'kode', 'jnj_jabatan');
     }
 }
