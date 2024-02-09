@@ -9,7 +9,7 @@ class MemoInternalController extends Controller
 {
     public function index(Request $request)
     {
-        $memo = \App\Models\RsiaMemoInternal::with('perihal')->where('status', '1')->orderBy('no_surat', 'desc');
+        $memo = \App\Models\RsiaMemoInternal::with('perihal', 'perihal.pj_detail')->where('status', '1')->orderBy('no_surat', 'desc');
 
         if ($request->keyword) {
             $memo = $memo->where('no_surat', 'like', '%' . $request->keyword . '%')
@@ -38,7 +38,7 @@ class MemoInternalController extends Controller
     {
         $nomor = str_replace('--', '/', $nomor);
 
-        $memo = \App\Models\RsiaMemoInternal::with(['perihal', 'penerima'])->where('no_surat', $nomor)->first();
+        $memo = \App\Models\RsiaMemoInternal::with(['perihal', 'penerima', 'perihal.pj_detail'])->where('no_surat', $nomor)->first();
 
         if (!$memo) {
             return isFail("Memo tidak ditemukan");
@@ -79,9 +79,10 @@ class MemoInternalController extends Controller
         $rules = [
             'dari'          => 'required',
             'perihal'       => 'required',
+            'pj'            => 'required',
             'tanggal'       => 'required|date_format:Y-m-d',
             'content'       => 'required',
-            // 'mengetahui'    => 'required',
+            'mengetahui'    => 'required',
             'penerima'      => 'required',
         ];
 
@@ -99,7 +100,7 @@ class MemoInternalController extends Controller
             'tgl_terbit'    => $request->tanggal,
 
             'tempat'        => '-',
-            'pj'            => '-',
+            'pj'            => $request->pj,
             'tanggal'       => '0000-00-00',
             'status'        => null,
         ];
@@ -109,7 +110,7 @@ class MemoInternalController extends Controller
             'dari'          => $request->dari,
             'no_surat'      => $nomor_surat,
             'content'       => $request->content,
-            'mengetahui'    => "-",
+            'mengetahui'    => $request->mengetahui,
         ];
 
         // penerima is array from post
@@ -153,9 +154,10 @@ class MemoInternalController extends Controller
         $rules = [
             'dari'          => 'required',
             'perihal'       => 'required',
+            'pj'            => 'required',
             'tanggal'       => 'required|date_format:Y-m-d',
             'content'       => 'required',
-            // 'mengetahui'    => 'required',
+            'mengetahui'    => 'required',
             'penerima'      => 'required',
         ];
 
@@ -171,7 +173,7 @@ class MemoInternalController extends Controller
             'tgl_terbit'    => $request->tanggal,
 
             'tempat'        => '-',
-            'pj'            => '-',
+            'pj'            => $request->pj,
             'tanggal'       => '0000-00-00',
             'status'        => null,
         ];
@@ -181,7 +183,7 @@ class MemoInternalController extends Controller
             'dari'          => $request->dari,
             // 'no_surat'      => $request->no_surat,
             'content'       => $request->content,
-            'mengetahui'    => "-",
+            'mengetahui'    => $request->mengetahui,
         ];
 
         // penerima is array from post
@@ -208,10 +210,10 @@ class MemoInternalController extends Controller
 
         try {
             // update to rsia_surat_internal
-            $surat_internal->update($data_surat_internal);
+            $surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->no_surat)->update($data_surat_internal);
 
             // update to rsia_memo_internal
-            $memo_internal->update($data_memo_internal);
+            $memo_internal = \App\Models\RsiaMemoInternal::where('no_surat', $request->no_surat)->update($data_memo_internal);
             
             // delete all penerima
             \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->no_surat)->delete();
