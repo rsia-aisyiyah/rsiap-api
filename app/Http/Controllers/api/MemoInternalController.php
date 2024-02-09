@@ -47,6 +47,33 @@ class MemoInternalController extends Controller
         return isSuccess($memo, "Memo berhasil ditemukan");
     }
 
+    public function getPm(Request $request)
+    {
+        if (!$request->no_surat) {
+            return isFail("Nomor surat tidak boleh kosong");
+        }
+
+        $mengetahui = [];
+        $penerima = \App\Models\RsiaSuratInternalPenerima::with(['pegawai' => function ($query) {
+            $query->select('nik', 'nama');
+        }])->where('no_surat', $request->no_surat)->get();
+        
+
+        $memo = \App\Models\RsiaMemoInternal::where('no_surat', $request->no_surat)->first();
+        
+        if (!$memo) {
+            $mengetahui = [];
+        } else {
+            $plainMengetahui = explode('|', $memo->mengetahui);
+            $mengetahui = \App\Models\Pegawai::with(['jenjang_jabatan'])->select('nik', 'nama', 'jbtn', 'jnj_jabatan')->whereIn('nik', $plainMengetahui)->get();
+        }
+
+        return isSuccess([
+            'mengetahui' => $mengetahui,
+            'penerima' => $penerima,
+        ], "Data berhasil ditemukan");
+    }
+
     public function store(Request $request)
     {
         $rules = [

@@ -43,6 +43,10 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
     $router->group(['prefix' => 'memo/internal'], function () use ($router) {
         $router->get('/', [\App\Http\Controllers\api\MemoInternalController::class, 'index']);
         $router->get('/{nomor}/show', [\App\Http\Controllers\api\MemoInternalController::class, 'show']);
+        
+        // get penerima & mengetahui memo internal
+        $router->get('/get/pm', [\App\Http\Controllers\api\MemoInternalController::class, 'getPm']);
+        
         $router->post('/store', [\App\Http\Controllers\api\MemoInternalController::class, 'store']);
         $router->post('/update', [\App\Http\Controllers\api\MemoInternalController::class, 'update']);
         $router->post('/delete', [\App\Http\Controllers\api\MemoInternalController::class, 'delete']);
