@@ -12,7 +12,7 @@ class RsiaSuratInternalController extends Controller
             $q->select('nip', 'nama');
         }]);
 
-        $data = $rsia_surat_internal->orderBy('tgl_terbit', 'desc')
+        $data = $rsia_surat_internal->orderBy('created_at', 'desc')
             ->orderBy('no_surat', 'desc')
             ->whereDoesntHave('memo');
 
@@ -125,7 +125,7 @@ class RsiaSuratInternalController extends Controller
         // get last surat by nomor surat
         $data = \App\Models\RsiaSuratInternal::select('no_surat')
             ->orderBy('no_surat', 'desc')
-            ->whereYear('tgl_terbit', date('Y'))
+            ->whereYear('created_at', date('Y'))
             ->first();
 
         if ($data) {
