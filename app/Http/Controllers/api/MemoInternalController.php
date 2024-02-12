@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MemoInternalController extends Controller
 {
@@ -332,5 +333,49 @@ class MemoInternalController extends Controller
         $nomor_surat = $last_number . '/A/S-RSIA/' . $date_now;
 
         return $nomor_surat;
+    }
+
+    // render pdf
+    public function renderPdf(Request $request, $nomor)
+    {
+        $nomor = str_replace('--', '/', $nomor);
+
+        $memo = \App\Models\RsiaMemoInternal::with(['perihal', 'penerima', 'perihal.pegawai_detail', 'penerima.pegawai' => function ($query) {
+            $query->select('nik', 'nama');
+        }])->where('no_surat', $nomor)->first();
+        
+        if (!$memo) {
+            return isFail("Memo tidak ditemukan");
+        }
+
+        $count_mengetahui = count(explode('|', $memo->mengetahui));
+        $mengetahui = explode('|', $memo->mengetahui);
+
+        // return view
+        $html = view('print.memo_internal', [
+            'memo' => $memo,
+            'mengetahui' => $mengetahui,
+            'count_mengetahui' => $count_mengetahui,
+        ])->render();
+
+        $pdf = PDF::loadHtml($html)->setWarnings(false)->setOptions([
+            'isPhpEnabled' => true,
+            'isRemoteEnabled' => true,
+            'isHtml5ParserEnabled' => true,
+            'dpi' => 300,
+            'defaultFont' => 'sans-serif',
+            'isFontSubsettingEnabled' => true,
+            'isJavascriptEnabled' => true,
+        ]);
+
+        // set papper size 210 mm x 330 mm
+
+        // margin top, right, bottom, left
+        $pdf->setOption('margin-top', 0);
+        $pdf->setOption('margin-right', 0);
+        $pdf->setOption('margin-bottom', 0);
+        $pdf->setOption('margin-left', 0);
+
+        return $pdf->stream('memo_internal.pdf');
     }
 }
