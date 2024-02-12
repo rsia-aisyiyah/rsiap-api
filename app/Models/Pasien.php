@@ -14,12 +14,13 @@ class Pasien extends Model implements JWTSubject
 
     protected $primaryKey = 'no_rkm_medis';
 
-    protected $hidden = ['no_rkm_medis', 'no_ktp', 'no_peserta'];
+    protected $hidden = ['no_ktp'];
     
     protected $guarded = [];
 
     public $timestamps = false;
 
+    public $incrementing = false;
 
     
     public function regPeriksa()
