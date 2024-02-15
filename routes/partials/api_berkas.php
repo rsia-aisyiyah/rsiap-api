@@ -18,6 +18,9 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
         $router->get('/show', [\App\Http\Controllers\RsiaSpoController::class, 'show']);
         $router->get('/last-nomor', [\App\Http\Controllers\RsiaSpoController::class, 'getLastNomor']);
         $router->get('/verify/{nomor}', [\App\Http\Controllers\RsiaSpoController::class, 'verify']);
+        
+        $router->get('/unit/{unit_terkait}', [\App\Http\Controllers\RsiaSpoController::class, 'showByUnit']);
+        
         $router->post('/show', [\App\Http\Controllers\RsiaSpoController::class, 'show']);
         $router->post('/create', [\App\Http\Controllers\RsiaSpoController::class, 'store']);
         $router->post('/update', [\App\Http\Controllers\RsiaSpoController::class, 'update']);

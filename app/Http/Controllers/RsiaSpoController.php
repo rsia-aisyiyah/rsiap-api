@@ -250,4 +250,27 @@ class RsiaSpoController extends Controller
         return isSuccess($rsia_spo, 'SPO berhasil diverifikasi');
     }
 
+    // get SPO by unit_terkait
+    public function showByUnit(Request $request)
+    {
+        if (!$request->unit_terkait) {
+            return isFail('Unit terkait tidak ditemukan', 404);
+        }
+
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->with('detail', 'departemen');
+        $rsia_spo = $rsia_spo->where('unit_terkait', 'LIKE', '%' . $request->unit_terkait . '%')->get();
+
+        if (!$rsia_spo) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        $data = [
+            'unit_terkait' => $request->unit_terkait,
+            'count' => $rsia_spo->count(),
+            'spo' => $rsia_spo,
+        ];
+
+        // rsia_spo is empty 
+        return isSuccess($data, $rsia_spo->isEmpty() ? 'Belum ada atau tidak ada SPO' : 'SPO berhasil ditampilkan');
+    }
 }
