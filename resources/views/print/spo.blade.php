@@ -1,6 +1,6 @@
 @extends('template.spo')
 @section('content')
-<div class="p-0" style="counter-reset: pages !important;">
+<div class="p-0" style="counter-reset: pages !important;" id="spoRender">
   <table class="table table-bordered">
     <thead>
       <tr class="text-center">
@@ -77,7 +77,7 @@
         </td>
         <td colspan="2">
           <ol class="list-unstyled">
-            @foreach (explode(',', $spo->unit) as $unit)
+            @foreach (explode(',', $spo->unit_terkait) as $unit)
             <li>{{ $unit }}</li>
             @endforeach
           </ol>

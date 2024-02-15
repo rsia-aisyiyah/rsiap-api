@@ -81,6 +81,10 @@
     .content-stretch {
       align-content: stretch;
     }
+
+    #spoRender ul, #spoRender ol {
+      padding-left: 1.5rem;
+    } 
   </style>
 </head>
 <body>

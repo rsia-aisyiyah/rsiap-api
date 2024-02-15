@@ -79,6 +79,7 @@ class RsiaSpoController extends Controller
             "nomor" => "required",
             "judul" => "required",
             "unit" => "required",
+            "unit_terkait" => "required",
             "tgl_terbit" => "required",
         ];
 
@@ -118,6 +119,7 @@ class RsiaSpoController extends Controller
             "nomor" => "required",
             "judul" => "required",
             "unit" => "required",
+            "unit_terkait" => "required",
             "tgl_terbit" => "required",
         ];
 
@@ -211,7 +213,6 @@ class RsiaSpoController extends Controller
             }
         }
 
-        // return view ('print.spo', compact('spo'));
         $html = view('print.spo', compact('spo', 'detail'))->render();
 
         $pdf = PDF::loadHtml($html)->setPaper('a4', 'portrait')->setWarnings(false)->setOptions([
@@ -224,7 +225,7 @@ class RsiaSpoController extends Controller
             'isJavascriptEnabled' => true,
         ]);
 
-        // return $pdf->stream('spo.pdf');
+        return $pdf->stream('spo.pdf');
 
         $filename = strtoupper(str_replace(' ', '_', $spo->judul) . '_SPO') . '.pdf';
         return $pdf->download($filename);
