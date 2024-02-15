@@ -50,6 +50,9 @@ class RsiaNotifUndangan extends Command
             return;
         }
 
+        echo $now->format('Y-m-d H:i:s') . " - Found " . count($undangan) . " undangan\n";
+        print_r($undangan->toArray());
+
         // looop through all undangan
         foreach ($undangan as $key => $und) {
             $c_u_tgl = \Carbon\Carbon::parse($und->tanggal);
@@ -67,8 +70,8 @@ class RsiaNotifUndangan extends Command
                         $msg = \Kreait\Firebase\Messaging\CloudMessage::withTarget('topic', $p->penerima)
                             ->withNotification([
                                 'topic' => $p->penerima,
-                                'title' => 'Reminder Undangan',
-                                'body'  => 'Mengingatkan bahwa undangan ' . $und->perihal . ' akan dimulai dalam 2 jam lagi',
+                                'title' => 'Reminder Undangan 🔔',
+                                'body'  => 'Mengingatkan bahwa undangan ' . $und->perihal . ' akan dimulai dalam 2 jam lagi.' . "\n" .'Terimakasih.',
                             ])->withData([
                                 'route' => 'undangan',
                                 'kategori' => 'surat_internal',
@@ -99,8 +102,8 @@ class RsiaNotifUndangan extends Command
                         $msg = \Kreait\Firebase\Messaging\CloudMessage::withTarget('topic', $p->penerima)
                             ->withNotification([
                                 'topic' => $p->penerima,
-                                'title' => 'Reminder Undangan',
-                                'body'  => 'Mengingatkan kembali bahwa undangan perihal ' . $und->perihal . ' akan dimulai dalam 30 menit lagi, mohon untuk segera mempersiapkan diri',
+                                'title' => 'Reminder Undangan 🔔',
+                                'body'  => 'Mengingatkan kembali bahwa undangan perihal ' . $und->perihal . ' akan dimulai dalam 30 menit lagi.' . "\n" .'Terimakasih.',
                             ])->withData([
                                 'route' => 'undangan',
                                 'kategori' => 'surat_internal',
