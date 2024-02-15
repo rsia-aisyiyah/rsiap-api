@@ -50,7 +50,11 @@
           <div class="flex flex-col" style="position: relative;">
             <p class="p-0 m-0"><small>Ditetapkan </small></p>
             <p class="p-0 m-0"><small>Direktur RSIA Aisyiyah Pekajangan </small></p>
-            <img src="{{ asset('public/images/ttd-dr-him.jpeg') }}" alt="logo" class="img-fluid pt-2" width="40%">
+            @if ($spo->is_verified)
+              <img src="{{ asset('public/images/ttd-dr-him.jpeg') }}" alt="logo" class="img-fluid pt-2" width="40%">
+            @else
+              <div class="my-5"></div>
+            @endif
             <strong
               style="white-space: nowrap; position: relative; margin: 0 !important; padding: 0 !important; top: -60px !important; line-height: 0 !important">dr.
               Himawan Budityastomo, Sp.OG</strong>

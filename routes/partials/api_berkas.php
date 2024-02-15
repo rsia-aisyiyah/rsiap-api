@@ -16,14 +16,14 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
     $router->group(['prefix' => 'spo'], function () use ($router) {
         $router->get('/', [\App\Http\Controllers\RsiaSpoController::class, 'index']);
         $router->get('/show', [\App\Http\Controllers\RsiaSpoController::class, 'show']);
+        $router->get('/last-nomor', [\App\Http\Controllers\RsiaSpoController::class, 'getLastNomor']);
+        $router->get('/verify/{nomor}', [\App\Http\Controllers\RsiaSpoController::class, 'verify']);
         $router->post('/show', [\App\Http\Controllers\RsiaSpoController::class, 'show']);
         $router->post('/create', [\App\Http\Controllers\RsiaSpoController::class, 'store']);
         $router->post('/update', [\App\Http\Controllers\RsiaSpoController::class, 'update']);
         $router->delete('/delete', [\App\Http\Controllers\RsiaSpoController::class, 'delete']);
-        
         // $router->delete('/destroy', [\App\Http\Controllers\RsiaSpoController::class, 'destroy']);
-        $router->get('/last-nomor', [\App\Http\Controllers\RsiaSpoController::class, 'getLastNomor']);
-        
+
         $router->group(['prefix' => 'detail'], function () use ($router) {
             $router->get('/', [\App\Http\Controllers\api\RsiaSpoDetailController::class, 'index']);
             $router->post('/store', [\App\Http\Controllers\api\RsiaSpoDetailController::class, 'store']);

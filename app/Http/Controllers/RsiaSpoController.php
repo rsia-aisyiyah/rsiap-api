@@ -230,4 +230,24 @@ class RsiaSpoController extends Controller
         $filename = strtoupper(str_replace(' ', '_', $spo->judul) . '_SPO') . '.pdf';
         return $pdf->download($filename);
     }
+
+    public function verify(Request $request)
+    {
+        // /verify/{nomor}
+        if (!$request->nomor) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        // nomor is replace -- to /
+        $nomor = str_replace('--', '/', $request->nomor);
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->where('nomor', $nomor)->first();
+
+        if (!$rsia_spo) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        $rsia_spo->update(['is_verified' => 1]);
+        return isSuccess($rsia_spo, 'SPO berhasil diverifikasi');
+    }
+
 }
