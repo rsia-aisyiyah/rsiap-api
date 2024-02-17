@@ -66,9 +66,9 @@ class RsiaNotifUndangan extends Command
             if ($diff == 120 || $diff == 30) {
                 $body = "Mengingatkan bahwa undangan " . $und->perihal . "\n";
                 $body .= "akan dimulai dalam " . ($diff == 120 ? "2 jam" : "30 menit") . " lagi." . "\n\n";
-                $body .= "Tempat \t: " . $und->tempat . "\n";
+                $body .= "Tempat \t\t: " . $und->tempat . "\n";
                 $body .= "Tanggal \t: " . $c_u_tgl->isoFormat('dddd, D MMMM Y') . "\n";
-                $body .= "Jam \t\t\t\t: " . $c_u_tgl->isoFormat('HH:mm') . "\n";
+                $body .= "Jam \t\t\t\t\t: " . $c_u_tgl->isoFormat('HH:mm') . "\n";
                 $body .= "Terimakasih.";
 
                 if ($und->penerima) {
