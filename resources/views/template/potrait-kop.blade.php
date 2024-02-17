@@ -122,7 +122,7 @@
     }
 
     main {
-      margin: 0px 16mm;
+      margin: 0px 22mm;
     }
 
     p {

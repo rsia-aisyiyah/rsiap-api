@@ -10,7 +10,7 @@ class RsiaSuratInternalController extends Controller
     {
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select("*")->with(['pj_detail' => function ($q) {
             $q->select('nip', 'nama');
-        }]);
+        }, 'penerima']);
 
         $data = $rsia_surat_internal->orderBy('created_at', 'desc')
             ->orderBy('no_surat', 'desc')
@@ -59,11 +59,11 @@ class RsiaSuratInternalController extends Controller
             ->with('pj_detail');
 
         if ($request->start && $request->end) {
-            $start = date('Y-m-d', strtotime($request->start . ' +1 day'));
-            $msg = "Data berhasil ditemukan dari tanggal " . $start . " sampai " . $request->end;
+            $start               = date('Y-m-d', strtotime($request->start . ' +1 day'));
+            $msg                 = "Data berhasil ditemukan dari tanggal " . $start . " sampai " . $request->end;
             $rsia_surat_internal = $rsia_surat_internal->whereBetween('tanggal', [$start, $request->end]);
         } else {
-            $msg = "Data berhasil ditemukan dari tanggal " . date('Y-m-d') . " sampai " . date('Y-m-d');
+            $msg                 = "Data berhasil ditemukan dari tanggal " . date('Y-m-d') . " sampai " . date('Y-m-d');
             $rsia_surat_internal = $rsia_surat_internal->whereMonth('tanggal', date('m'))->whereYear('tanggal', date('Y'));
         }
 
@@ -139,7 +139,7 @@ class RsiaSuratInternalController extends Controller
         }
 
         // last number
-        $date_now = $request->tgl_terbit ? date('dmy', strtotime($request->tgl_terbit)) : date('dmy');
+        $date_now    = $request->tgl_terbit ? date('dmy', strtotime($request->tgl_terbit)) : date('dmy');
         $last_number = $data[0];
         $last_number = str_pad($last_number + 1, 3, '0', STR_PAD_LEFT);
         $nomor_surat = $last_number . '/A/S-RSIA/' . $date_now;
@@ -170,24 +170,24 @@ class RsiaSuratInternalController extends Controller
             \Illuminate\Support\Facades\DB::beginTransaction();
 
             $rsia_surat_internal = \App\Models\RsiaSuratInternal::create([
-                'no_surat' => $nomor_surat,
-                'perihal' => $request->perihal,
-                'tempat' => $request->tempat,
-                'pj' => $request->pj,
-                'tanggal' => $request->tanggal,
+                'no_surat'   => $nomor_surat,
+                'perihal'    => $request->perihal,
+                'tempat'     => $request->tempat,
+                'pj'         => $request->pj,
+                'tanggal'    => $request->tanggal,
                 'tgl_terbit' => $request->tgl_terbit,
-                'catatan' => $request->catatan ?? '-',
-                'status' => 'pengajuan',
+                'catatan'    => $request->catatan ?? '-',
+                'status'     => 'pengajuan',
             ]);
 
             $penerima = $request->karyawan ? $request->karyawan : [];
             foreach ($penerima as $key => $value) {
-                $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
+                $rsia_surat_internal_penerima           = new \App\Models\RsiaSuratInternalPenerima;
                 $rsia_surat_internal_penerima->no_surat = $nomor_surat;
                 $rsia_surat_internal_penerima->penerima = $value;
 
                 $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
-                $nm = $nm_pegawai ? $nm_pegawai->nama : '';
+                $nm         = $nm_pegawai ? $nm_pegawai->nama : '';
 
                 $body = "👋 Halo $nm, anda mendapatkan undangan perihal: \n\n";
                 $body .= "$request->perihal \n\n";
@@ -205,13 +205,13 @@ class RsiaSuratInternalController extends Controller
                     "Undangan baru untuk anda 📨",
                     $body,
                     [
-                        'route' => 'undangan',
-                        'kategori' => 'surat_internal',
-                        'no_surat' => $request->old_nomor,
-                        'perihal' => $request->perihal,
-                        'tempat' => $request->tempat,
+                        'route'      => 'undangan',
+                        'kategori'   => 'surat_internal',
+                        'no_surat'   => $request->old_nomor,
+                        'perihal'    => $request->perihal,
+                        'tempat'     => $request->tempat,
                         'tgl_terbit' => $request->tgl_terbit,
-                        'tanggal' => $request->tanggal,
+                        'tanggal'    => $request->tanggal,
                     ],
                     $value,
                 );
@@ -224,7 +224,7 @@ class RsiaSuratInternalController extends Controller
 
             return isSuccess([
                 'no_surat' => $nomor_surat,
-                'surat' => $rsia_surat_internal->toArray()
+                'surat'    => $rsia_surat_internal->toArray(),
             ], "Surat berhasil dibuat");
         } catch (\Exception $e) {
             // An error occurred, rollback the transaction
@@ -233,11 +233,9 @@ class RsiaSuratInternalController extends Controller
             return isFail("Error: " . $e->getMessage());
         }
 
-
-
         return isSuccess([
             'no_surat' => $nomor_surat,
-            'surat' => $rsia_surat_internal->toArray()
+            'surat'    => $rsia_surat_internal->toArray(),
         ], "Surat berhasil dibuat");
     }
 
@@ -274,13 +272,13 @@ class RsiaSuratInternalController extends Controller
         }
 
         $update_data = [
-            'pj' => $request->pj,
-            'no_surat' => $request->no_surat,
-            'perihal' => $request->perihal,
-            'tempat' => $request->tempat,
-            'tanggal' => $request->tanggal,
+            'pj'         => $request->pj,
+            'no_surat'   => $request->no_surat,
+            'perihal'    => $request->perihal,
+            'tempat'     => $request->tempat,
+            'tanggal'    => $request->tanggal,
             'tgl_terbit' => $request->tgl_terbit,
-            'catatan' => $request->catatan ?? '-',
+            'catatan'    => $request->catatan ?? '-',
         ];
 
         // Update the main record
@@ -300,12 +298,12 @@ class RsiaSuratInternalController extends Controller
         // Insert new penerima
         $penerima = $request->penerima ? $request->penerima : [];
         foreach ($penerima as $key => $value) {
-            $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
+            $rsia_surat_internal_penerima           = new \App\Models\RsiaSuratInternalPenerima;
             $rsia_surat_internal_penerima->no_surat = $request->old_nomor;
             $rsia_surat_internal_penerima->penerima = $value;
 
             $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
-            $nm = $nm_pegawai ? $nm_pegawai->nama : '';
+            $nm         = $nm_pegawai ? $nm_pegawai->nama : '';
 
             $body = "👋 Halo $nm, anda mendapatkan undangan perihal: \n\n";
             $body .= "$request->perihal \n\n";
@@ -323,12 +321,12 @@ class RsiaSuratInternalController extends Controller
                 "Undangan baru untuk anda 📨",
                 $body,
                 [
-                    'route' => 'undangan',
-                    'kategori' => 'surat_internal',
-                    'no_surat' => $request->old_nomor,
-                    'perihal' => $request->perihal,
-                    'tempat' => $request->tempat,
-                    'tanggal' => $request->tanggal,
+                    'route'      => 'undangan',
+                    'kategori'   => 'surat_internal',
+                    'no_surat'   => $request->old_nomor,
+                    'perihal'    => $request->perihal,
+                    'tempat'     => $request->tempat,
+                    'tanggal'    => $request->tanggal,
                     'tgl_terbit' => $request->tgl_terbit,
                 ],
                 $value,
@@ -351,8 +349,8 @@ class RsiaSuratInternalController extends Controller
         }
 
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
-        $data = $rsia_surat_internal->update([
-            'status' => $request->status
+        $data                = $rsia_surat_internal->update([
+            'status' => $request->status,
         ]);
 
         return isSuccess($data, "Data berhasil diupdate");
@@ -365,7 +363,7 @@ class RsiaSuratInternalController extends Controller
         }
 
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->no_surat);
-        $data = $rsia_surat_internal->delete();
+        $data                = $rsia_surat_internal->delete();
 
         return isSuccess($data, "Data berhasil dihapus");
     }
@@ -375,9 +373,57 @@ class RsiaSuratInternalController extends Controller
     {
         // get count all data group by status
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('status', \Illuminate\Support\Facades\DB::raw('count(*) as total'));
-        $data = $rsia_surat_internal->groupBy('status')->get();
+        $data                = $rsia_surat_internal->groupBy('status')->get();
 
         return isSuccess($data, "Data berhasil ditemukan");
+    }
+
+    // cetakUndangan
+    public function cetakUndangan($nomor)
+    {
+        $nomor = str_replace('--', '/', $nomor);
+        $penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $nomor)->with(['pegawai' => function ($q) {
+            $q->select('nik', 'nama', 'jbtn', 'bidang');
+        }])->get();
+
+        if ($penerima->count() == 0) {
+            return isFail("Data penerima tidak ditemukan");
+        }
+
+        // group penerima per 10 data maka jika ada 20 data maka akan menjadi 2 array
+        $penerima = $penerima->chunk(10);
+
+        $surat = \App\Models\RsiaSuratInternal::where('no_surat', $nomor)->with(['pegawai_detail' => function ($q) {
+            $q->with('jenjang_jabatan')->select('nik', 'nama', 'bidang', 'jbtn', 'jnj_jabatan');
+        }])->first();
+
+        if (!$surat) {
+            return isFail("Data surat tidak ditemukan");
+        }
+
+        $html = view('print.undangan_internal', [
+            'nomor' => $nomor,
+            'penerima' => $penerima,
+            'undangan' => $surat,
+        ]);
+
+        // PDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setWarnings(false)->setOptions([
+            'isPhpEnabled'            => true,
+            'isRemoteEnabled'         => true,
+            'isHtml5ParserEnabled'    => true,
+            'dpi'                     => 300,
+            'defaultFont'             => 'sans-serif',
+            'isFontSubsettingEnabled' => true,
+            'isJavascriptEnabled'     => true,
+        ]);
+
+        $pdf->setOption('margin-top', 0);
+        $pdf->setOption('margin-right', 0);
+        $pdf->setOption('margin-bottom', 0);
+        $pdf->setOption('margin-left', 0);
+
+        return $pdf->stream('undangan_internal.pdf');
     }
 
     private function colSuratInternal($model, $request)
@@ -403,7 +449,7 @@ class RsiaSuratInternalController extends Controller
     {
         if ($request->select) {
             $select = explode(',', $request->select);
-            $modal = $modal->select($select);
+            $modal  = $modal->select($select);
         } else {
             $modal = $modal->select('*');
         }
