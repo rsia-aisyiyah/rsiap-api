@@ -32,7 +32,7 @@
 
 <div class="mb-2">
   <span class="p-0 m-0">Kepada Yth.</span>
-  @if (count($penerima) <= 7) <ol class="mr-2" style="list-style-type: decimal; padding-inline-start: 20px;">
+  @if (count($penerima) <= 5) <ol class="mr-2" style="list-style-type: decimal; padding-inline-start: 20px;">
     @foreach ($penerima as $key => $item)
     <li>{{ $item->pegawai->nama }}</li>
     @endforeach
@@ -100,7 +100,16 @@
   </tr>
 </table>
 
-@if (count($penerima) > 7)
+{{-- if undangan->catatan not null not empty or not - --}}
+@if ($undangan->catatan != null && $undangan->catatan != '-' && $undangan->catatan != '')
+<div class="mt-4">
+  <strong>
+    NB : {{ $undangan->catatan }}
+  </strong>
+</div>
+@endif
+
+@if (count($penerima) > 5)
 {{-- break for penerima --}}
 <div class="break-page"></div>
 
@@ -190,9 +199,9 @@
         </td>
         <td>
           @if ($key % 2 == 0)
-            <div class="">{{ $key + 1 }}.</div>
+          <div class="">{{ $key + 1 }}.</div>
           @else
-            <div class="text-center">{{ $key + 1 }}.</div>
+          <div class="text-center">{{ $key + 1 }}.</div>
           @endif
         </td>
       </tr>
@@ -234,8 +243,8 @@
               @endif
             </td>
           </tr>
-        @endfor
-      @endif
+          @endfor
+          @endif
     </tbody>
   </table>
 </div>
