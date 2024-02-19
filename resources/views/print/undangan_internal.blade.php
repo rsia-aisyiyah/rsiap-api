@@ -32,7 +32,7 @@
 
 <div class="mb-2">
   <span class="p-0 m-0">Kepada Yth.</span>
-  @if (count($penerima) <= 7) <ol class="mr-2" style="list-style-type: decimal; padding-inline-start: 20px;">
+  @if (count($penerima) <= 5) <ol class="mr-2" style="list-style-type: decimal; padding-inline-start: 20px;">
     @foreach ($penerima as $key => $item)
     <li>{{ $item->pegawai->nama }}</li>
     @endforeach
@@ -100,7 +100,16 @@
   </tr>
 </table>
 
-@if (count($penerima) > 7)
+{{-- if undangan->catatan not null not empty or not - --}}
+@if ($undangan->catatan != null && $undangan->catatan != '-' && $undangan->catatan != '')
+<div class="mt-4">
+  <strong>
+    NB : {{ $undangan->catatan }}
+  </strong>
+</div>
+@endif
+
+@if (count($penerima) > 5)
 {{-- break for penerima --}}
 <div class="break-page"></div>
 
@@ -173,46 +182,56 @@
         <td class="text-center">{{ $key + 1 }}.</td>
         <td>{{ $item->pegawai->nama }}</td>
         {{-- if in jbtn contain koordinator change to koor --}}
-        <td>{{ str_contains(strtolower($item->pegawai->jbtn), 'koordinator') ? ucfirst(str_replace('koordinator', 'koor', strtolower($item->pegawai->jbtn))) : strtolower($item->pegawai->jbtn) }}</td>
+        <td>{{ str_contains(strtolower($item->pegawai->jbtn), 'koordinator') ? ucfirst(str_replace('koordinator',
+          'koor', strtolower($item->pegawai->jbtn))) : strtolower($item->pegawai->jbtn) }}</td>
         <td>
           @if ($key % 2 == 0)
-            <div class="">{{ $key + 1 }}.</div>
+          <div class="">{{ $key + 1 }}.</div>
           @else
-            <div class="text-center">{{ $key + 1 }}.</div>
+          <div class="text-center">{{ $key + 1 }}.</div>
           @endif
         </td>
       </tr>
       @endforeach
 
-      {{-- if count penerima < maxRow loop blank  --}}
-      @if (count($penerima) < $maxRow)
-        @for ($i = 0; $i < $maxRow - count($penerima); $i++) 
-          <tr>
-            <td class="text-center">
-              {{-- lanjutkan penomoran jika tr diatas sudah 20 maka disini dimulai dari 21 --}}
-              {{ $i + count($penerima) + 1 }}.
-            </td>
-            <td><div class="my-3"></div></td>
-            <td><div class="my-3"></div></td>
-            <td>
-              @if (($i + count($penerima)) % 2 == 0)
-                <div class="">{{ $i + count($penerima) + 1 }}.</div>
-              @else
-                <div class="text-center">{{ $i + count($penerima) + 1 }}.</div>
-              @endif
-            </td>
-          </tr>
+      {{-- if count penerima < maxRow loop blank --}} @if (count($penerima) < $maxRow) @for ($i=0; $i < $maxRow -
+        count($penerima); $i++) <tr>
+        <td class="text-center">
+          {{-- lanjutkan penomoran jika tr diatas sudah 20 maka disini dimulai dari 21 --}}
+          {{ $i + count($penerima) + 1 }}.
+        </td>
+        <td>
+          <div class="my-3"></div>
+        </td>
+        <td>
+          <div class="my-3"></div>
+        </td>
+        <td>
+          @if (($i + count($penerima)) % 2 == 0)
+          <div class="">{{ $i + count($penerima) + 1 }}.</div>
+          @else
+          <div class="text-center">{{ $i + count($penerima) + 1 }}.</div>
+          @endif
+        </td>
+        </tr>
         @endfor
-      @elseif (count($penerima) > $maxRow)
-        @for ($i = 0; $i < $maxRow - (count($penerima) % $maxRow); $i++) 
-          <tr>
-            <td><div class="my-3"></div></td>
-            <td><div class="my-3"></div></td>
-            <td><div class="my-3"></div></td>
-            <td><div class="my-3"></div></td>
+        @elseif (count($penerima) > $maxRow)
+        @for ($i = 0; $i < $maxRow - (count($penerima) % $maxRow); $i++) <tr>
+          <td>
+            <div class="my-3"></div>
+          </td>
+          <td>
+            <div class="my-3"></div>
+          </td>
+          <td>
+            <div class="my-3"></div>
+          </td>
+          <td>
+            <div class="my-3"></div>
+          </td>
           </tr>
-        @endfor
-      @endif
+          @endfor
+          @endif
     </tbody>
   </table>
 </div>
