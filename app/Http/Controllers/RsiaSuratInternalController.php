@@ -390,8 +390,11 @@ class RsiaSuratInternalController extends Controller
             return isFail("Data penerima tidak ditemukan");
         }
 
-        // group penerima per 10 data maka jika ada 20 data maka akan menjadi 2 array
-        $penerima = $penerima->chunk(10);
+        // penerima order by pegawai nama ascending
+        $penerima = $penerima->sortBy('pegawai.nama', SORT_NATURAL | SORT_FLAG_CASE);
+        
+        // reset key $penerima
+        $penerima = $penerima->values();
 
         $surat = \App\Models\RsiaSuratInternal::where('no_surat', $nomor)->with(['pegawai_detail' => function ($q) {
             $q->with('jenjang_jabatan')->select('nik', 'nama', 'bidang', 'jbtn', 'jnj_jabatan');

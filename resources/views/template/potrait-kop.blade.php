@@ -122,7 +122,7 @@
     }
 
     main {
-      margin: 0px 22mm;
+      margin: 0px 19mm;
     }
 
     p {
@@ -150,6 +150,10 @@
       background-repeat: no-repeat;
       background-position: center;
       width: 100%;
+    }
+
+    .break-page {
+      page-break-before: always;
     }
   </style>
 </head>
