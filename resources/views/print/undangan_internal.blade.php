@@ -173,7 +173,21 @@
         <td class="text-center">{{ $key + 1 }}.</td>
         <td>{{ $item->pegawai->nama }}</td>
         {{-- if in jbtn contain koordinator change to koor --}}
-        <td>{{ str_contains(strtolower($item->pegawai->jbtn), 'koordinator') ? ucfirst(str_replace('koordinator', 'koor', strtolower($item->pegawai->jbtn))) : strtolower($item->pegawai->jbtn) }}</td>
+        <td>
+          @if (str_contains($item->pegawai->jbtn, 'Koordinator') || str_contains($item->pegawai->jbtn, 'koordinator'))
+            @if (str_contains($item->pegawai->jbtn, 'Koordinator'))
+              {{ str_replace('Koordinator', 'Koor', $item->pegawai->jbtn) }}
+            @elseif (str_contains($item->pegawai->jbtn, 'koordinator'))
+              {{ str_replace('koordinator', 'Koor', $item->pegawai->jbtn) }}
+            @endif
+          @else
+            @if (strlen($item->pegawai->jbtn) > 10)
+              {{ ucwords(strtolower($item->pegawai->jbtn)) }}
+            @else
+            {{ strtoupper($item->pegawai->jbtn) }}
+            @endif
+          @endif
+        </td>
         <td>
           @if ($key % 2 == 0)
             <div class="">{{ $key + 1 }}.</div>
@@ -192,8 +206,8 @@
               {{-- lanjutkan penomoran jika tr diatas sudah 20 maka disini dimulai dari 21 --}}
               {{ $i + count($penerima) + 1 }}.
             </td>
-            <td><div class="my-3"></div></td>
-            <td><div class="my-3"></div></td>
+            <td><div class="my-2"></div></td>
+            <td><div class="my-2"></div></td>
             <td>
               @if (($i + count($penerima)) % 2 == 0)
                 <div class="">{{ $i + count($penerima) + 1 }}.</div>
@@ -206,10 +220,19 @@
       @elseif (count($penerima) > $maxRow)
         @for ($i = 0; $i < $maxRow - (count($penerima) % $maxRow); $i++) 
           <tr>
-            <td><div class="my-3"></div></td>
-            <td><div class="my-3"></div></td>
-            <td><div class="my-3"></div></td>
-            <td><div class="my-3"></div></td>
+            <td class="text-center">
+              {{-- lanjutkan penomoran jika tr diatas sudah 20 maka disini dimulai dari 21 --}}
+              {{ $i + count($penerima) + 1 }}.
+            </td>
+            <td><div class="my-2"></div></td>
+            <td><div class="my-2"></div></td>
+            <td>
+              @if (($i + count($penerima)) % 2 == 0)
+                <div class="">{{ $i + count($penerima) + 1 }}.</div>
+              @else
+                <div class="text-center">{{ $i + count($penerima) + 1 }}.</div>
+              @endif
+            </td>
           </tr>
         @endfor
       @endif
