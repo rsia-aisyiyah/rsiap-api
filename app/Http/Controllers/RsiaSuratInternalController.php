@@ -120,6 +120,23 @@ class RsiaSuratInternalController extends Controller
         return isSuccess($surat, "Data berhasil ditemukan");
     }
 
+    public function detailSimple(Request $request)
+    {
+        if (!$request->nomor) {
+            return isFail("No surat tidak boleh kosong");
+        }
+
+        $surat = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor)->with(['pj_detail' => function ($q) {
+            $q->select('nip', 'nama');
+        }])->first();
+
+        if (!$surat) {
+            return isFail("Data tidak ditemukan");
+        }
+        
+        return isSuccess($surat, "Data berhasil ditemukan");
+    }
+
     public function create(Request $request)
     {
         // get last surat by nomor surat

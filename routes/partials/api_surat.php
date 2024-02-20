@@ -14,6 +14,7 @@ Route::middleware('jwt.verify')->prefix('surat')->group(function ($router) {
         $router->get('/', [\App\Http\Controllers\RsiaSuratInternalController::class, 'index']);
         $router->get('get/calendar', [\App\Http\Controllers\RsiaSuratInternalController::class, 'getCalendar']);
         $router->get('/detail', [\App\Http\Controllers\RsiaSuratInternalController::class, 'detail']);
+        $router->get('/detail/simple', [\App\Http\Controllers\RsiaSuratInternalController::class, 'detailSimple']);
         $router->get('/metrics', [\App\Http\Controllers\RsiaSuratInternalController::class, 'metrics']);
 
         $router->post('/detail', [\App\Http\Controllers\RsiaSuratInternalController::class, 'detail']);
