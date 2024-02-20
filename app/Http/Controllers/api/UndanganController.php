@@ -19,7 +19,6 @@ class UndanganController extends Controller
                     $q->select('nik', 'nama');
                 }]);
             }])
-            ->where('status', '1')
             ->orderBy('no_surat', 'DESC')
             ->groupBy('no_surat');
 
