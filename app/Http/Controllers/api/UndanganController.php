@@ -17,10 +17,14 @@ class UndanganController extends Controller
             }, 'notulen' => function ($q) {
                 $q->select('no_surat', 'notulis_nik', 'created_at')->with(['notulis' => function ($q) {
                     $q->select('nik', 'nama');
-                }]);
+                }])->where('status', '1');
             }])
             ->orderBy('no_surat', 'DESC')
             ->groupBy('no_surat');
+
+        // $data = $data->whereHas('notulen', function ($q) {
+        //     $q->where('status', '1');
+        // });
 
         if ($request->keyword) {
             $data = $data->where('no_surat', 'like', '%' . $request->keyword . '%')
