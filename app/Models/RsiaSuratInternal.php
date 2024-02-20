@@ -42,4 +42,9 @@ class RsiaSuratInternal extends Model
     {
         return $this->hasOne(RsiaMemoInternal::class, 'no_surat', 'no_surat');
     }
+
+    public function penanggung_jawab()
+    {
+        return $this->pegawai_detail();
+    }
 }

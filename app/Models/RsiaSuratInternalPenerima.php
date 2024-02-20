@@ -15,6 +15,8 @@ class RsiaSuratInternalPenerima extends Model
 
     public $timestamps = false;
 
+    public $incrementing = false;
+    
 
     protected $casts = [
         'no_surat' => 'string'
@@ -34,5 +36,11 @@ class RsiaSuratInternalPenerima extends Model
     public function surat()
     {
         return $this->belongsTo(RsiaSuratInternal::class, 'no_surat', 'no_surat');
+    }
+
+    // notulen
+    public function notulen()
+    {
+        return $this->hasOne(RsiaNotulen::class, 'no_surat', 'no_surat');
     }
 }
