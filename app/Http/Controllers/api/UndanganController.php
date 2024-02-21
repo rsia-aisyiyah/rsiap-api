@@ -22,10 +22,6 @@ class UndanganController extends Controller
             ->orderBy('no_surat', 'DESC')
             ->groupBy('no_surat');
 
-        // $data = $data->whereHas('notulen', function ($q) {
-        //     $q->where('status', '1');
-        // });
-
         if ($request->keyword) {
             $data = $data->where('no_surat', 'like', '%' . $request->keyword . '%')
                 ->orWhereHas('surat', function ($q) use ($request) {
@@ -95,4 +91,75 @@ class UndanganController extends Controller
         return isSuccess($data, "Berhasil mendapatkan data");
     }
 
+    public function present(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'no_surat' => 'required|string|exists:rsia_surat_internal,no_surat',
+            'nik' => 'string|exists:pegawai,nik'
+        ]);
+
+        if ($validator->fails()) {
+            return isFail($validator->errors()->first());
+        }   
+
+        $nik = $request->nik ?? $request->payload['sub'];
+        $karyawan =$request->karyawan ? $request->karyawan : [];
+
+        if (count($karyawan) <= 0) {
+            // cek apakah termasuk penerima
+            $penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->no_surat)->where('penerima', $nik)->first();
+            if (!$penerima) {
+                return isFail("Anda tidak terdaftar sebagai penerima undangan, silahkan hubungi sekretariat untuk informasi lebih lanjut"); 
+            }
+
+            // cek sudah presensi atau belum
+            $kehadiran = \App\Models\RsiaKehadiranRapat::where('no_surat', $request->no_surat)->where('nik', $nik)->first();
+            if ($kehadiran) {
+                return isOk("Anda sudah melakukan presensi rapat pada : " . \Carbon\Carbon::parse($kehadiran->created_at)->isoFormat('dddd, D MMMM Y') . " " . \Carbon\Carbon::parse($kehadiran->created_at)->format('H:i:s'));
+            }
+
+            // create
+            $data = \App\Models\RsiaKehadiranRapat::create([
+                'no_surat' => $request->no_surat,
+                'nik' => $nik,
+            ]);
+    
+            if (!$data) {
+                return isFail("Gagal melakukan presensi rapat");
+            }
+    
+            return isSuccess($data, "Berhasil melakukan presensi rapat");
+        }
+
+        // jika ada karyawan yang diinputkan 
+        
+        // hapus semua presensi berdasaarkan no_surat
+        $delete = \App\Models\RsiaKehadiranRapat::where('no_surat', $request->no_surat)->delete();
+        if (!$delete) {
+            return isFail("Gagal melakukan presensi rapat");
+        }
+
+        // create
+        foreach ($karyawan as $v) {
+            // cek nik on penerima
+            $penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->no_surat)->where('penerima', $v)->first();
+            if (!$penerima) {
+                $penerima = \App\Models\RsiaSuratInternalPenerima::create([
+                    'no_surat' => $request->no_surat,
+                    'penerima' => $v,
+                ]);
+            }
+
+            $data = \App\Models\RsiaKehadiranRapat::create([
+                'no_surat' => $request->no_surat,
+                'nik' => $v,
+            ]);
+    
+            if (!$data) {
+                return isFail("Gagal melakukan presensi rapat");
+            }
+        }
+
+        return isOk("Sejumlah " . count($karyawan) . " karyawan berhasil di presensi");
+    }
 }

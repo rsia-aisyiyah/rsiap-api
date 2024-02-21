@@ -8,4 +8,7 @@ Route::middleware('jwt.verify')->prefix('undangan')->group(function ($router) {
     
     $router->post('/detail', [\App\Http\Controllers\api\UndanganController::class, 'detail']);
 
+    $router->group(['prefix' => 'kegiatan', 'middleware' => 'departmen:ADM,DIR,DM10,DM9,IT'], function () use ($router) {
+        $router->post('present', [\App\Http\Controllers\api\UndanganController::class, 'present']);
+    });
 });
