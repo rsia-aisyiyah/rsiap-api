@@ -65,4 +65,34 @@ class UndanganController extends Controller
 
         return isSuccess($data, "Berhasil mendapatkan data");
     }
+
+    public function detail(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'no_surat' => 'required|string|exists:rsia_surat_internal,no_surat'
+        ]);
+
+        if ($validator->fails()) {
+            return isFail($validator->errors()->first());
+        }
+
+        $data = \App\Models\RsiaSuratInternal::select("*")
+            ->with(['penanggung_jawab' => function ($q) {
+                $q->select('nik', 'nama');
+            }, 'notulen', 'notulen.notulis' => function ($q) {
+                $q->select('nik', 'nama'); 
+            }, 'penerima', 'penerima.pegawai' => function($q) {
+                $q->select('nik', 'nama');
+            }])
+            ->whereHas('penerima')
+            ->where('no_surat', $request->no_surat)
+            ->first();
+
+        if (!$data) {
+            return isFail("Data tidak ditemukan");
+        }
+
+        return isSuccess($data, "Berhasil mendapatkan data");
+    }
+
 }
