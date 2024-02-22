@@ -7,8 +7,11 @@ Route::middleware('jwt.verify')->prefix('undangan')->group(function ($router) {
     $router->get('/me', [\App\Http\Controllers\api\UndanganController::class, 'me']);
     
     $router->post('/detail', [\App\Http\Controllers\api\UndanganController::class, 'detail']);
+    $router->post('/penerima', [\App\Http\Controllers\api\UndanganController::class, 'penerima']);
 
-    $router->group(['prefix' => 'kegiatan', 'middleware' => 'departmen:ADM,DIR,DM10,DM9,IT'], function () use ($router) {
+    // 'middleware' => 'departmen:ADM,DIR,DM10,DM9,IT'
+    $router->group(['prefix' => 'kegiatan'], function () use ($router) {
         $router->post('present', [\App\Http\Controllers\api\UndanganController::class, 'present']);
+        $router->post('tambah/presensi', [\App\Http\Controllers\api\UndanganController::class, 'tambahPresensi']);
     });
 });
