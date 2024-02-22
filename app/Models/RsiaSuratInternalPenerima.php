@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class RsiaSuratInternalPenerima extends Model
 {
     use HasFactory;
+    use \Awobaz\Compoships\Compoships;
 
     protected $table = 'rsia_surat_internal_penerima';
 
@@ -42,5 +43,15 @@ class RsiaSuratInternalPenerima extends Model
     public function notulen()
     {
         return $this->hasOne(RsiaNotulen::class, 'no_surat', 'no_surat');
+    }
+
+    // kehadiran
+    public function kehadiran()
+    {
+        return $this->hasOne(
+            RsiaKehadiranRapat::class,
+            ['no_surat', 'nik'],
+            ['no_surat', 'penerima']
+        );
     }
 }

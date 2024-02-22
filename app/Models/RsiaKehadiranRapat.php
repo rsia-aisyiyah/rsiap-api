@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class RsiaKehadiranRapat extends Model
 {
     use HasFactory;
+    use \Awobaz\Compoships\Compoships;
 
     protected $table = 'rsia_kehadiran_rapat';
 
