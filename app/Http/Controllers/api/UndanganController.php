@@ -317,6 +317,9 @@ class UndanganController extends Controller
         }
 
         // create
+        \Illuminate\Support\Facades\DB::beginTransaction();
+
+        $data = [];
         foreach ($karyawan as $v) {
             // cek nik on penerima
             $penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->no_surat)->where('penerima', $v)->first();
@@ -333,16 +336,24 @@ class UndanganController extends Controller
                 continue;
             }
 
-            $data = \App\Models\RsiaKehadiranRapat::create([
+            $data[] = [
                 'no_surat' => $request->no_surat,
                 'nik' => $v,
-            ]);
-
-            if (!$data) {
-                return isFail("Gagal melakukan presensi rapat");
-            }
+            ];
         }
 
-        return isOk("Sejumlah " . count($karyawan) . " karyawan berhasil di presensi");
+        if (count($data) <= 0) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return isFail("Tidak ada karyawan yang bisa di presensi");
+        }
+
+        $data = \App\Models\RsiaKehadiranRapat::insert($data);
+
+        if (!$data) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return isFail("Gagal melakukan presensi rapat");
+        }
+
+        \Illuminate\Support\Facades\DB::commit();
     }
 }
