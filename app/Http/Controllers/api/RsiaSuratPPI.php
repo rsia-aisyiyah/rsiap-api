@@ -70,7 +70,7 @@ class RsiaSuratPPI extends Controller
         }
 
         $rsia_surat_ppi = new \App\Models\RsiaSuratPPI();
-        $rsia_surat_ppi->nomor = $this->getLastNomor(date('Y'));
+        $rsia_surat_ppi->nomor = $this->getLastNomor($request->tgl_terbit);
         $rsia_surat_ppi->pj = $request->pj;
         $rsia_surat_ppi->perihal = $request->perihal;
         $rsia_surat_ppi->tgl_terbit = $request->tgl_terbit;
@@ -166,8 +166,8 @@ class RsiaSuratPPI extends Controller
 
     protected function getLastNomor($tgl_terbit)
     {
-        $rsia_surat_ppi = \App\Models\RsiaSuratPPI::whereYear('tgl_terbit', $tgl_terbit)->max('nomor');
-
+        $year = date('Y', strtotime($tgl_terbit));
+        $rsia_surat_ppi = \App\Models\RsiaBerkasPMKP::whereYear('tgl_terbit', $year)->max('nomor');
         if (!$rsia_surat_ppi) {
             return 1;
         }
