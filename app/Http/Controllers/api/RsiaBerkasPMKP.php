@@ -15,7 +15,7 @@ class RsiaBerkasPMKP extends Controller
 
         if ($request->keyword) {
             $rsia_surat_ppi->where('nomor', 'like', '%' . $request->keyword . '%')
-                ->where('perihal', 'like', '%' . $request->keyword . '%')
+                ->orWhere('perihal', 'like', '%' . $request->keyword . '%')
                 ->orWhere('pj', 'like', '%' . $request->keyword . '%')
                 ->orWhereHas('penanggungjawab', function ($query) use ($request) {
                     $query->where('nama', 'like', '%' . $request->keyword . '%');
