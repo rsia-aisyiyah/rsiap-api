@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\JasaPelayananAkun;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class JasaPelayanan extends Model
 {
     use HasFactory;
+    use \Awobaz\Compoships\Compoships;
+
 
     protected $table = 'rsia_log_jm';
     // protected $hidden = ['no_rkm_medis', 'no_ktp', 'no_peserta'];
@@ -20,5 +23,13 @@ class JasaPelayanan extends Model
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'nik', 'nik');
+    }
+    public function jasa_pelayanan_akun()
+    {
+        return $this->belongsTo(
+            JasaPelayananAkun::class,
+            ['tahun', 'bulan'],
+            ['tahun', 'bulan']
+        );
     }
 }
