@@ -77,7 +77,7 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
     $router->group(['prefix' => 'ppi'], function () use ($router) {
         $router->get('/', [\App\Http\Controllers\api\RsiaSuratPPI::class, 'index']);
         $router->get('/{nomor}/show', [\App\Http\Controllers\api\RsiaSuratPPI::class, 'show']);
-        
+
         $router->post('/store', [\App\Http\Controllers\api\RsiaSuratPPI::class, 'store']);
         $router->post('/update', [\App\Http\Controllers\api\RsiaSuratPPI::class, 'update']);
         $router->post('/delete', [\App\Http\Controllers\api\RsiaSuratPPI::class, 'delete']);
@@ -89,12 +89,27 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
     $router->group(['prefix' => 'pmkp'], function () use ($router) {
         $router->get('/', [\App\Http\Controllers\api\RsiaBerkasPMKP::class, 'index']);
         $router->get('/{nomor}/show', [\App\Http\Controllers\api\RsiaBerkasPMKP::class, 'show']);
-        
+
         $router->post('/store', [\App\Http\Controllers\api\RsiaBerkasPMKP::class, 'store']);
         $router->post('/update', [\App\Http\Controllers\api\RsiaBerkasPMKP::class, 'update']);
         $router->post('/delete', [\App\Http\Controllers\api\RsiaBerkasPMKP::class, 'delete']);
 
         $router->delete('/destroy', [\App\Http\Controllers\api\RsiaBerkasPMKP::class, 'destroy']);
+    });
+
+    // Komite
+    $router->group(['prefix' => 'komite'], function () use ($router) {
+        // Keperawatan komite/keperawatan
+        $router->group(['prefix' => 'keperawatan'], function () use ($router) {
+            $router->get('/', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'index']);
+            $router->get('/{nomor}/show', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'show']);
+
+            $router->post('/store', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'store']);
+            $router->post('/update', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'update']);
+            $router->post('/delete', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'delete']);
+
+            $router->delete('/destroy', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'destroy']);
+        });
     });
 });
 
