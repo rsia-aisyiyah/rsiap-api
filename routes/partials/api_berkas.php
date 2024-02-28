@@ -99,7 +99,7 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
 
     // Komite
     $router->group(['prefix' => 'komite'], function () use ($router) {
-        // Keperawatan komite/keperawatan
+        // keperawatan komite/keperawatan
         $router->group(['prefix' => 'keperawatan'], function () use ($router) {
             $router->get('/', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'index']);
             $router->get('/{nomor}/show', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'show']);
@@ -110,6 +110,54 @@ Route::middleware('jwt.verify')->prefix('berkas')->group(function ($router) {
 
             $router->delete('/destroy', [\App\Http\Controllers\api\RsiaBerkasKomiteKeperawatan::class, 'destroy']);
         });
+
+        // kesehatan komite/kesehatan
+        $router->group(['prefix' => 'kesehatan'], function () use ($router) {
+            $router->get('/', [\App\Http\Controllers\api\RsiaBerkasKomiteKesehatan::class, 'index']);
+            $router->get('/{nomor}/show', [\App\Http\Controllers\api\RsiaBerkasKomiteKesehatan::class, 'show']);
+
+            $router->post('/store', [\App\Http\Controllers\api\RsiaBerkasKomiteKesehatan::class, 'store']);
+            $router->post('/update', [\App\Http\Controllers\api\RsiaBerkasKomiteKesehatan::class, 'update']);
+            $router->post('/delete', [\App\Http\Controllers\api\RsiaBerkasKomiteKesehatan::class, 'delete']);
+
+            $router->delete('/destroy', [\App\Http\Controllers\api\RsiaBerkasKomiteKesehatan::class, 'destroy']);
+        });
+
+        // medis komite/medis
+        $router->group(['prefix' => 'medis'], function () use ($router) {
+            $router->get('/', [\App\Http\Controllers\api\RsiaBerkasKomiteMedis::class, 'index']);
+            $router->get('/{nomor}/show', [\App\Http\Controllers\api\RsiaBerkasKomiteMedis::class, 'show']);
+
+            $router->post('/store', [\App\Http\Controllers\api\RsiaBerkasKomiteMedis::class, 'store']);
+            $router->post('/update', [\App\Http\Controllers\api\RsiaBerkasKomiteMedis::class, 'update']);
+            $router->post('/delete', [\App\Http\Controllers\api\RsiaBerkasKomiteMedis::class, 'delete']);
+
+            $router->delete('/destroy', [\App\Http\Controllers\api\RsiaBerkasKomiteMedis::class, 'destroy']);
+        });
+    });
+
+    // Radiologi
+    $router->group(['prefix' => 'radiologi'], function () use ($router) {
+        $router->get('/', [\App\Http\Controllers\api\RsiaBerkasRadiologi::class, 'index']);
+        $router->get('/{nomor}/show', [\App\Http\Controllers\api\RsiaBerkasRadiologi::class, 'show']);
+
+        $router->post('/store', [\App\Http\Controllers\api\RsiaBerkasRadiologi::class, 'store']);
+        $router->post('/update', [\App\Http\Controllers\api\RsiaBerkasRadiologi::class, 'update']);
+        $router->post('/delete', [\App\Http\Controllers\api\RsiaBerkasRadiologi::class, 'delete']);
+
+        $router->delete('/destroy', [\App\Http\Controllers\api\RsiaBerkasRadiologi::class, 'destroy']);
+    });
+
+    // Sertifikat IHT
+    $router->group(['prefix' => 'sertifikat'], function () use ($router) {
+        $router->get('/', [\App\Http\Controllers\api\RsiaBerkasSertifikat::class, 'index']);
+        $router->get('/{nomor}/show', [\App\Http\Controllers\api\RsiaBerkasSertifikat::class, 'show']);
+
+        $router->post('/store', [\App\Http\Controllers\api\RsiaBerkasSertifikat::class, 'store']);
+        $router->post('/update', [\App\Http\Controllers\api\RsiaBerkasSertifikat::class, 'update']);
+        $router->post('/delete', [\App\Http\Controllers\api\RsiaBerkasSertifikat::class, 'delete']);
+
+        $router->delete('/destroy', [\App\Http\Controllers\api\RsiaBerkasSertifikat::class, 'destroy']);
     });
 });
 
