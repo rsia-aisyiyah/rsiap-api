@@ -12,9 +12,10 @@ class MenuEPersonal extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = \App\Models\RsiaMasterMenuEPersonal::where('status', 1)->get()->groupBy('group');
+        $set_data = \App\Models\SetMenuEPersonal::select('menu_id')->where('dep_id', $request->dep)->get();
+        $data = \App\Models\RsiaMasterMenuEPersonal::whereIn('id', $set_data)->get()->groupBy('group');
         return new \App\Http\Resources\Collection\MenuEPersonalCollection($data);
     }
 
