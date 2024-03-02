@@ -15,7 +15,7 @@ class MenuEPersonal extends Controller
     public function index(Request $request)
     {
         $set_data = \App\Models\SetMenuEPersonal::select('menu_id')->where('dep_id', $request->dep)->get();
-        $data = \App\Models\RsiaMasterMenuEPersonal::whereIn('id', $set_data)->get()->groupBy('group');
+        $data = \App\Models\RsiaMasterMenuEPersonal::whereIn('id', $set_data)->orderBy('urutan', 'ASC')->get()->groupBy('group');
         return new \App\Http\Resources\Collection\MenuEPersonalCollection($data);
     }
 
