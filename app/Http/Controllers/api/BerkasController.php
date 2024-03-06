@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class BerkasController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $payload = auth()->payload();
         $nik = $payload->get('sub');
@@ -133,9 +133,15 @@ class BerkasController extends Controller
         }
     }
 
-    public function get_kategori()
+    public function get_kategori(Request $request)
     {
-        $kategori = \App\Models\MasterBerkasPegawai::select('kategori')->distinct()->get();
+        $kategori = \App\Models\MasterBerkasPegawai::select('kategori', 'kode')->groupBy('kategori');
+
+        if ($request->spk_rkk && $request->spk_rkk == 'true' || $request->spk_rkk == 1) {
+            $kategori = $kategori->whereIn('kode', ['MBP0006', 'MBP0019', 'MBP0032', 'MBP0045']);
+        }
+
+        $kategori = $kategori->get();
 
         return isSuccess($kategori, "kategori berhasil diambil");
     }

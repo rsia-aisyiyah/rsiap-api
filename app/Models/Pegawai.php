@@ -31,6 +31,11 @@ class Pegawai extends Model
         return $this->hasMany(BerkasPegawai::class, 'nik', 'nik');
     }
 
+    public function spkrkk()
+    {
+        return $this->hasMany(BerkasPegawai::class, 'nik', 'nik')->whereIn('kode_berkas', ['MBP0006', 'MBP0019', 'MBP0032', 'MBP0045'])->orderBy('tgl_uploud', 'desc');
+    }
+
     public function bidang_detail()
     {
         return $this->hasOne(Bidang::class, 'nama', 'jnj_jabatan');
