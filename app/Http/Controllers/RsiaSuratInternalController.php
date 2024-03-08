@@ -10,8 +10,11 @@ class RsiaSuratInternalController extends Controller
     {
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select("*")->with(['pj_detail' => function ($q) {
             $q->select('nip', 'nama');
-        }]);
-        $data = $rsia_surat_internal->orderBy('tanggal', 'desc')->orderBy('no_surat', 'desc');
+        }, 'penerima']);
+
+        $data = $rsia_surat_internal->orderBy('created_at', 'desc')
+            ->orderBy('no_surat', 'desc')
+            ->whereDoesntHave('memo');
 
         if ($request->keyword) {
             $data = $data->where(function ($q) use ($request) {
@@ -23,6 +26,15 @@ class RsiaSuratInternalController extends Controller
                         $q->where('nama', 'like', '%' . $request->keyword . '%');
                     });
             });
+        }
+
+        if ($request->tgl_terbit) {
+            $data = $data->where('tgl_terbit', $request->tgl_terbit);
+        }
+
+        // status
+        if ($request->status) {
+            $data = $data->where('status', $request->status);
         }
 
         if ($request->datatables) {
@@ -42,14 +54,16 @@ class RsiaSuratInternalController extends Controller
     public function getCalendar(Request $request)
     {
         // get this month and  return [title is perihal, date is tanggal]
-        $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('no_surat', 'tempat', 'pj', 'perihal as title', 'tanggal as date', 'tanggal', 'status')->with('pj_detail');
+        $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('no_surat', 'tempat', 'pj', 'perihal as title', 'tanggal as date', 'tanggal', 'status')
+            ->whereHas('penerima')
+            ->with('pj_detail');
 
         if ($request->start && $request->end) {
-            $start = date('Y-m-d', strtotime($request->start . ' +1 day'));
-            $msg = "Data berhasil ditemukan dari tanggal " . $start . " sampai " . $request->end;
+            $start               = date('Y-m-d', strtotime($request->start . ' +1 day'));
+            $msg                 = "Data berhasil ditemukan dari tanggal " . $start . " sampai " . $request->end;
             $rsia_surat_internal = $rsia_surat_internal->whereBetween('tanggal', [$start, $request->end]);
         } else {
-            $msg = "Data berhasil ditemukan dari tanggal " . date('Y-m-d') . " sampai " . date('Y-m-d');
+            $msg                 = "Data berhasil ditemukan dari tanggal " . date('Y-m-d') . " sampai " . date('Y-m-d');
             $rsia_surat_internal = $rsia_surat_internal->whereMonth('tanggal', date('m'))->whereYear('tanggal', date('Y'));
         }
 
@@ -106,12 +120,29 @@ class RsiaSuratInternalController extends Controller
         return isSuccess($surat, "Data berhasil ditemukan");
     }
 
+    public function detailSimple(Request $request)
+    {
+        if (!$request->nomor) {
+            return isFail("No surat tidak boleh kosong");
+        }
+
+        $surat = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor)->with(['pj_detail' => function ($q) {
+            $q->select('nip', 'nama');
+        }])->first();
+
+        if (!$surat) {
+            return isFail("Data tidak ditemukan");
+        }
+        
+        return isSuccess($surat, "Data berhasil ditemukan");
+    }
+
     public function create(Request $request)
     {
         // get last surat by nomor surat
         $data = \App\Models\RsiaSuratInternal::select('no_surat')
             ->orderBy('no_surat', 'desc')
-            ->whereYear('tanggal', date('Y'))
+            ->whereYear('created_at', date('Y'))
             ->first();
 
         if ($data) {
@@ -120,8 +151,12 @@ class RsiaSuratInternalController extends Controller
             $data = [0];
         }
 
+        if (!$request->tgl_terbit) {
+            return isFail("Tanggal terbit tidak boleh kosong");
+        }
+
         // last number
-        $date_now = date('dmy');
+        $date_now    = $request->tgl_terbit ? date('dmy', strtotime($request->tgl_terbit)) : date('dmy');
         $last_number = $data[0];
         $last_number = str_pad($last_number + 1, 3, '0', STR_PAD_LEFT);
         $nomor_surat = $last_number . '/A/S-RSIA/' . $date_now;
@@ -152,19 +187,51 @@ class RsiaSuratInternalController extends Controller
             \Illuminate\Support\Facades\DB::beginTransaction();
 
             $rsia_surat_internal = \App\Models\RsiaSuratInternal::create([
-                'no_surat' => $nomor_surat,
-                'perihal' => $request->perihal,
-                'tempat' => $request->tempat,
-                'pj' => $request->pj,
-                'tanggal' => $request->tanggal,
-                'status' => 'pengajuan',
+                'no_surat'   => $nomor_surat,
+                'perihal'    => $request->perihal,
+                'tempat'     => $request->tempat,
+                'pj'         => $request->pj,
+                'tanggal'    => $request->tanggal,
+                'tgl_terbit' => $request->tgl_terbit,
+                'catatan'    => $request->catatan ?? '-',
+                'status'     => 'pengajuan',
             ]);
 
             $penerima = $request->karyawan ? $request->karyawan : [];
             foreach ($penerima as $key => $value) {
-                $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
+                $rsia_surat_internal_penerima           = new \App\Models\RsiaSuratInternalPenerima;
                 $rsia_surat_internal_penerima->no_surat = $nomor_surat;
                 $rsia_surat_internal_penerima->penerima = $value;
+
+                $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
+                $nm         = $nm_pegawai ? $nm_pegawai->nama : '';
+
+                $body = "👋 Halo $nm, anda mendapatkan undangan perihal: \n\n";
+                $body .= "$request->perihal \n\n";
+                $body .= "Tempat \t: " . $request->tempat . "\n";
+                $body .= "Tanggal \t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('dddd, D MMMM Y') . "\n";
+                $body .= "Jam \t\t\t\t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('HH:mm') . "\n";
+
+                // if request->catatan && not empty or null or -
+                if ($request->catatan && $request->catatan != '-' && $request->catatan != '') {
+                    $body .= "\n";
+                    $body .= "Catatan \t: " . $request->catatan . "\n";
+                }
+
+                \App\Http\Controllers\PushNotificationPegawai::sendTo(
+                    "Undangan baru untuk anda 📨",
+                    $body,
+                    [
+                        'route'      => 'undangan',
+                        'kategori'   => 'surat_internal',
+                        'no_surat'   => $request->old_nomor,
+                        'perihal'    => $request->perihal,
+                        'tempat'     => $request->tempat,
+                        'tgl_terbit' => $request->tgl_terbit,
+                        'tanggal'    => $request->tanggal,
+                    ],
+                    $value,
+                );
 
                 $rsia_surat_internal_penerima->save();
             }
@@ -174,7 +241,7 @@ class RsiaSuratInternalController extends Controller
 
             return isSuccess([
                 'no_surat' => $nomor_surat,
-                'surat' => $rsia_surat_internal->toArray()
+                'surat'    => $rsia_surat_internal->toArray(),
             ], "Surat berhasil dibuat");
         } catch (\Exception $e) {
             // An error occurred, rollback the transaction
@@ -183,11 +250,9 @@ class RsiaSuratInternalController extends Controller
             return isFail("Error: " . $e->getMessage());
         }
 
-
-
         return isSuccess([
             'no_surat' => $nomor_surat,
-            'surat' => $rsia_surat_internal->toArray()
+            'surat'    => $rsia_surat_internal->toArray(),
         ], "Surat berhasil dibuat");
     }
 
@@ -202,27 +267,36 @@ class RsiaSuratInternalController extends Controller
             return isFail("Data tidak ditemukan");
         }
 
-        $update_data = [
-            'pj' => $request->pj,
-            'no_surat' => $request->no_surat,
-            'perihal' => $request->perihal,
-            'tempat' => $request->tempat,
-            'tanggal' => $request->tanggal,
-        ];
-
-        // Delete all penerima
-        $rsia_surat_internal_penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->nomor);
-        $rsia_surat_internal_penerima->delete();
-
-        // Insert new penerima
-        $penerima = $request->penerima ? $request->penerima : [];
-        foreach ($penerima as $key => $value) {
-            $rsia_surat_internal_penerima = new \App\Models\RsiaSuratInternalPenerima;
-            $rsia_surat_internal_penerima->no_surat = $request->nomor;
-            $rsia_surat_internal_penerima->penerima = $value;
-
-            $rsia_surat_internal_penerima->save();
+        // check request
+        if (!$request->perihal) {
+            return isFail("Perihal tidak boleh kosong");
         }
+
+        if (!$request->pj) {
+            return isFail("PJ tidak boleh kosong");
+        }
+
+        if (!$request->tgl_terbit) {
+            return isFail("Tanggal terbit tidak boleh kosong");
+        }
+
+        if (!$request->tanggal) {
+            return isFail("Tanggal tidak boleh kosong");
+        }
+
+        if (!$request->tempat) {
+            return isFail("Tempat tidak boleh kosong");
+        }
+
+        $update_data = [
+            'pj'         => $request->pj,
+            'no_surat'   => $request->no_surat,
+            'perihal'    => $request->perihal,
+            'tempat'     => $request->tempat,
+            'tanggal'    => $request->tanggal,
+            'tgl_terbit' => $request->tgl_terbit,
+            'catatan'    => $request->catatan ?? '-',
+        ];
 
         // Update the main record
         // $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
@@ -233,6 +307,50 @@ class RsiaSuratInternalController extends Controller
         // Update the PJ record
         // $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
         // $data = $rsia_surat_internal->update($update_pj);
+
+        // Delete all penerima
+        $rsia_surat_internal_penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->old_nomor);
+        $rsia_surat_internal_penerima->delete();
+
+        // Insert new penerima
+        $penerima = $request->penerima ? $request->penerima : [];
+        foreach ($penerima as $key => $value) {
+            $rsia_surat_internal_penerima           = new \App\Models\RsiaSuratInternalPenerima;
+            $rsia_surat_internal_penerima->no_surat = $request->old_nomor;
+            $rsia_surat_internal_penerima->penerima = $value;
+
+            $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
+            $nm         = $nm_pegawai ? $nm_pegawai->nama : '';
+
+            $body = "👋 Halo $nm, anda mendapatkan undangan perihal: \n\n";
+            $body .= "$request->perihal \n\n";
+            $body .= "Tempat \t: " . $request->tempat . "\n";
+            $body .= "Tanggal \t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('dddd, D MMMM Y') . "\n";
+            $body .= "Jam \t\t\t\t: " . \Carbon\Carbon::parse($request->tanggal)->isoFormat('HH:mm') . "\n";
+
+            // if request->catatan && not empty or null or -
+            if ($request->catatan && $request->catatan != '-' && $request->catatan != '') {
+                $body .= "\n";
+                $body .= "Catatan \t: " . $request->catatan . "\n";
+            }
+
+            \App\Http\Controllers\PushNotificationPegawai::sendTo(
+                "Undangan baru untuk anda 📨",
+                $body,
+                [
+                    'route'      => 'undangan',
+                    'kategori'   => 'surat_internal',
+                    'no_surat'   => $request->old_nomor,
+                    'perihal'    => $request->perihal,
+                    'tempat'     => $request->tempat,
+                    'tanggal'    => $request->tanggal,
+                    'tgl_terbit' => $request->tgl_terbit,
+                ],
+                $value,
+            );
+
+            $rsia_surat_internal_penerima->save();
+        }
 
         return isSuccess($data, "Data berhasil diupdate");
     }
@@ -248,8 +366,8 @@ class RsiaSuratInternalController extends Controller
         }
 
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->nomor);
-        $data = $rsia_surat_internal->update([
-            'status' => $request->status
+        $data                = $rsia_surat_internal->update([
+            'status' => $request->status,
         ]);
 
         return isSuccess($data, "Data berhasil diupdate");
@@ -262,7 +380,7 @@ class RsiaSuratInternalController extends Controller
         }
 
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::where('no_surat', $request->no_surat);
-        $data = $rsia_surat_internal->delete();
+        $data                = $rsia_surat_internal->delete();
 
         return isSuccess($data, "Data berhasil dihapus");
     }
@@ -272,19 +390,70 @@ class RsiaSuratInternalController extends Controller
     {
         // get count all data group by status
         $rsia_surat_internal = \App\Models\RsiaSuratInternal::select('status', \Illuminate\Support\Facades\DB::raw('count(*) as total'));
-        $data = $rsia_surat_internal->groupBy('status')->get();
+        $data                = $rsia_surat_internal->groupBy('status')->get();
 
         return isSuccess($data, "Data berhasil ditemukan");
     }
 
+    // cetakUndangan
+    public function cetakUndangan($nomor)
+    {
+        $nomor = str_replace('--', '/', $nomor);
+        $penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $nomor)->with(['pegawai' => function ($q) {
+            $q->select('nik', 'nama', 'jbtn', 'bidang');
+        }])->get();
+
+        if ($penerima->count() == 0) {
+            return isFail("Data penerima tidak ditemukan");
+        }
+
+        // penerima order by pegawai nama ascending
+        $penerima = $penerima->sortBy('pegawai.nama', SORT_NATURAL | SORT_FLAG_CASE);
+        
+        // reset key $penerima
+        $penerima = $penerima->values();
+
+        $surat = \App\Models\RsiaSuratInternal::where('no_surat', $nomor)->with(['pegawai_detail' => function ($q) {
+            $q->with('jenjang_jabatan')->select('nik', 'nama', 'bidang', 'jbtn', 'jnj_jabatan');
+        }])->first();
+
+        if (!$surat) {
+            return isFail("Data surat tidak ditemukan");
+        }
+
+        $html = view('print.undangan_internal', [
+            'nomor' => $nomor,
+            'penerima' => $penerima,
+            'undangan' => $surat,
+        ]);
+
+        // PDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setWarnings(false)->setOptions([
+            'isPhpEnabled'            => true,
+            'isRemoteEnabled'         => true,
+            'isHtml5ParserEnabled'    => true,
+            'dpi'                     => 300,
+            'defaultFont'             => 'sans-serif',
+            'isFontSubsettingEnabled' => true,
+            'isJavascriptEnabled'     => true,
+        ]);
+
+        $pdf->setOption('margin-top', 0);
+        $pdf->setOption('margin-right', 0);
+        $pdf->setOption('margin-bottom', 0);
+        $pdf->setOption('margin-left', 0);
+
+        return $pdf->stream('undangan_internal.pdf');
+    }
+
     private function colSuratInternal($model, $request)
     {
-        $col = ['no_surat', 'penerima', 'pj', 'status', 'month(tanggal)', 'year(tanggal)', 'date(tanggal)'];
+        $col = ['no_surat', 'penerima', 'pj', 'status', 'month(tgl_terbit)', 'year(tgl_terbit)', 'date(tgl_terbit)'];
 
         $new_model = $model->where(function ($q) use ($col, $request) {
             foreach ($col as $key => $value) {
                 if ($request->has($value)) {
-                    if ($value == 'month(tanggal)' || $value == 'year(tanggal)' || $value == 'date(tanggal)') {
+                    if ($value == 'month(tgl_terbit)' || $value == 'year(tgl_terbit)' || $value == 'date(tgl_terbit)') {
                         $q->whereRaw($value . ' = ?', [$request->input($value)]);
                     } else {
                         $q->where($value, $request->input($value));
@@ -300,7 +469,7 @@ class RsiaSuratInternalController extends Controller
     {
         if ($request->select) {
             $select = explode(',', $request->select);
-            $modal = $modal->select($select);
+            $modal  = $modal->select($select);
         } else {
             $modal = $modal->select('*');
         }

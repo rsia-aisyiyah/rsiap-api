@@ -29,7 +29,9 @@ class JasaMedisController extends Controller
         $payload = auth()->payload();
         $nik = $payload->get('sub');
         
-        $pegawai = \App\Models\JasaPelayanan::with('pegawai')
+        $pegawai = \App\Models\JasaPelayanan::with(['pegawai','jasa_pelayanan_akun'=>function($key){
+            return $key->where('id_akun','12');
+        }])
             ->where('nik', $nik)
             ->where('status_payroll', '1')
             ->orderBy('tahun','Desc')

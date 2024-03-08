@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('rsia:notif-undangan')->everyMinute();
         $schedule->command('rsia:radiologi-new-data')->everyMinute();
         $schedule->command('rsia:radiologi-uncomplete-data')->everyThreeHours();
     }

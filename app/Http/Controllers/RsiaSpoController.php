@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class RsiaSpoController extends Controller
 {
@@ -21,6 +22,11 @@ class RsiaSpoController extends Controller
                 ->orWhere('nomor', 'LIKE', '%' . $request->keyword . '%');
         }
 
+        // tgl_terbit
+        if ($request->tgl_terbit) {
+            $rsia_spo = $rsia_spo->where('status', '1')->where('tgl_terbit', $request->tgl_terbit);
+        }
+
         if ($request->jenis) {
             $jenis = $request->jenis;
             if (substr($jenis, 0, 1) != '/') {
@@ -34,7 +40,7 @@ class RsiaSpoController extends Controller
             $rsia_spo = $rsia_spo->where('status', '1')->where('nomor', 'LIKE', '%' . $jenis . '%');
         }
 
-        $rsia_spo = $rsia_spo->where('status', '1')->orderBy('nomor', 'desc');
+        $rsia_spo = $rsia_spo->where('status', '1')->orderBy('tgl_terbit', 'desc')->orderBy('nomor', 'desc');
 
         if ($request->datatables) {
             if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
@@ -73,6 +79,7 @@ class RsiaSpoController extends Controller
             "nomor" => "required",
             "judul" => "required",
             "unit" => "required",
+            "unit_terkait" => "required",
             "tgl_terbit" => "required",
         ];
 
@@ -112,6 +119,7 @@ class RsiaSpoController extends Controller
             "nomor" => "required",
             "judul" => "required",
             "unit" => "required",
+            "unit_terkait" => "required",
             "tgl_terbit" => "required",
         ];
 
@@ -172,12 +180,97 @@ class RsiaSpoController extends Controller
 
     public function getLastNomor(Request $request)
     {
+        $q = \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->orderBy('nomor', 'desc');
+
+        $medis = (clone $q)->where('nomor', 'LIKE', '%/A/%')->first();
+        $penunjang = (clone $q)->where('nomor', 'LIKE', '%/B/%')->first();
+        $umum = (clone $q)->where('nomor', 'LIKE', '%/C/%')->first();
+
         $data = [
-            'medis' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/A/%')->orderBy('nomor', 'desc')->first()->nomor,
-            'penunjang' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/B/%')->orderBy('nomor', 'desc')->first()->nomor,
-            'umum' => \App\Models\RsiaSpo::select('nomor')->whereYear('tgl_terbit', date('Y'))->where('nomor', 'LIKE', '%/C/%')->orderBy('nomor', 'desc')->first()->nomor,
+            'medis' => $medis ? $medis->nomor : null,
+            'penunjang' => $penunjang ? $penunjang->nomor : null,
+            'umum' => $umum ? $umum->nomor : null,
         ];
 
         return isSuccess($data, 'Data SPO berhasil ditampilkan');
+    }
+
+    public function renderPdf($nomor)
+    {
+        $rn = str_replace('--', '/', $nomor);
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->with('detail')->where('nomor', $rn)->first();
+
+        if (!$rsia_spo) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        $spo = $rsia_spo;
+        $detail = [];
+
+        foreach ($spo->detail->toArray() as $key => $value) {
+            if ($key != 'nomor') {
+                $detail[$key] = html_entity_decode($value);
+            }
+        }
+
+        $html = view('print.spo', compact('spo', 'detail'))->render();
+
+        $pdf = PDF::loadHtml($html)->setPaper('a4', 'portrait')->setWarnings(false)->setOptions([
+            'isPhpEnabled' => true,
+            'isRemoteEnabled' => true,
+            'isHtml5ParserEnabled' => true,
+            'dpi' => 300,
+            'defaultFont' => 'sans-serif',
+            'isFontSubsettingEnabled' => true,
+            'isJavascriptEnabled' => true,
+        ]);
+
+        return $pdf->stream('spo.pdf');
+
+        $filename = strtoupper(str_replace(' ', '_', $spo->judul) . '_SPO') . '.pdf';
+        return $pdf->download($filename);
+    }
+
+    public function verify(Request $request)
+    {
+        // /verify/{nomor}
+        if (!$request->nomor) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        // nomor is replace -- to /
+        $nomor = str_replace('--', '/', $request->nomor);
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->where('nomor', $nomor)->first();
+
+        if (!$rsia_spo) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        $rsia_spo->update(['is_verified' => 1]);
+        return isSuccess($rsia_spo, 'SPO berhasil diverifikasi');
+    }
+
+    // get SPO by unit_terkait
+    public function showByUnit(Request $request)
+    {
+        if (!$request->unit_terkait) {
+            return isFail('Unit terkait tidak ditemukan', 404);
+        }
+
+        $rsia_spo = \App\Models\RsiaSpo::select("*")->with('detail', 'departemen');
+        $rsia_spo = $rsia_spo->where('unit_terkait', 'LIKE', '%' . $request->unit_terkait . '%')->get();
+
+        if (!$rsia_spo) {
+            return isFail('SPO tidak ditemukan', 404);
+        }
+
+        $data = [
+            'unit_terkait' => $request->unit_terkait,
+            'count' => $rsia_spo->count(),
+            'spo' => $rsia_spo,
+        ];
+
+        // rsia_spo is empty 
+        return isSuccess($data, $rsia_spo->isEmpty() ? 'Belum ada atau tidak ada SPO' : 'SPO berhasil ditampilkan');
     }
 }

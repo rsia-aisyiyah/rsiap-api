@@ -121,6 +121,40 @@ class PegawaiController extends Controller
         return isSuccess($pegawai, 'Berhasil mengambil data pegawai');
     }
 
+    public function getMengetahui(Request $request)
+    {
+        $only = ["DIRU", "WD", "RS1", "RS12", "RS13", "RS15", "RS16", "RS17", "RS2", "RS3", "RS4", "RS5", "RS6", "RS7", "RS8"];
+        $pegawai = \App\Models\Pegawai::select('nik', 'nama', 'jbtn', 'departemen', 'jnj_jabatan')
+            ->with(['dpt', 'jenjang_jabatan'])
+            ->whereIn('jnj_jabatan', $only)
+            ->where('stts_aktif', 'AKTIF')
+            ->orderBy('nik', 'ASC');
+        
+        if ($request->keyword) {
+            $pegawai->where(function ($q) use ($request) {
+                $q->where('nik', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('jbtn', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('bidang', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhere('nama', 'LIKE', '%' . $request->keyword . '%')
+                    ->orWhereHas('dpt', function ($q) use ($request) {
+                        $q->where('nama', 'LIKE', '%' . $request->keyword . '%');
+                    });
+            });
+        }
+
+        if ($request->datatables) {
+            if ($request->datatables == 1 || $request->datatables == true || $request->datatables == 'true') {
+                return \Yajra\DataTables\DataTables::of($pegawai)->make(true);
+            } else {
+                $pegawai = $pegawai->paginate(5);
+            }
+        } else {
+            $pegawai = $pegawai->paginate(5);
+        }
+
+        return isSuccess($pegawai, 'Berhasil mengambil data pegawai');
+    }
+
     public function store(Request $request)
     {
         $table_insert = [

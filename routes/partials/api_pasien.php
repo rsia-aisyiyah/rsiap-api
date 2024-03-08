@@ -4,10 +4,28 @@ use App\Http\Controllers\RadiologiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\PasienController;
 use App\Http\Controllers\api\OperasiController;
+use App\Http\Controllers\api\PasienAuth;
 use App\Http\Controllers\api\PasienRalanController;
 use App\Http\Controllers\api\PasienRanapController;
 
+
+Route::prefix('pasien')->group(function ($router) {
+    // auth group
+    $router->prefix('auth')->group(function ($r) {
+        $r->post('register', [PasienAuth::class, 'register']);
+        $r->post('login', [PasienAuth::class, 'login']);
+        $r->middleware('jwt.verify')->post('logout', [PasienAuth::class, 'logout']);
+    });
+});
+
 Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
+    
+    $router->prefix('auth')->group(function ($r) {
+        $r->post('logout', [PasienAuth::class, 'logout']);
+        $r->get('validate', [PasienAuth::class, 'validateToken']);
+        $r->get('user', [PasienAuth::class, 'getUser']);
+    });
+
     // Semua Pasien (termasuk rawat inap dan rawat jalan)
     Route::get('/', [PasienController::class, 'index']);
     Route::get('now', [PasienController::class, 'now']);

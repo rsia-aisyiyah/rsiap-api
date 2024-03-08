@@ -80,7 +80,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'id',
 
     /*
     |--------------------------------------------------------------------------
@@ -93,7 +93,7 @@ return [
     |
     */
 
-    'fallback_locale' => 'en',
+    'fallback_locale' => 'id',
 
     /*
     |--------------------------------------------------------------------------
@@ -106,7 +106,7 @@ return [
     |
     */
 
-    'faker_locale' => 'en_US',
+    'faker_locale' => 'id_ID',
 
     /*
     |--------------------------------------------------------------------------
@@ -232,7 +232,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         // load ApiResponser class
-        'APIResponse' => App\Traits\ApiResponser::class,
+        // 'APIResponse' => App\Traits\ApiResponser::class,
 
         // JWT Auth
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,

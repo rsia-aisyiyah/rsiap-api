@@ -28,8 +28,30 @@ class RsiaSuratInternal extends Model
         return $this->hasOne(Petugas::class, 'nip', 'pj');
     }
 
+    public function pegawai_detail()
+    {
+        return $this->hasOne(Pegawai::class, 'nik', 'pj');
+    }
+
     public function penerima()
     {
         return $this->hasMany(RsiaSuratInternalPenerima::class, 'no_surat', 'no_surat');
     }
+
+    public function memo()
+    {
+        return $this->hasOne(RsiaMemoInternal::class, 'no_surat', 'no_surat');
+    }
+
+    public function notulen()
+    {
+        return $this->hasOne(RsiaNotulen::class, 'no_surat', 'no_surat');
+    }
+
+    public function penanggung_jawab()
+    {
+        return $this->pegawai_detail();
+    }
+
+    
 }

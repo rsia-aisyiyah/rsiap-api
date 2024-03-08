@@ -18,6 +18,15 @@ class PasienController extends Controller
         $this->tracker = new \App\Http\Controllers\TrackerSqlController();
     }
 
+    /**
+     * Pasien
+     * 
+     * Digunakan untuk mengambil seluruh data pasien yang ditangani oleh dokter yang bersangkutan, data akan diurutkan berdasarkan tanggal registrasi. hasil data akan di pagination
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     * @authenticated
+     */
     public function index()
     {
         $payload   = auth()->payload();
@@ -31,6 +40,15 @@ class PasienController extends Controller
         return isSuccess($pasien, 'Seluruh Pasien berhasil dimuat');
     }
 
+    /**
+     * Pasien Now
+     * 
+     * Digunakan untuk mengambil seluruh data pasien yang ditangani oleh dokter yang bersangkutan berdasarkan tanggal registrasi sekarang.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     * @authenticated
+     */
     public function now()
     {
         $payload   = auth()->payload();
@@ -51,6 +69,21 @@ class PasienController extends Controller
         return isSuccess($pasien, 'Pasien hari ini berhasil dimuat');
     }
 
+    /**
+     * Metric Pasien - Current Date
+     * 
+     * Endpoint untuk mendapatkan data metric pasien berdasarkan spesialis dokter yang bersangkutan, data yang diambil antara lain : 
+     * - Jumlah pasien rawat jalan
+     * - Jumlah pasien rawat inap
+     * - Jumlah jadwal operasi
+     * 
+     * Pasien ranap : data yang diambl adalah pasien yang ditangani oleh dokter yang bersangkutan dan pasien belum pulang
+     * Pasien ralan : data yang diambl adalah pasien yang ditangani oleh dokter yang bersangkutan dan pasien yang registrasi hari ini
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     * @authenticated
+     */
     public function metricNow()
     {
         $payload   = auth()->payload();
@@ -116,6 +149,19 @@ class PasienController extends Controller
         return isSuccess($data, 'Data metric berhasil dimuat');
     }
 
+    /**
+     * Metrics Pasien Radiologi - Current Date
+     * Endpoint untuk mendapatkan data metric pasien radiologi berdasarkan spesialis dokter yang bersangkutan, data yang diambil antara lain :
+     * - Jumlah permintaan radiologi
+     * - Jumlah pasien radiologi
+     * 
+     * Data permintaan radiologi : data yang diambil berdasarkan tanggal permintaan radiologi hari ini dan belum diambil sampelnya / data dengan sampel (hasil scan) belum diisi
+     * Data pasien radiologi : data yang diambil berdasarkan tanggal permintaan radiologi hari ini dan sampel (hasil scan) sudah diisi
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     * @authenticated
+     */
     public function metricRadiologiNow(Request $request)
     {
         $kd_dokter = $request->payload->get('sub');
@@ -139,43 +185,48 @@ class PasienController extends Controller
         return isSuccess($data, $msg);
     }
 
+    /**
+     * Pasien - By Date
+     * 
+     * Digunakan untuk mengambil seluruh data pasien yang ditangani oleh dokter yang bersangkutan berdasarkan tanggal registrasi yang diinputkan. data akan diurutkan berdasarkan tanggal registrasi. hasil data akan di pagination
+     * 
+     * @queryParam tahun string
+     * @queryParam bulan string
+     * @queryParam tanggal string
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     * @authenticated
+     */
     function byDate($tahun = null, $bulan = null, $tanggal = null)
     {
         $payload = auth()->payload();
 
         if ($tahun !== null) {
-            $message = "Pasien tahun $tahun berhasil dimuat";
-            $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
+            $query = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
                 ->where('kd_dokter', $payload->get('sub'))
-                ->whereYear('tgl_registrasi', $tahun)
-                ->orderBy('tgl_registrasi', 'DESC')
+                ->whereYear('tgl_registrasi', $tahun);
+        
+            if ($bulan !== null) {
+                $query->whereMonth('tgl_registrasi', $bulan);
+        
+                if ($tanggal !== null) {
+                    $message = "Pasien tanggal $tanggal bulan $bulan tahun $tahun berhasil dimuat";
+                    $fullDate = "$tahun-$bulan-$tanggal";
+                    $query->where('tgl_registrasi', $fullDate);
+                } else {
+                    $message = "Pasien bulan $bulan tahun $tahun berhasil dimuat";
+                }
+            } else {
+                $message = "Pasien tahun $tahun berhasil dimuat";
+            }
+        
+            $pasien = $query->orderBy('tgl_registrasi', 'DESC')
                 ->orderBy('jam_reg', 'DESC')
                 ->paginate(env('PER_PAGE', 20));
         }
-
-        if ($tahun !== null && $bulan !== null) {
-            $message = "Pasien bulan $bulan tahun $tahun berhasil dimuat";
-            $pasien  = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
-                ->where('kd_dokter', $payload->get('sub'))
-                ->whereYear('tgl_registrasi', $tahun)
-                ->whereMonth('tgl_registrasi', $bulan)
-                ->orderBy('tgl_registrasi', 'DESC')
-                ->orderBy('jam_reg', 'DESC')
-                ->paginate(env('PER_PAGE', 20));
-        }
-
-        if ($tahun !== null && $bulan !== null && $tanggal !== null) {
-            $message  = "Pasien tanggal $tanggal bulan $bulan tahun $tahun berhasil dimuat";
-            $fullDate = $tahun . '-' . $bulan . '-' . $tanggal;
-            $pasien   = \App\Models\RegPeriksa::with('poliklinik', 'pasien', 'penjab', 'kamarInap.kamar.bangsal')
-                ->where('kd_dokter', $payload->get('sub'))
-                ->where('tgl_registrasi', $fullDate)
-                ->orderBy('tgl_registrasi', 'DESC')
-                ->orderBy('jam_reg', 'DESC')
-                ->paginate(env('PER_PAGE', 20));
-        }
-
-        return isSuccess($pasien, $message);
+        
+        return isSuccess($pasien, $message);        
     }
 
     /**
@@ -280,6 +331,7 @@ class PasienController extends Controller
 
     /**
      * pemeriksaan
+     * digunakan untuk mengambil data pemeriksaan pasien berdasarkan no rawat
      *
      * @bodyParam no_rawat string required
      * @return \Illuminate\Http\JsonResponse
@@ -372,6 +424,17 @@ class PasienController extends Controller
         return isSuccess($data, $message);
     }
 
+    /**
+     * Pemeriksaan Chart
+     * Digunakan untuk mengambil data pemeriksaan pasien berdasarkan no rawat, data yang diambil bisa langsung digunakan untuk keperluan membuat chart
+     * 
+     * @bodyParam no_rawat string required
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     * @authenticated
+     * 
+     * */ 
     function pemeriksaanChart(Request $request)
     {
         // if not post return error
@@ -409,6 +472,19 @@ class PasienController extends Controller
         return isSuccess($data, $message);
     }
 
+    
+    /**
+     * Fungsi `verifikasiSoap` digunakan untuk memverifikasi SOAP (Subjektif, Objektif, Penilaian, Rencana) 
+     * data untuk pasien rumah sakit dan menyimpan detail verifikasi di database.
+     * 
+     * @bodyParam no_rawat string required
+     * @bodyParam tgl_perawatan string required
+     * @bodyParam jam_rawat string required
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     * @authenticated
+     */
     public function verifikasiSoap(Request $request)
     {
         $payload = auth()->payload();
