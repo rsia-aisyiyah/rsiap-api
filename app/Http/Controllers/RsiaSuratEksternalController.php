@@ -113,6 +113,7 @@ class RsiaSuratEksternalController extends Controller
             'alamat' => 'required',
             'pj' => 'required',
             'tanggal' => 'required',
+            'tgl_terbit' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -224,17 +225,18 @@ class RsiaSuratEksternalController extends Controller
      *  }
      * }
      * */ 
-    public function getLastNomor()
+    public function getLastNomor(Request $request)
     {
+        $tgl_terbit = $request->tgl_terbit ?? date('Y-m-d');
         $lastNomor = \App\Models\RsiaSuratEksternal::select('no_surat')
             ->orderBy('tanggal', 'desc')
             ->orderBy('no_surat', 'desc')
-            ->whereYear('tanggal', date('Y'))
+            ->whereYear('tanggal', date('Y', strtotime($tgl_terbit)))
             ->first();
 
-        if (!$lastNomor) {
-            return isFail('Data Surat Eksternal tidak ditemukan');
-        }
+        // if (!$lastNomor) {
+        //     return isFail('Data Surat Eksternal tidak ditemukan');
+        // }
 
         return isSuccess($lastNomor, 'Data Surat Eksternal berhasil ditampilkan');
     }
