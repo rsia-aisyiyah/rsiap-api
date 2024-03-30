@@ -229,9 +229,9 @@ class RsiaSuratEksternalController extends Controller
     {
         $tgl_terbit = $request->tgl_terbit ?? date('Y-m-d');
         $lastNomor = \App\Models\RsiaSuratEksternal::select('no_surat')
-            ->orderBy('tanggal', 'desc')
+            ->orderBy('tgl_terbit', 'desc')
             ->orderBy('no_surat', 'desc')
-            ->whereYear('tanggal', date('Y', strtotime($tgl_terbit)))
+            ->whereYear('tgl_terbit', date('Y', strtotime($tgl_terbit)))
             ->first();
 
         // if (!$lastNomor) {
