@@ -232,7 +232,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         // load ApiResponser class
-        // 'APIResponse' => App\Traits\ApiResponser::class,
+        'APIResponse' => App\ApiResponse::class,
 
         // JWT Auth
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,

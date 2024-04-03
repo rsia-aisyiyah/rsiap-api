@@ -13,7 +13,7 @@ class ApiResponse extends ServiceProvider
      */
     public function register()
     {
-        // require_once app_path('api_response.php');
+        require_once app_path('ApiResponse.php');
     }
 
     /**

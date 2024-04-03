@@ -32,7 +32,7 @@ class Pasien extends Model implements JWTSubject
     {
         return $this->belongsTo(Spesialis::class, 'kd_sps', 'kd_sps');
     }
-
+    
     /**
 	 * Get the identifier that will be stored in the subject claim of the JWT.
 	 * @return mixed

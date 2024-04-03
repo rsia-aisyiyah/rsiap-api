@@ -27,6 +27,12 @@ class PksController extends Controller
             });
         }
 
+        if ($request->month) {
+            // request month 2023-08
+            [$year, $month] = explode('-', $request->month);
+            $pks = $pks->whereYear('tanggal_akhir', $year)->whereMonth('tanggal_akhir', $month);
+        }
+
         if ($request->perpage) {
             $pks = $pks->paginate(env('PER_PAGE', $request->perpage));
         } else {
