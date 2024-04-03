@@ -12,6 +12,7 @@
         "awobaz/compoships": "^2.2",
         "barryvdh/laravel-dompdf": "^2.0",
         "fruitcake/laravel-cors": "^2.0",
+        "grkamil/laravel-telegram-logging": "^1.11",
         "guzzlehttp/guzzle": "^7.2.0",
         "itsgoingd/clockwork": "^5.1",
         "kreait/firebase-php": "^6.0",
@@ -19,6 +20,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "league/flysystem-sftp": "^1.1",
+        "tailflow/laravel-orion": "^2.22",
         "thiagoprz/eloquent-composite-key": "^1.0",
         "tymon/jwt-auth": "^1",
         "yajra/laravel-datatables": "^1.5"
