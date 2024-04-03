@@ -18,6 +18,8 @@ Route::get('/', function () {
     return isOk("API v2 is working");
 });
 
+Route::post('/e-klaim', [App\Http\Controllers\v2\WSEklaim::class, 'index']);
+
 
 $files = scandir(__DIR__ . '/partials_v2');
 foreach ($files as $file) {
