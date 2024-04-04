@@ -40,4 +40,20 @@ class KamarInap extends Model
     {
         return $this->belongsTo(Kamar::class, 'kd_kamar', 'kd_kamar');
     }
+
+    // pasien from reg_periksa
+    public function pasien()
+    {
+        return $this->hasOneThrough(Pasien::class, RegPeriksa::class, 'no_rawat', 'no_rkm_medis', 'no_rawat', 'no_rkm_medis');
+    }
+
+    public function sep()
+    {
+        return $this->hasOne(BridgingSep::class, 'no_rawat', 'no_rawat')->select(['no_rawat', 'no_sep', 'tglsep', 'diagawal', 'klsrawat']);
+    }
+    
+    public function inacbg()
+    {
+        return $this->hasOneThrough(InacbgGroupStage12::class, BridgingSep::class, 'no_rawat', 'no_sep', 'no_rawat', 'no_sep');
+    }
 }
