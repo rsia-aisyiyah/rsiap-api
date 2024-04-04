@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RawatInapPr extends Model
+class PeriksaLab extends Model
 {
     use HasFactory;
 
-    protected $table = 'rawat_inap_pr';
+    protected $table = 'periksa_lab';
 
     protected $primaryKey = 'no_rawat';
 
     protected $keyType = 'string';
-    
+
     public $incrementing = false;
 
     public $timestamps = false;

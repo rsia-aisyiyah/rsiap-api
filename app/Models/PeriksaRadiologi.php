@@ -11,8 +11,18 @@ class PeriksaRadiologi extends Model
     use \Awobaz\Compoships\Compoships;
 
     protected $table = 'periksa_radiologi';
+    
+    protected $primaryKey = 'no_rawat';
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
 
     public $timestamps = false;
+    
+    protected $casts = [
+        'no_rawat' => 'string',
+    ];
 
 
     public function hasil()

@@ -11,6 +11,14 @@ class Operasi extends Model
 
     protected $table = 'operasi';
 
+    protected $primaryKey = 'no_rawat';
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
+    public $timestamps = false;
+
     protected $casts = [
         'no_rawat' => 'string',
     ];

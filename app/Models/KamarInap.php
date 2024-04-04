@@ -11,6 +11,21 @@ class KamarInap extends Model
 
     protected $table = 'kamar_inap';
 
+    protected $primaryKey = 'no_rawat';
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
+    public $timestamps = false;
+    
+    protected $casts = [
+        'no_rawat' => 'string',
+    ];
+
+    protected $guarded = [];
+    
+
     public function regPeriksa()
     {
         return $this->belongsTo(RegPeriksa::class, 'no_rawat', 'no_rawat');

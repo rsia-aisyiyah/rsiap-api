@@ -11,7 +11,17 @@ class DetailPemberianObat extends Model
 
     protected $table = 'detail_pemberian_obat';
 
+    protected $primaryKey = 'no_rawat';
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
     public $timestamps = false;
+    
+    protected $casts = [
+        'no_rawat' => 'string',
+    ];
 
     public function obat()
     {
