@@ -18,13 +18,13 @@ class KamarInap extends Model
     public $incrementing = false;
 
     public $timestamps = false;
-    
+
     protected $casts = [
         'no_rawat' => 'string',
     ];
 
     protected $guarded = [];
-    
+
 
     public function regPeriksa()
     {
@@ -51,9 +51,69 @@ class KamarInap extends Model
     {
         return $this->hasOne(BridgingSep::class, 'no_rawat', 'no_rawat')->select(['no_rawat', 'no_sep', 'tglsep', 'diagawal', 'klsrawat']);
     }
-    
+
     public function inacbg()
     {
         return $this->hasOneThrough(InacbgGroupStage12::class, BridgingSep::class, 'no_rawat', 'no_sep', 'no_rawat', 'no_sep');
+    }
+
+    // rawat inap dr
+    public function rawatInapDr()
+    {
+        return $this->hasMany(RawatInapDr::class, 'no_rawat', 'no_rawat');
+    }
+
+    // rawat inap pr
+    public function rawatInapPr()
+    {
+        return $this->hasMany(RawatInapPr::class, 'no_rawat', 'no_rawat');
+    }
+
+    // rawat inap drpr
+    public function rawatInapDrPr()
+    {
+        return $this->hasMany(RawatInapDrPr::class, 'no_rawat', 'no_rawat');
+    }
+
+    // rawat jalan pr
+    public function rawatJalanPr()
+    {
+        return $this->hasMany(RawatJalanPr::class, 'no_rawat', 'no_rawat');
+    }
+
+    // rawat jalan dr
+    public function rawatJalanDr()
+    {
+        return $this->hasMany(RawatJalanDr::class, 'no_rawat', 'no_rawat');
+    }
+
+    // rawat jalan drpr
+    public function rawatJalanDrPr()
+    {
+        return $this->hasMany(RawatJalanDrPr::class, 'no_rawat', 'no_rawat');
+    }
+
+    // operasi
+    public function operasi()
+    {
+        return $this->hasMany(Operasi::class, 'no_rawat', 'no_rawat');
+    }
+
+    // periksa_lab
+    public function periksaLab()
+    {
+        return $this->hasMany(PeriksaLab::class, 'no_rawat', 'no_rawat');
+    }
+
+    // periksa_radiologi
+    public function periksaRadiologi()
+    {
+        return $this->hasMany(PeriksaRadiologi::class, 'no_rawat', 'no_rawat');
+    }
+
+    // detail_pemberian_obat
+    public function detailPemberianObat()
+    {
+        return $this->hasMany(DetailPemberianObat::class, 'no_rawat', 'no_rawat');
     }
 }
