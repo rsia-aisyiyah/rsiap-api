@@ -327,6 +327,7 @@ class UndanganController extends Controller
                 $penerima = \App\Models\RsiaPenerimaUndangan::create([
                     'no_surat'  => $request->no_surat,
                     'penerima'  => $v,
+                    'ref'       => \App\Models\RsiaSuratInternal::class,
                 ]);
             }
 

@@ -135,6 +135,7 @@ class MemoInternalController extends Controller
                 \App\Models\RsiaPenerimaUndangan::create([
                     'no_surat'  => $nomor_surat,
                     'penerima'  => $nip,
+                    'ref'       => \App\Models\RsiaMemoInternal::class,
                 ]);
             }
 
@@ -224,6 +225,7 @@ class MemoInternalController extends Controller
                 \App\Models\RsiaPenerimaUndangan::create([
                     'no_surat'  => $request->no_surat,
                     'penerima'  => $nip,
+                    'ref'       => \App\Models\RsiaMemoInternal::class,
                 ]);
             }
 

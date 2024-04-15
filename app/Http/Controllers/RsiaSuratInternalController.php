@@ -202,6 +202,7 @@ class RsiaSuratInternalController extends Controller
                 $rsia_penerima_undangan           = new \App\Models\RsiaPenerimaUndangan;
                 $rsia_penerima_undangan->no_surat = $nomor_surat;
                 $rsia_penerima_undangan->penerima = $value;
+                $rsia_penerima_undangan->ref      = \App\Models\RsiaSuratInternal::class;
 
                 $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
                 $nm         = $nm_pegawai ? $nm_pegawai->nama : '';
@@ -318,6 +319,7 @@ class RsiaSuratInternalController extends Controller
             $rsia_penerima_undangan           = new \App\Models\RsiaPenerimaUndangan;
             $rsia_penerima_undangan->no_surat = $request->old_nomor;
             $rsia_penerima_undangan->penerima = $value;
+            $rsia_penerima_undangan->ref      = \App\Models\RsiaSuratInternal::class;
 
             $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
             $nm         = $nm_pegawai ? $nm_pegawai->nama : '';
