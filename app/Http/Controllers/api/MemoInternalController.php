@@ -55,7 +55,7 @@ class MemoInternalController extends Controller
         }
 
         $mengetahui = [];
-        $penerima = \App\Models\RsiaSuratInternalPenerima::with(['pegawai' => function ($query) {
+        $penerima = \App\Models\RsiaPenerimaUndangan::with(['pegawai' => function ($query) {
             $query->select('nik', 'nama');
         }])->where('no_surat', $request->no_surat)->get();
         
@@ -130,11 +130,11 @@ class MemoInternalController extends Controller
             // insert to rsia_memo_internal
             $memo_internal = \App\Models\RsiaMemoInternal::create($data_memo_internal);
             
-            // insert to rsia_surat_internal_penerima
+            // insert to rsia_penerima_undangan
             foreach ($penerima as $nip) {
-                \App\Models\RsiaSuratInternalPenerima::create([
-                    'no_surat' => $nomor_surat,
-                    'penerima' => $nip,
+                \App\Models\RsiaPenerimaUndangan::create([
+                    'no_surat'  => $nomor_surat,
+                    'penerima'  => $nip,
                 ]);
             }
 
@@ -217,13 +217,13 @@ class MemoInternalController extends Controller
             $memo_internal = \App\Models\RsiaMemoInternal::where('no_surat', $request->no_surat)->update($data_memo_internal);
             
             // delete all penerima
-            \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->no_surat)->delete();
+            \App\Models\RsiaPenerimaUndangan::where('no_surat', $request->no_surat)->delete();
             
-            // insert to rsia_surat_internal_penerima
+            // insert to rsia_penerima_undangan
             foreach ($penerima as $nip) {
-                \App\Models\RsiaSuratInternalPenerima::create([
-                    'no_surat' => $request->no_surat,
-                    'penerima' => $nip,
+                \App\Models\RsiaPenerimaUndangan::create([
+                    'no_surat'  => $request->no_surat,
+                    'penerima'  => $nip,
                 ]);
             }
 

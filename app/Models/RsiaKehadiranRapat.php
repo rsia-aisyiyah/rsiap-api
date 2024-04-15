@@ -45,6 +45,6 @@ class RsiaKehadiranRapat extends Model
     // penerima
     public function penerima()
     {
-        return $this->belongsTo(RsiaSuratInternalPenerima::class, 'no_surat', 'no_surat');
+        return $this->belongsTo(RsiaPenerimaUndangan::class, 'no_surat', 'no_surat');
     }
 }

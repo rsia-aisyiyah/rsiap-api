@@ -113,7 +113,7 @@ class RsiaSuratInternalController extends Controller
             return isFail("Data tidak ditemukan");
         }
 
-        $surat->penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->nomor)->with(['pegawai' => function ($q) {
+        $surat->penerima = \App\Models\RsiaPenerimaUndangan::where('no_surat', $request->nomor)->with(['pegawai' => function ($q) {
             $q->select('nik', 'nama', 'jbtn', 'bidang');
         }])->get();
 
@@ -199,9 +199,9 @@ class RsiaSuratInternalController extends Controller
 
             $penerima = $request->karyawan ? $request->karyawan : [];
             foreach ($penerima as $key => $value) {
-                $rsia_surat_internal_penerima           = new \App\Models\RsiaSuratInternalPenerima;
-                $rsia_surat_internal_penerima->no_surat = $nomor_surat;
-                $rsia_surat_internal_penerima->penerima = $value;
+                $rsia_penerima_undangan           = new \App\Models\RsiaPenerimaUndangan;
+                $rsia_penerima_undangan->no_surat = $nomor_surat;
+                $rsia_penerima_undangan->penerima = $value;
 
                 $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
                 $nm         = $nm_pegawai ? $nm_pegawai->nama : '';
@@ -233,7 +233,7 @@ class RsiaSuratInternalController extends Controller
                     $value,
                 );
 
-                $rsia_surat_internal_penerima->save();
+                $rsia_penerima_undangan->save();
             }
 
             // Commit the transaction if everything is successful
@@ -309,15 +309,15 @@ class RsiaSuratInternalController extends Controller
         // $data = $rsia_surat_internal->update($update_pj);
 
         // Delete all penerima
-        $rsia_surat_internal_penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->old_nomor);
-        $rsia_surat_internal_penerima->delete();
+        $rsia_penerima_undangan = \App\Models\RsiaPenerimaUndangan::where('no_surat', $request->old_nomor);
+        $rsia_penerima_undangan->delete();
 
         // Insert new penerima
         $penerima = $request->penerima ? $request->penerima : [];
         foreach ($penerima as $key => $value) {
-            $rsia_surat_internal_penerima           = new \App\Models\RsiaSuratInternalPenerima;
-            $rsia_surat_internal_penerima->no_surat = $request->old_nomor;
-            $rsia_surat_internal_penerima->penerima = $value;
+            $rsia_penerima_undangan           = new \App\Models\RsiaPenerimaUndangan;
+            $rsia_penerima_undangan->no_surat = $request->old_nomor;
+            $rsia_penerima_undangan->penerima = $value;
 
             $nm_pegawai = \App\Models\Pegawai::where('nik', $value)->first();
             $nm         = $nm_pegawai ? $nm_pegawai->nama : '';
@@ -349,7 +349,7 @@ class RsiaSuratInternalController extends Controller
                 $value,
             );
 
-            $rsia_surat_internal_penerima->save();
+            $rsia_penerima_undangan->save();
         }
 
         return isSuccess($data, "Data berhasil diupdate");
@@ -399,7 +399,7 @@ class RsiaSuratInternalController extends Controller
     public function cetakUndangan($nomor)
     {
         $nomor = str_replace('--', '/', $nomor);
-        $penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $nomor)->with(['pegawai' => function ($q) {
+        $penerima = \App\Models\RsiaPenerimaUndangan::where('no_surat', $nomor)->with(['pegawai' => function ($q) {
             $q->select('nik', 'nama', 'jbtn', 'bidang');
         }])->get();
 

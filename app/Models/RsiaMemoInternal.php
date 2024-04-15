@@ -24,6 +24,6 @@ class RsiaMemoInternal extends Model
     // penerima lebih dari 1
     public function penerima()
     {
-        return $this->hasMany(RsiaSuratInternalPenerima::class, 'no_surat', 'no_surat');
+        return $this->hasMany(RsiaPenerimaUndangan::class, 'no_surat', 'no_surat');
     }
 }

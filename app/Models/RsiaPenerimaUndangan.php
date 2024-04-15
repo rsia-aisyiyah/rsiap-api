@@ -5,20 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RsiaSuratInternalPenerima extends Model
+// class RsiaSuratInternalPenerima extends Model
+class RsiaPenerimaUndangan extends Model
 {
     use HasFactory;
     use \Awobaz\Compoships\Compoships;
 
-    protected $table = 'rsia_surat_internal_penerima';
+    protected $table = 'rsia_penerima_undangan';
 
     protected $guarded = [];
 
     public $timestamps = false;
 
     public $incrementing = false;
-    
 
+    protected $keyType = 'string';
+    
     protected $casts = [
         'no_surat' => 'string'
     ];

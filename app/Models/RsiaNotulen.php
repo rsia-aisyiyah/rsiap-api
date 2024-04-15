@@ -33,7 +33,7 @@ class RsiaNotulen extends Model
     // peserta
     public function peserta()
     {
-        return $this->hasMany(RsiaSuratInternalPenerima::class, 'no_surat', 'no_surat');
+        return $this->hasMany(RsiaPenerimaUndangan::class, 'no_surat', 'no_surat');
     }
 
     // 

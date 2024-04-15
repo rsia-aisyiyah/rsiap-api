@@ -17,6 +17,9 @@ class RsiaSuratInternal extends Model
 
     public $timestamps = false;
 
+    public $incrementing = false;
+
+    protected $keyType = 'string';
     
     
     protected $casts = [
@@ -35,7 +38,7 @@ class RsiaSuratInternal extends Model
 
     public function penerima()
     {
-        return $this->hasMany(RsiaSuratInternalPenerima::class, 'no_surat', 'no_surat');
+        return $this->hasMany(RsiaPenerimaUndangan::class, 'no_surat', 'no_surat');
     }
 
     public function memo()

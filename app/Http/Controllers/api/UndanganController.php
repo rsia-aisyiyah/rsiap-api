@@ -25,7 +25,7 @@ class UndanganController extends Controller
      * */ 
     public function index(Request $request)
     {
-        $data = \App\Models\RsiaSuratInternalPenerima::select("*")
+        $data = \App\Models\RsiaPenerimaUndangan::select("*")
             ->with(['surat' => function ($q) {
                 $q->with(['penanggung_jawab' => function ($q) {
                     $q->select('nik', 'nama');
@@ -82,7 +82,7 @@ class UndanganController extends Controller
     public function me(Request $request)
     {
         $nip = $request->payload['sub'];
-        $data = \App\Models\RsiaSuratInternalPenerima::select("*")
+        $data = \App\Models\RsiaPenerimaUndangan::select("*")
             ->with('surat')
             ->where('penerima', $nip)
             ->orderBy('no_surat', 'DESC')
@@ -186,7 +186,7 @@ class UndanganController extends Controller
             return isFail($validator->errors()->first());
         }
 
-        $data = \App\Models\RsiaSuratInternalPenerima::select("*")
+        $data = \App\Models\RsiaPenerimaUndangan::select("*")
             ->with(['pegawai' => function ($q) {
                 $q->select('nik', 'nama');
             }, 'kehadiran'])
@@ -209,7 +209,7 @@ class UndanganController extends Controller
             $data = $data->paginate(env('PER_PAGE', 10));
         }
 
-        $penerimaHadir = \App\Models\RsiaSuratInternalPenerima::select("penerima")
+        $penerimaHadir = \App\Models\RsiaPenerimaUndangan::select("penerima")
             ->where('no_surat', $request->no_surat)
             ->whereHas('kehadiran')
             ->get();
@@ -256,7 +256,7 @@ class UndanganController extends Controller
         $nik = $request->nik ?? $request->payload['sub'];
 
         // cek apakah termasuk penerima
-        $penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->no_surat)->where('penerima', $nik)->first();
+        $penerima = \App\Models\RsiaPenerimaUndangan::where('no_surat', $request->no_surat)->where('penerima', $nik)->first();
         if (!$penerima) {
             return isFail("Anda tidak terdaftar sebagai penerima undangan, silahkan hubungi sekretariat untuk informasi lebih lanjut.");
         }
@@ -322,11 +322,11 @@ class UndanganController extends Controller
         $data = [];
         foreach ($karyawan as $v) {
             // cek nik on penerima
-            $penerima = \App\Models\RsiaSuratInternalPenerima::where('no_surat', $request->no_surat)->where('penerima', $v)->first();
+            $penerima = \App\Models\RsiaPenerimaUndangan::where('no_surat', $request->no_surat)->where('penerima', $v)->first();
             if (!$penerima) {
-                $penerima = \App\Models\RsiaSuratInternalPenerima::create([
-                    'no_surat' => $request->no_surat,
-                    'penerima' => $v,
+                $penerima = \App\Models\RsiaPenerimaUndangan::create([
+                    'no_surat'  => $request->no_surat,
+                    'penerima'  => $v,
                 ]);
             }
 
