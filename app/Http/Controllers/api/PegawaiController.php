@@ -324,15 +324,11 @@ class PegawaiController extends Controller
         }
 
         $pegawai = \App\Models\Pegawai::where('nik', $request->nik);
-        if ($this->isDokter($request->nik)) {
-            $pegawai->with('dokter.spesialis');
-            $pegawai->with('rsia_email_pegawai');
-        } else {
-            $pegawai->with('dpt');
-            $pegawai->with('petugas');
-            $pegawai->with('stts_kerja');
-            $pegawai->with('rsia_email_pegawai');
-        }
+        
+        $pegawai->with('dpt');
+        $pegawai->with('petugas');
+        $pegawai->with('stts_kerja');
+        $pegawai->with('rsia_email_pegawai');
 
         $pegawai = $pegawai->first();
 

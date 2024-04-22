@@ -13,4 +13,7 @@ Route::prefix('dokter')->group(function ($router) {
 
 Route::middleware('jwt.verify')->prefix('dokter')->group(function ($router) {
     Route::get('/', [DokterController::class, 'index']);
+    
+    Route::get('/detail', [DokterController::class, 'detail']);
+    Route::post('/detail', [DokterController::class, 'detail']);
 });

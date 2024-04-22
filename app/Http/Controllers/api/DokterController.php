@@ -22,6 +22,29 @@ class DokterController extends Controller
         return isSuccess($dokter, 'Dokter berhasil dimuat');
     }
 
+    public function detail(Request $request)
+    {
+        if (!$request->nik) {
+            return isFail('NIK is required', 422);
+        }
+
+        if (!\App\Models\Dokter::where('kd_dokter', $request->nik)->exists()) {
+            return isFail('Bukan dokter', 422);
+        }
+
+        $pegawai = \App\Models\Pegawai::where('nik', $request->nik);
+        $pegawai->with('dokter.spesialis');
+        $pegawai->with('rsia_email_pegawai');
+
+        $pegawai = $pegawai->first();
+
+        if (!$pegawai) {
+            return isFail('Pegawai not found', 404);
+        }
+
+        return isSuccess($pegawai, 'Berhasil mengambil data pegawai');
+    }
+
     public function spesialis()
     {
         $payload = auth()->payload();
