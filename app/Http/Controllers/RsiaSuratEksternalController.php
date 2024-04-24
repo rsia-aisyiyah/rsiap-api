@@ -20,7 +20,7 @@ class RsiaSuratEksternalController extends Controller
      * */ 
     public function index(Request $request)
     {
-        $suratEksternal = \App\Models\RsiaSuratEksternal::with("pj_detail")->orderBy('tanggal', 'desc')->orderBy('no_surat', 'desc');
+        $suratEksternal = \App\Models\RsiaSuratEksternal::with("pj_detail")->orderBy('created_at', 'desc')->orderBy('no_surat', 'desc');
 
         if ($request->keyword) {
             $suratEksternal = $suratEksternal->where('no_surat', 'like', "%{$request->keyword}%")
