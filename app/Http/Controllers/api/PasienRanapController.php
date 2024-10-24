@@ -211,15 +211,27 @@ class PasienRanapController extends Controller
             'dokter' => function ($q) {
                 $q->select('kd_dokter', 'nm_dokter');
             },
-            'regPeriksa', 
-            'regPeriksa.penjab' => function ($q) {
-                $q->select('kd_pj', 'png_jawab', 'status');
-            }, 
-            'regPeriksa.pasien' => function ($q) {
-                $q->select('no_rkm_medis', 'nm_pasien', 'jk', 'tmp_lahir', 'tgl_lahir', 'alamat', 'no_tlp', 'gol_darah', 'tgl_daftar');
+            'regPeriksa' => function ($q) {
+                $q->select('no_rawat', 'no_rkm_medis', 'kd_pj', 'umurdaftar', 'sttsumur'); // hanya kolom yang dibutuhkan
             },
-            'regPeriksa.kamarInap.kamar.bangsal',
-        ])->where('no_rawat', $request->no_rawat)->first();
+            'regPeriksa.penjab' => function ($q) {
+                $q->select('kd_pj', 'png_jawab');
+            },
+            'regPeriksa.pasien' => function ($q) {
+                $q->select('no_rkm_medis', 'nm_pasien', 'tmp_lahir', 'tgl_lahir', 'alamat', 'no_tlp');
+            },
+            'regPeriksa.kamarInap.kamar' => function ($q) {
+                $q->select('kd_kamar', 'kd_bangsal');
+            },
+            'regPeriksa.kamarInap.kamar.bangsal' => function ($q) {
+                $q->select('kd_bangsal', 'nm_bangsal');
+            },
+            'radiologi.periksa.jenis' => function ($q) {
+                $q->select('kd_jenis_prw', 'nm_perawatan');
+            },
+            'radiologi.periksa.hasil',
+            'radiologi.periksa.gambar',
+        ])->where('no_rawat', $request->no_rawat)->first();        
 
         if ($resume) {
             return isSuccess($resume, 'Data resume pasien berhasil dimuat');

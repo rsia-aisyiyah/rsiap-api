@@ -68,6 +68,8 @@ Route::middleware('jwt.verify')->prefix('pasien')->group(function ($router) {
         $r->post('hasil', [RadiologiController::class, 'hasil']);
         $r->get('permintaan', [RadiologiController::class, 'permintaan']);
         $r->get('permintaan/now', [RadiologiController::class, 'permintaanNow']);
+        $r->post('hasil/get', [RadiologiController::class, 'getHasil']);
+        $r->post('hasil/store', [RadiologiController::class, 'storeHasil']);
     });
 
 

@@ -25,4 +25,9 @@ class ResumePasienRanap extends Model
     {
         return $this->hasOne(RsiaVerifResumeRanap::class, 'no_rawat', 'no_rawat');
     }
+
+    public function radiologi()
+    {
+        return $this->hasMany(PermintaanRadiologi::class, 'no_rawat', 'no_rawat');
+    }
 }

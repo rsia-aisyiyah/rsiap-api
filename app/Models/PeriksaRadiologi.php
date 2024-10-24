@@ -14,6 +14,7 @@ class PeriksaRadiologi extends Model
 
     public $timestamps = false;
 
+    protected $guarded = [];
 
     public function hasil()
     {
@@ -44,7 +45,7 @@ class PeriksaRadiologi extends Model
 
     public function gambar()
     {
-        return $this->belongsTo(
+        return $this->hasMany(
             GambarRadiologi::class,
             ['no_rawat', 'tgl_periksa', 'jam'],
             ['no_rawat', 'tgl_periksa', 'jam'],

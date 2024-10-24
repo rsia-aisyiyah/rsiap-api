@@ -179,4 +179,67 @@ class RadiologiController extends Controller
 
         return isSuccess($data, "Data hasil pemeriksaan radiologi no_rawat: $request->no_rawat tanggal: $request->tanggal jam: $request->jam berhasil diambil");
     }
+
+    public function getHasil(Request $request)
+    {
+        $request->validate([
+            'no_rawat'    => 'required|string',
+            'tgl_periksa' => 'required|date|date_format:Y-m-d',
+            'jam'         => 'required|string',
+        ]);
+
+        if (!$request->validate($request, $rule)) {
+            return isFail("Invalid parameter");
+        }
+
+        $data = \App\Models\HasilRadiologi::select('hasil')->where('no_rawat', $request->no_rawat)
+            ->where('tgl_periksa', $request->tgl_periksa)
+            ->where('jam', $request->jam)
+            ->first();
+
+        return isSuccess($data, "Data hasil pemeriksaan radiologi berhasil diambil");
+    }
+
+    public function storeHasil(Request $request)
+    {
+        $request->validate([
+            'no_rawat'    => 'required|string',
+            'tgl_periksa' => 'required|date|date_format:Y-m-d',
+            'jam'         => 'required|string',
+            'hasil'       => 'required|string',
+        ]);
+
+        // create or update by no_rawat, tgl_periksa, jam
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+                $data = \App\Models\HasilRadiologi::where('no_rawat', $request->no_rawat)
+                    ->where('tgl_periksa', $request->tgl_periksa)
+                    ->where('jam', $request->jam)
+                    ->first();
+    
+                if ($data) {
+                    $data = \App\Models\HasilRadiologi::where('no_rawat', $request->no_rawat)
+                        ->where('tgl_periksa', $request->tgl_periksa)
+                        ->where('jam', $request->jam)
+                        ->update(['hasil' => $request->hasil]);
+                } else {
+                    $data = new \App\Models\HasilRadiologi();
+                    $data->no_rawat = $request->no_rawat;
+                    $data->tgl_periksa = $request->tgl_periksa;
+                    $data->jam = $request->jam;
+                    $data->hasil = $request->hasil;
+                    $data->save();
+                }
+            }, 5);
+
+            return isSuccess([
+                'no_rawat'    => $request->no_rawat,
+                'tgl_periksa' => $request->tgl_periksa,
+                'jam'         => $request->jam,
+                'hasil'       => $request->hasil,
+            ], "Data hasil pemeriksaan radiologi berhasil disimpan");
+        } catch (\Throwable $th) {
+            return isFail("Data hasil pemeriksaan radiologi gagal disimpan : " . $th->getMessage());
+        }
+    }
 }
